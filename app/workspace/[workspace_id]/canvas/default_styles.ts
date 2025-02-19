@@ -19,7 +19,7 @@ class DefaultRect extends fabric.Rect {
             color: "black",
             blur: 5,
          }),
-         objectCaching: true,
+         // objectCaching: true,
          ...params,
       });
    }
@@ -36,7 +36,7 @@ class DefaultTriangle extends fabric.Triangle {
          padding: 2,
          cornerStrokeColor: "#4040ef",
          strokeUniform: true,
-         objectCaching: true,
+         // objectCaching: true,
          ...params,
       });
    }
@@ -59,7 +59,7 @@ class DefaultEllipse extends fabric.Ellipse {
          padding: 2,
          cornerStrokeColor: "#4040ef",
          strokeUniform: true,
-         objectCaching: true,
+         // objectCaching: true,
          shadow: new fabric.Shadow({
             blur: 4,
             offsetX: 2,
@@ -88,7 +88,7 @@ class DefaultCircle extends fabric.Circle {
          padding: 2,
          transparentCorners: false,
          strokeUniform: true,
-         objectCaching: true,
+         // objectCaching: true,
          centeredRotation: true,
          shadow: new fabric.Shadow({
             blur: 4,
@@ -113,7 +113,7 @@ class DefaultIText extends fabric.IText {
          fontStyle: "italic",
          cornerStrokeColor: "#4040ef",
          strokeUniform: true,
-         objectCaching: true,
+         // objectCaching: true,
          ...params,
       });
    }
@@ -140,7 +140,7 @@ class DefaultPath extends fabric.Path {
             cornerStyle: "circle",
             padding: 2,
             cornerStrokeColor: "#4040ef",
-            objectCaching: true,
+            // objectCaching: true,
          },
       );
    }

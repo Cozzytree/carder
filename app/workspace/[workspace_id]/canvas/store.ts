@@ -2,17 +2,17 @@ import { FabricObject } from "fabric";
 import { create } from "zustand";
 
 interface canvasInterface {
+   width: number;
+   height: number;
    activeObject: FabricObject | undefined;
    isDrawing: boolean;
-
-   setDrawingMode: (v: boolean) => void;
-   setFabricObject: (v: FabricObject | undefined) => void;
-}
-
-interface otherInterface {
    containerScale: number;
 
    setContainerScale: (v: number) => void;
+   setHeight: (v: number) => void;
+   setWidth: (v: number) => void;
+   setDrawingMode: (v: boolean) => void;
+   setFabricObject: (v: FabricObject | undefined) => void;
 }
 
 interface colorStoreInterface {
@@ -40,16 +40,16 @@ const useColorStore = create<colorStoreInterface>((set) => ({
 }));
 
 const useCanvasStore = create<canvasInterface>((set) => ({
+   width: 700,
+   height: 400,
    activeObject: undefined,
    isDrawing: false,
-
-   setDrawingMode: (v) => set({ isDrawing: v }),
-   setFabricObject: (v) => set({ activeObject: v }),
-}));
-
-const useOtherStore = create<otherInterface>((set) => ({
    containerScale: 1,
 
+   setWidth: (v) => set({ width: v }),
+   setHeight: (v) => set({ height: v }),
+   setDrawingMode: (v) => set({ isDrawing: v }),
+   setFabricObject: (v) => set({ activeObject: v }),
    setContainerScale: (v) =>
       set((state) => {
          if (state.containerScale <= 0.2 || state.containerScale >= 5)
@@ -59,4 +59,4 @@ const useOtherStore = create<otherInterface>((set) => ({
       }),
 }));
 
-export { useCanvasStore, useColorStore, useOtherStore };
+export { useCanvasStore, useColorStore };

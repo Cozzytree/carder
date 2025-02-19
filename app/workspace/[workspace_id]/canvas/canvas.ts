@@ -6,6 +6,8 @@ import {
    Group,
    PencilBrush,
    SprayBrush,
+   TPointerEvent,
+   TPointerEventInfo,
 } from "fabric";
 import { brushTypes, canvasShapes } from "./types";
 import {
@@ -17,25 +19,36 @@ import {
 
 interface canvasInterface {
    canvas: Canvas;
+   canvasElement: HTMLCanvasElement;
 
    callbackDrawMode: (v: boolean) => void;
    callbackSeleted: (o: FabricObject | undefined) => void;
 }
 
 class CanvasC {
+   declare mousedownpoint: { x: number; y: number };
    declare canvas: Canvas;
    declare draw_brush: PencilBrush | SprayBrush | CircleBrush | null;
    declare callbackDrawMode: (v: boolean) => void;
+   declare canvasElement: HTMLCanvasElement;
+
+   isDragging: boolean = false;
 
    brush_props: { stroke: number; stroke_color: string } = {
       stroke: 10,
       stroke_color: "black",
    };
 
-   constructor({ canvas, callbackSeleted, callbackDrawMode }: canvasInterface) {
+   constructor({
+      canvas,
+      callbackSeleted,
+      callbackDrawMode,
+      canvasElement,
+   }: canvasInterface) {
       this.canvas = canvas;
       this.draw_brush = null;
       this.callbackDrawMode = callbackDrawMode;
+      this.canvasElement = canvasElement;
 
       this.canvas.on("mouse:down", () => {
          const active = canvas.getActiveObject();
@@ -51,6 +64,35 @@ class CanvasC {
       this.canvas.on("object:removed", () => {
          callbackSeleted(undefined);
       });
+      if (window.innerWidth <= 480) {
+         this.canvas.selection = false;
+         this.canvas.on("mouse:move", this.canvasMouseMove.bind(this));
+         this.canvas.on("mouse:down", this.canvasMouseDown.bind(this));
+         this.canvas.on("mouse:up", this.canvasMouseup.bind(this));
+      } else {
+         this.canvas.selection = true;
+      }
+   }
+
+   canvasMouseDown(e: TPointerEventInfo<TPointerEvent>) {
+      if (this.canvas.getActiveObject()) return;
+      const p = e.scenePoint;
+      this.mousedownpoint = { x: p.x, y: p.y };
+      this.isDragging = true;
+   }
+   canvasMouseMove(e: TPointerEventInfo<TPointerEvent>) {
+      if (!this.isDragging) return;
+      this.canvasElement.style.pointerEvents = "none";
+      // const { x, y } = e.scenePoint;
+
+      // const vpt = this.canvas.viewportTransform;
+      // vpt[4] += x - this.mousedownpoint.x;
+      // vpt[5] += y - this.mousedownpoint.y;
+      // this.canvas.requestRenderAll();
+   }
+   canvasMouseup(e) {
+      this.isDragging = false;
+      this.canvasElement.style.pointerEvents = "auto";
    }
 
    createNewShape(shapetype: canvasShapes, textType?: number) {

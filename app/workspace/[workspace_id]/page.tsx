@@ -7,13 +7,21 @@ import {
    DefaultIText,
    DefaultRect,
 } from "./canvas/default_styles";
-import { useCanvasStore, useOtherStore } from "./canvas/store";
+import { useCanvasStore } from "./canvas/store";
 import CanvasOptions from "./canvas/options";
 import { Slider } from "@/components/ui/slider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Page() {
-   const { setFabricObject, isDrawing, setDrawingMode } = useCanvasStore();
-   const { containerScale, setContainerScale } = useOtherStore();
+   const {
+      setFabricObject,
+      width,
+      height,
+      setDrawingMode,
+      containerScale,
+      setContainerScale,
+      activeObject,
+   } = useCanvasStore();
    const canvasRef = useRef<HTMLCanvasElement | null>(null);
    const canvasC_ref = useRef<CanvasC | null>(null);
    const containerRef = useRef<HTMLDivElement | null>(null);
@@ -21,8 +29,8 @@ export default function Page() {
    useEffect(() => {
       if (!canvasRef.current) return;
       const f = new fabric.Canvas(canvasRef.current, {
-         width: 500,
-         height: 800,
+         width: width,
+         height: height,
          preserveObjectStacking: true,
          uniScaleKey: "altKey",
          uniformScaling: true,
@@ -64,6 +72,7 @@ export default function Page() {
          callbackDrawMode: (v) => {
             setDrawingMode(v);
          },
+         canvasElement: canvasRef.current,
       });
 
       return () => {
@@ -73,7 +82,9 @@ export default function Page() {
 
    useEffect(() => {
       if (!canvasC_ref.current) return;
-   }, []);
+      canvasC_ref.current.canvas.set("width", width);
+      canvasC_ref.current.canvas.set("height", height);
+   }, [width, height]);
 
    return (
       <div className="w-full overflow-hidden h-screen flex flex-col justify-center items-center">
@@ -85,36 +96,20 @@ export default function Page() {
                ref={containerRef}
                style={{
                   scale: containerScale,
-                  translate: `${(containerScale - 1) * 200}px ${(containerScale - 1) * 500}px`,
+                  // translate: `${(containerScale - 1) * 200}px ${(containerScale - 1) * 400}px`,
                }}
-               className="w-full h-full flex justify-center items-center"
+               className="shrink-0 mx-16 my-16 w-full h-full flex justify-center items-center"
             >
-               <canvas
-                  ref={canvasRef}
-                  className="border border-foreground/10 rounded-md shadow-lg"
-               />
+               <ScrollArea>
+                  <canvas
+                     ref={canvasRef}
+                     className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`}
+                  />
+               </ScrollArea>
             </div>
          </div>
 
-         <CanvasOptions canvasC={canvasC_ref} />
-         <div className="w-full flex justify-center items-center h-14 bg-foreground/10">
-            <div className="w-48 flex items-center gap-1">
-               <span>{(containerScale * 100).toFixed(0)}</span>
-               <Slider
-                  defaultValue={[containerScale]}
-                  onValueChange={(e) => {
-                     const v = Number(e[0]);
-                     if (containerRef.current) {
-                        setContainerScale(v / 100);
-                        containerRef.current.style.scale = `${v / 100}`;
-                     }
-                  }}
-                  min={20}
-                  // step={25}
-                  max={500}
-               />
-            </div>
-         </div>
+         <CanvasOptions canvasC={canvasC_ref} containerRef={containerRef} />
       </div>
    );
 }
