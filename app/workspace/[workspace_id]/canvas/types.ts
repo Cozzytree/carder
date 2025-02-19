@@ -14,3 +14,5 @@ export type Align =
    | "justify-left"
    | "justify-center"
    | "justify-right";
+
+export type brushTypes = "pencil" | "spray" | "circle";

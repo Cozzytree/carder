@@ -10,9 +10,8 @@ import FontOptions from "./components/font_options";
 
 import { RefObject } from "react";
 import { useCanvasStore } from "./store";
-import { Button } from "@/components/ui/button";
-import { TrashIcon } from "lucide-react";
 import CanvasActions from "./components/canvas_actions";
+import DrawOptions from "./components/draw_options";
 
 type props = {
    canvasC: RefObject<CanvasC | null>;

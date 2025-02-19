@@ -3,7 +3,9 @@ import { create } from "zustand";
 
 interface canvasInterface {
    activeObject: FabricObject | undefined;
+   isDrawing: boolean;
 
+   setDrawingMode: (v: boolean) => void;
    setFabricObject: (v: FabricObject | undefined) => void;
 }
 
@@ -21,12 +23,9 @@ interface colorStoreInterface {
    setAlpha: (v: number) => void;
 }
 
-const useColorStore = create<colorStoreInterface>((set, get) => ({
+const useColorStore = create<colorStoreInterface>((set) => ({
    alpha: 1,
-   recentColors: localStorage.getItem("recent-colors")
-      ? // @ts-expect-error //type error
-        JSON.parse(localStorage.getItem("recent-colors"))
-      : [],
+   recentColors: [],
 
    setAlpha: (v) => set({ alpha: v }),
    setRecentColors: (v) => {
@@ -42,7 +41,9 @@ const useColorStore = create<colorStoreInterface>((set, get) => ({
 
 const useCanvasStore = create<canvasInterface>((set) => ({
    activeObject: undefined,
+   isDrawing: false,
 
+   setDrawingMode: (v) => set({ isDrawing: v }),
    setFabricObject: (v) => set({ activeObject: v }),
 }));
 

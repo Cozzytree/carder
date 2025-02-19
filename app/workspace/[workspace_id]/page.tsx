@@ -12,7 +12,7 @@ import CanvasOptions from "./canvas/options";
 import { Slider } from "@/components/ui/slider";
 
 export default function Page() {
-   const { setFabricObject } = useCanvasStore();
+   const { setFabricObject, isDrawing, setDrawingMode } = useCanvasStore();
    const { containerScale, setContainerScale } = useOtherStore();
    const canvasRef = useRef<HTMLCanvasElement | null>(null);
    const canvasC_ref = useRef<CanvasC | null>(null);
@@ -60,6 +60,9 @@ export default function Page() {
          canvas: f,
          callbackSeleted: (e) => {
             setFabricObject(e);
+         },
+         callbackDrawMode: (v) => {
+            setDrawingMode(v);
          },
       });
 

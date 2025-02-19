@@ -1,5 +1,13 @@
-import { ActiveSelection, Canvas, FabricObject, Group } from "fabric";
-import { canvasShapes } from "./types";
+import {
+   ActiveSelection,
+   Canvas,
+   CircleBrush,
+   FabricObject,
+   Group,
+   PencilBrush,
+   SprayBrush,
+} from "fabric";
+import { brushTypes, canvasShapes } from "./types";
 import {
    DefaultCircle,
    DefaultIText,
@@ -10,24 +18,34 @@ import {
 interface canvasInterface {
    canvas: Canvas;
 
+   callbackDrawMode: (v: boolean) => void;
    callbackSeleted: (o: FabricObject | undefined) => void;
 }
 
 class CanvasC {
    declare canvas: Canvas;
+   declare draw_brush: PencilBrush | SprayBrush | CircleBrush | null;
+   declare callbackDrawMode: (v: boolean) => void;
 
-   constructor({ canvas, callbackSeleted }: canvasInterface) {
+   brush_props: { stroke: number; stroke_color: string } = {
+      stroke: 10,
+      stroke_color: "black",
+   };
+
+   constructor({ canvas, callbackSeleted, callbackDrawMode }: canvasInterface) {
       this.canvas = canvas;
+      this.draw_brush = null;
+      this.callbackDrawMode = callbackDrawMode;
 
-      this.canvas.on("mouse:down", (e) => {
+      this.canvas.on("mouse:down", () => {
          const active = canvas.getActiveObject();
          callbackSeleted(active);
       });
-      this.canvas.on("mouse:up", (e) => {
+      this.canvas.on("mouse:up", () => {
          const active = canvas.getActiveObject();
          callbackSeleted(active);
       });
-      this.canvas.on("object:moving", (e) => {
+      this.canvas.on("object:moving", () => {
          // consol
       });
       this.canvas.on("object:removed", () => {
@@ -155,6 +173,50 @@ class CanvasC {
       this.canvas.requestRenderAll();
    }
 
+   canvasToggleDrawMode() {
+      if (this.canvas.isDrawingMode) {
+         this.canvas.isDrawingMode = false;
+         this.callbackDrawMode(false);
+      } else {
+         this.callbackDrawMode(true);
+         this.canvas.isDrawingMode = true;
+         if (!this.draw_brush) {
+            this.draw_brush = new PencilBrush(this.canvas);
+            this.draw_brush.width = this.brush_props.stroke;
+            this.draw_brush.color = this.brush_props.stroke_color;
+         }
+
+         this.canvas.freeDrawingBrush = this.draw_brush;
+      }
+   }
+
+   setBrushColor(c: string) {
+      if (!this.draw_brush) return;
+      this.draw_brush.color = c;
+      this.brush_props.stroke_color = c;
+   }
+   setBrushWidth(new_width: number) {
+      if (this.draw_brush == null) return;
+      this.draw_brush.width = new_width;
+      this.brush_props.stroke = new_width;
+   }
+   setBrushType(brush_type: brushTypes) {
+      if (this.draw_brush == null) return;
+
+      // Set the brush type to the new type
+      if (brush_type === "spray") {
+         this.draw_brush = new SprayBrush(this.canvas);
+      } else if (brush_type === "pencil") {
+         this.draw_brush = new PencilBrush(this.canvas);
+      } else if (brush_type === "circle") {
+         this.draw_brush = new CircleBrush(this.canvas);
+      }
+
+      this.draw_brush.color = this.brush_props.stroke_color;
+      this.draw_brush.width = this.brush_props.stroke;
+
+      this.canvas.freeDrawingBrush = this.draw_brush;
+   }
    changeCanvasProperties(obj: FabricObject, key: string, value?: any) {
       if (obj instanceof ActiveSelection || obj instanceof Group) {
          obj.forEachObject((o) => {

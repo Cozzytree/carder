@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
-import { Roboto, Balsamiq_Sans } from "next/font/google";
+import { Balsamiq_Sans } from "next/font/google";
 import "./globals.css";
-
-const roboto = Roboto({
-   weight: ["300", "400", "500", "700", "900"],
-   style: ["italic", "normal"],
-});
 
 const balsamiq = Balsamiq_Sans({
    weight: ["400", "700"],
    style: ["italic", "normal"],
    display: "auto",
+   subsets: ["cyrillic", "latin"],
 });
 
 export const metadata: Metadata = {

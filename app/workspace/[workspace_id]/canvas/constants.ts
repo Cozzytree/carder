@@ -5,9 +5,12 @@ import {
    AlignHorizontalJustifyStart,
    AlignLeft,
    AlignRightIcon,
+   BrushIcon,
+   CircleDot,
    LucideIcon,
+   PencilIcon,
 } from "lucide-react";
-import { Align } from "./types";
+import { Align, brushTypes } from "./types";
 
 const basicColors = ["#101010", "#ef4040", "#20ff50", "#2050ef", "#9a9a10"];
 
@@ -51,8 +54,14 @@ const aligns: { label: Align; I: LucideIcon }[] = [
 
 const fontweights = [100, 300, 500, 700, 900];
 const alphas = [0, 0.25, 0.5, 0.75, 1];
+const brushes: { btype: brushTypes; I: LucideIcon }[] = [
+   { btype: "pencil", I: PencilIcon },
+   { btype: "spray", I: BrushIcon },
+   { btype: "circle", I: CircleDot },
+];
 
 export {
+   brushes,
    basicColors,
    radius,
    colors,
