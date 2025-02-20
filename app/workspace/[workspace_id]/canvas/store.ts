@@ -7,7 +7,9 @@ interface canvasInterface {
    activeObject: FabricObject | undefined;
    isDrawing: boolean;
    containerScale: number;
+   hasPointerEvents: boolean;
 
+   setPointerEvents: (v: boolean) => void;
    setContainerScale: (v: number) => void;
    setHeight: (v: number) => void;
    setWidth: (v: number) => void;
@@ -41,11 +43,13 @@ const useColorStore = create<colorStoreInterface>((set) => ({
 
 const useCanvasStore = create<canvasInterface>((set) => ({
    width: 700,
-   height: 400,
+   height: 600,
    activeObject: undefined,
    isDrawing: false,
    containerScale: 1,
+   hasPointerEvents: true,
 
+   setPointerEvents: (v) => set({ hasPointerEvents: v }),
    setWidth: (v) => set({ width: v }),
    setHeight: (v) => set({ height: v }),
    setDrawingMode: (v) => set({ isDrawing: v }),

@@ -23,6 +23,7 @@ interface canvasInterface {
 
    callbackDrawMode: (v: boolean) => void;
    callbackSeleted: (o: FabricObject | undefined) => void;
+   changePointerEventsForCanvas: (v: boolean) => void;
 }
 
 class CanvasC {
@@ -31,6 +32,7 @@ class CanvasC {
    declare draw_brush: PencilBrush | SprayBrush | CircleBrush | null;
    declare callbackDrawMode: (v: boolean) => void;
    declare canvasElement: HTMLCanvasElement;
+   declare changePointerEventsForCanvas: (v: boolean) => void;
 
    isDragging: boolean = false;
 
@@ -44,11 +46,13 @@ class CanvasC {
       callbackSeleted,
       callbackDrawMode,
       canvasElement,
+      changePointerEventsForCanvas,
    }: canvasInterface) {
       this.canvas = canvas;
       this.draw_brush = null;
       this.callbackDrawMode = callbackDrawMode;
       this.canvasElement = canvasElement;
+      this.changePointerEventsForCanvas = changePointerEventsForCanvas;
 
       this.canvas.on("mouse:down", () => {
          const active = canvas.getActiveObject();
@@ -82,7 +86,7 @@ class CanvasC {
    }
    canvasMouseMove(e: TPointerEventInfo<TPointerEvent>) {
       if (!this.isDragging) return;
-      this.canvasElement.style.pointerEvents = "none";
+      // this.changePointerEventsForCanvas(false);
       // const { x, y } = e.scenePoint;
 
       // const vpt = this.canvas.viewportTransform;
@@ -92,7 +96,7 @@ class CanvasC {
    }
    canvasMouseup(e) {
       this.isDragging = false;
-      this.canvasElement.style.pointerEvents = "auto";
+      // this.changePointerEventsForCanvas(true);
    }
 
    createNewShape(shapetype: canvasShapes, textType?: number) {

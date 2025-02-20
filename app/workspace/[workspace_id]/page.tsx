@@ -1,16 +1,16 @@
 "use client";
 import * as fabric from "fabric";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import CanvasC from "./canvas/canvas";
 import {
    DefaultCircle,
+   DefaultCustomPath,
    DefaultIText,
+   DefaultLine,
    DefaultRect,
 } from "./canvas/default_styles";
 import { useCanvasStore } from "./canvas/store";
 import CanvasOptions from "./canvas/options";
-import { Slider } from "@/components/ui/slider";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Page() {
    const {
@@ -19,9 +19,9 @@ export default function Page() {
       height,
       setDrawingMode,
       containerScale,
-      setContainerScale,
-      activeObject,
+      setPointerEvents,
    } = useCanvasStore();
+   const [containerZoom, setContainerZoom] = useState(1);
    const canvasRef = useRef<HTMLCanvasElement | null>(null);
    const canvasC_ref = useRef<CanvasC | null>(null);
    const containerRef = useRef<HTMLDivElement | null>(null);
@@ -37,6 +37,26 @@ export default function Page() {
       });
 
       f.add(
+         new DefaultCustomPath(
+            `M 20 20
+         A 10 10 0 0 1 40 20
+         L 120 20
+         A 10 10 0 0 1 120 40
+         L 100 80
+         A 10 10 0 0 1 80 80
+         L 0 80
+         A 10 10 0 0 1 0 60
+         Z`,
+            {},
+         ),
+         new DefaultLine([10, 20, 100, 100], {
+            top: 100,
+            left: 100,
+            stroke: "black",
+            strokeWidth: 3,
+            strokeUniform: true,
+            width: 10,
+         }),
          new DefaultRect({
             top: 50,
             left: 50,
@@ -73,18 +93,45 @@ export default function Page() {
             setDrawingMode(v);
          },
          canvasElement: canvasRef.current,
+         changePointerEventsForCanvas: (v) => {
+            setPointerEvents(v);
+         },
       });
 
       return () => {
          canvasC_ref.current?.clear();
       };
-   }, []);
+   }, [width, height]);
 
    useEffect(() => {
-      if (!canvasC_ref.current) return;
-      canvasC_ref.current.canvas.set("width", width);
-      canvasC_ref.current.canvas.set("height", height);
-   }, [width, height]);
+      const handler = () => {
+         if (!canvasRef.current) return;
+         if (containerRef.current) {
+            containerRef.current.scrollIntoView({
+               behavior: "smooth",
+               block: "center",
+               inline: "center",
+            });
+         }
+
+         if (window.innerWidth <= 480) {
+            canvasRef.current.style.pointerEvents = "none";
+         } else {
+            canvasRef.current.style.pointerEvents = "auto";
+         }
+      };
+      handler();
+      window.addEventListener("resize", handler);
+      return () => {
+         window.removeEventListener("resize", handler);
+      };
+   }, []);
+
+   // useEffect(() => {
+   //    if (!canvasC_ref.current) return;
+   //    canvasC_ref.current.canvas.set("width", width);
+   //    canvasC_ref.current.canvas.set("height", height);
+   // }, [width, height]);
 
    return (
       <div className="w-full overflow-hidden h-screen flex flex-col justify-center items-center">
@@ -96,20 +143,29 @@ export default function Page() {
                ref={containerRef}
                style={{
                   scale: containerScale,
-                  // translate: `${(containerScale - 1) * 200}px ${(containerScale - 1) * 400}px`,
                }}
-               className="shrink-0 mx-16 my-16 w-full h-full flex justify-center items-center"
+               className="shrink-0 w-full h-full relative"
             >
-               <ScrollArea>
+               <div
+                  className="w-full h-full absolute top-0 left-0 grid place-items-center"
+                  style={{
+                     translate: `${(containerZoom - 1) * 100}px ${(containerZoom - 1) * 100}px`,
+                  }}
+               >
                   <canvas
                      ref={canvasRef}
                      className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`}
                   />
-               </ScrollArea>
+               </div>
             </div>
          </div>
 
-         <CanvasOptions canvasC={canvasC_ref} containerRef={containerRef} />
+         <CanvasOptions
+            containerZoom={containerZoom}
+            setContainerZoom={setContainerZoom}
+            canvasC={canvasC_ref}
+            containerRef={containerRef}
+         />
       </div>
    );
 }
