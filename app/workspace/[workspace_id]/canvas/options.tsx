@@ -1,6 +1,5 @@
 import CanvasC from "./canvas";
 import CanvasBackgroundOption from "./components/canvasb_options";
-import CanvasElements from "./components/elements";
 import FillOprions from "./components/fill_options";
 import FontOptions from "./components/font_options";
 import OpacityOption from "./components/opacity_option";
@@ -8,6 +7,7 @@ import RadiusOption from "./components/radius_option";
 import ShadowOption from "./components/shadow_option";
 import StrokeOptions from "./components/stroke_options";
 
+import { CanvasElements } from "./components/elements";
 import {
    DropdownMenu,
    DropdownMenuContent,
@@ -15,10 +15,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { FabricObject } from "fabric";
-import { ShapesIcon } from "lucide-react";
-import { Dispatch, RefObject, SetStateAction } from "react";
+import { CircleIcon, ShapesIcon } from "lucide-react";
+import {
+   Dispatch,
+   RefObject,
+   SetStateAction,
+   useEffect,
+   useState,
+} from "react";
 import CanvasActions from "./components/canvas_actions";
-import { useCanvasStore } from "./store";
+import { useCanvasStore, useWhichOptionsOpen } from "./store";
+import { useIsMobile } from "./hooks/isMobile";
+import { Button } from "@/components/ui/button";
+import ActiveColor from "./components/active_color";
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipProvider,
+   TooltipTrigger,
+} from "@/components/ui/tooltip";
+import FontOptionUpdated from "./components/font_option(updated)";
 
 type props = {
    containerRef: RefObject<HTMLDivElement | null>;
@@ -35,79 +51,90 @@ function CanvasOptions({
    containerZoom,
 }: props) {
    const { activeObject } = useCanvasStore();
+   const { isMobile } = useIsMobile();
+
    return (
       <>
-         {/* {form small device} */}
-         <div className="h-[4rem] w-full sm:hidden flex justify-between items-center px-3">
-            {activeObject ? (
-               <div className="mx-auto flex gap-2">
-                  <Options activeObject={activeObject} canvasC={canvasC} />
-               </div>
-            ) : (
-               <>
-                  <DropdownMenu>
-                     <DropdownMenuTrigger>
-                        <ShapesIcon />
-                     </DropdownMenuTrigger>
-                     <DropdownMenuContent className="flex flex-col gap-1">
-                        <CanvasElements canvasC={canvasC} />
-                     </DropdownMenuContent>
-                  </DropdownMenu>
-                  <div className="w-full flex justify-center items-center h-14 bg-foreground/10">
-                     <div className="w-48 flex items-center gap-1">
-                        <span>{(containerZoom * 100).toFixed(0)}</span>
-                        <Slider
-                           defaultValue={[containerZoom * 100]}
-                           onValueChange={(e) => {
-                              const v = Number(e[0]);
-                              if (containerRef.current) {
-                                 setContainerZoom(v / 100);
-                                 containerRef.current.style.scale = `${v / 100}`;
-                              }
-                           }}
-                           min={20}
-                           // step={25}
-                           max={300}
-                        />
-                     </div>
-                  </div>
-               </>
-            )}
-         </div>
-         <div className="w-full hidden md:flex justify-center items-center h-14 bg-foreground/10">
-            <div className="w-48 flex items-center gap-1">
-               <span>{(containerZoom * 100).toFixed(0)}</span>
-               <Slider
-                  defaultValue={[containerZoom * 100]}
-                  onValueChange={(e) => {
-                     const v = Number(e[0]);
-                     if (containerRef.current) {
-                        setContainerZoom(v / 100);
-                        containerRef.current.style.scale = `${v / 100}`;
-                     }
-                  }}
-                  min={20}
-                  // step={25}
-                  max={300}
-               />
-            </div>
-         </div>
-
-         <div
-            className={`hidden sm:flex z-[99] flex-col gap-2 items-center w-16 h-screen fixed top-[3%] left-0`}
-         >
-            <CanvasElements canvasC={canvasC} />
-         </div>
-         <div className="pointer-events-none w-full hidden sm:flex gap-2 justify-center items-center fixed left-0 top-[5%] min-h-[10px] px-2 md:px-10">
-            <div className="pointer-events-auto w-fit px-2 shadow-md rounded-md py-1 flex gap-2 items-center border-[2px] bg-secondary">
-               <Options activeObject={activeObject} canvasC={canvasC} />
-            </div>
-         </div>
+         {isMobile ? (
+            <OptionsMobile activeObject={activeObject} canvasC={canvasC} />
+         ) : (
+            <Options activeObj={activeObject} canvasC={canvasC} />
+         )}
       </>
    );
 }
 
 function Options({
+   activeObj,
+   canvasC,
+}: {
+   canvasC: RefObject<CanvasC | null>;
+   activeObj: FabricObject | undefined;
+}) {
+   const { setWhichOption, which } = useWhichOptionsOpen();
+
+   return (
+      <div className="px-2 min-h-16 bg-secondary border-b-2 flex items-center">
+         {activeObj ? (
+            <TooltipProvider>
+               <div className="flex items-center gap-2">
+                  <ActiveColor
+                     fn={() => {
+                        setWhichOption("color");
+                     }}
+                     color={activeObj.get("fill")}
+                     label="change color"
+                  />
+                  <Tooltip>
+                     <TooltipTrigger>
+                        <CircleIcon
+                           onClick={() => {
+                              setWhichOption("outline");
+                           }}
+                        />
+                     </TooltipTrigger>
+                     <TooltipContent>Stroke and Shadow</TooltipContent>
+                  </Tooltip>
+
+                  {(activeObj.type === "i-text" ||
+                     activeObj.type === "textbox") && (
+                     <>
+                        <button
+                           className={`${which === "fonts" && "bg-foreground/20 p-[4px] rounded-md"}`}
+                           onClick={() => {
+                              setWhichOption("fonts");
+                           }}
+                        >
+                           {activeObj.get("fontFamily")}
+                        </button>
+                        <FontOptionUpdated canvasC={canvasC} />
+                     </>
+                  )}
+               </div>
+            </TooltipProvider>
+         ) : (
+            <div className="flex gap-2 text-sm">
+               <ActiveColor
+                  fn={() => {
+                     setWhichOption("color");
+                  }}
+                  color={""}
+                  label="change color"
+               />
+               <button
+                  onClick={() => {
+                     setWhichOption("resize_canvas");
+                  }}
+               >
+                  Resize Canvas
+               </button>
+            </div>
+         )}
+      </div>
+   );
+}
+
+function OptionsMobile({
    activeObject,
    canvasC,
 }: {
@@ -115,10 +142,11 @@ function Options({
    canvasC: RefObject<CanvasC | null>;
 }) {
    return (
-      <>
+      <div className="flex gap-2 md:hidden">
          {activeObject && (
             <>
                {(activeObject.type === "text" ||
+                  activeObject.type === "textbox" ||
                   activeObject.type === "i-text") && (
                   <FontOptions canvasC={canvasC} />
                )}
@@ -199,7 +227,7 @@ function Options({
          />
 
          {activeObject && <CanvasActions canvasC={canvasC} />}
-      </>
+      </div>
    );
 }
 

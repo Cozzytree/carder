@@ -3,19 +3,22 @@ import {
    Canvas,
    CircleBrush,
    FabricObject,
+   Gradient,
    Group,
    PencilBrush,
    SprayBrush,
    TPointerEvent,
    TPointerEventInfo,
 } from "fabric";
-import { brushTypes, canvasShapes } from "./types";
+import { brushTypes, canvasShapes, textTypes } from "./types";
 import {
    DefaultCircle,
+   DefaultCustomPath,
    DefaultIText,
    DefaultRect,
    DefaultTriangle,
 } from "./default_styles";
+import { makeText } from "./utilfunc";
 
 interface canvasInterface {
    canvas: Canvas;
@@ -54,6 +57,21 @@ class CanvasC {
       this.canvasElement = canvasElement;
       this.changePointerEventsForCanvas = changePointerEventsForCanvas;
 
+      this.canvas.on("selection:created", () => {
+         const selected = this.canvas.getActiveObject();
+         if (selected?.type === "activeselection") {
+            selected.set({
+               borderDashArray: [3],
+               cornerSize: 10,
+               cornerStyle: "circle",
+               cornerStrokeColor: "#0000ff",
+               strokeUniform: true,
+               cornerColor: "#2020ff",
+               transparentCorners: false,
+               padding: 2,
+            });
+         }
+      });
       this.canvas.on("mouse:down", () => {
          const active = canvas.getActiveObject();
          callbackSeleted(active);
@@ -99,7 +117,27 @@ class CanvasC {
       // this.changePointerEventsForCanvas(true);
    }
 
-   createNewShape(shapetype: canvasShapes, textType?: number) {
+   createText(type: textTypes) {
+      const t = makeText(type);
+      if (!t) return;
+      t.set({
+         fontStyle: "normal",
+         top: this.canvas.height / 2 - t.height,
+         left: this.canvas.width / 2 - t.width,
+      });
+      this.canvas.discardActiveObject();
+      this.canvas.add(t);
+      this.canvas.setActiveObject(t);
+      this.canvas.requestRenderAll();
+   }
+
+   createNewShape({
+      shapetype,
+      path,
+   }: {
+      shapetype: canvasShapes;
+      path?: string;
+   }) {
       const w = this.canvas.width;
       const h = this.canvas.height;
       let shape: FabricObject | null = null;
@@ -120,22 +158,16 @@ class CanvasC {
                radius: 20,
             });
             break;
-         case "i-text":
-            shape = new DefaultIText("Text", {
-               fontSize: Number(textType) > 1 ? 40 : 80,
-               fontWeight: 400,
-               top: h / 2 - 50,
-               left: w / 2 - 50,
-               underline: false,
-            });
-            if (shape instanceof DefaultIText) {
-               shape.enterEditing();
-            }
-            break;
          case "triangle":
             shape = new DefaultTriangle({
                width: 100,
                height: 100,
+               top: h / 2 - 50,
+               left: w / 2 - 50,
+            });
+            break;
+         case "path":
+            shape = new DefaultCustomPath(path || "", {
                top: h / 2 - 50,
                left: w / 2 - 50,
             });
@@ -149,7 +181,7 @@ class CanvasC {
       }
    }
 
-   changeCanvasColor(v: string) {
+   changeCanvasColor(v: string | Gradient<unknown, "linear">) {
       this.canvas.set("backgroundColor", v);
       this.canvas.requestRenderAll();
    }
@@ -161,14 +193,6 @@ class CanvasC {
       a.forEach((o) => {
          this.canvas.remove(o);
       });
-      // if (a instanceof ActiveSelection) {
-      //    a.forEachObject((o) => {
-      //       this.canvas = this.canvas;
-      //       this.canvas.remove(o);
-      //    });
-      // } else {
-      //    this.canvas.remove(a);
-      // }
 
       this.canvas.requestRenderAll();
       this.canvas.fire("object:removed");
@@ -275,10 +299,56 @@ class CanvasC {
       }
    }
 
+   changeCanvasSize(t: "width" | "height", v: number) {
+      if (t == "width") {
+         this.canvas.set("width", v);
+      } else {
+         this.canvas.set("height", v);
+      }
+      this.canvas.requestRenderAll();
+   }
+
+   async addNewFont(name: string, url: string) {
+      const f = new FontFace(name, url, {
+         style: "normal",
+         weight: "normal",
+      });
+      await f.load().catch((e) => {
+         if (e instanceof Error) {
+            throw new Error(e.message);
+         }
+      });
+      document.fonts.add(f);
+      return true;
+   }
+
    clear() {
-      this.canvas.clear();
-      this.canvas.destroy();
+      // this.canvas.clear();
+      // this.canvas.destroy();
+      this.canvas.dispose();
    }
 }
+
+// function handleObectMovingSnap({
+//    canvas,
+//    obj,
+//    snapD,
+// }: {
+//    snapD: number;
+//    obj: FabricObject;
+//    canvas: Canvas;
+// }) {
+//    const cW = canvas?.width;
+//    const cH = canvas?.height;
+//    const left = obj.left;
+//    const top = obj.top;
+//    const right = left + obj.width + obj.scaleX;
+//    const bottom = top + obj.height + obj.scaleY;
+
+//    const cebterX = left + (obj.width + obj.scaleX) / 2;
+//    const centerY = top + (obj.height + obj.scaleY) / 2;
+
+//    let newGuideLines = [];
+// }
 
 export default CanvasC;

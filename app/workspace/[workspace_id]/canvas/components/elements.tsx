@@ -5,24 +5,64 @@ import {
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+   ArrowBigRight,
+   ArrowRight,
+   CaseUpperIcon,
    CircleIcon,
+   DiamondIcon,
+   Hexagon,
+   Image,
    LucideIcon,
    PencilIcon,
    ShapesIcon,
    Square,
+   SquareX,
+   Star,
    TextIcon,
    TriangleIcon,
 } from "lucide-react";
-import { canvasShapes } from "../types";
+import { canvasShapes, whichOption } from "../types";
 import CanvasC from "../canvas";
 import { RefObject } from "react";
-import { useCanvasStore } from "../store";
+import { useCanvasStore, useWhichOptionsOpen } from "../store";
 import DrawOptions from "./draw_options";
+import { c_paths } from "../constants";
+import { useIsMobile } from "../hooks/isMobile";
 
-const shapes: { shape: canvasShapes; I: LucideIcon }[] = [
+const shapes: { shape: canvasShapes; I: LucideIcon; path?: string }[] = [
    { shape: "rect", I: Square },
    { shape: "circle", I: CircleIcon },
-   { shape: "triangle", I: TriangleIcon },
+   { shape: "path", I: TriangleIcon, path: c_paths.triangle },
+   {
+      shape: "path",
+      I: ArrowBigRight,
+      path: c_paths.arrow_right,
+   },
+   {
+      shape: "path",
+      I: ArrowRight,
+      path: c_paths.arrow_plane,
+   },
+   {
+      shape: "path",
+      I: Hexagon,
+      path: c_paths.hexagon,
+   },
+   {
+      shape: "path",
+      I: DiamondIcon,
+      path: c_paths.diamond,
+   },
+   {
+      shape: "path",
+      I: Star,
+      path: c_paths.star,
+   },
+   {
+      shape: "path",
+      I: SquareX,
+      path: c_paths.quadrilateral,
+   },
 ];
 
 const texts: { shape: canvasShapes; label: string; level: number }[] = [
@@ -36,12 +76,29 @@ type props = {
 
 function CanvasElements({ canvasC }: props) {
    const { isDrawing } = useCanvasStore();
+   const { isMobile } = useIsMobile();
 
+   return (
+      <>
+         {isMobile ? (
+            <CanvasElementsMobile isDrawing={isDrawing} canvasC={canvasC} />
+         ) : (
+            <CanvasElementStandard />
+         )}
+         {/* <div className="w-full h-full">asa</div>; */}
+      </>
+   );
+}
+
+function CanvasElementsMobile({
+   canvasC,
+   isDrawing,
+}: props & { isDrawing: boolean }) {
    return (
       <>
          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-               <button className="text-sm flex flex-col items-center w-full">
+               <button className="text-sm text-foreground/80 flex flex-col items-center w-full">
                   <ShapesIcon />
                   Shapes
                </button>
@@ -55,7 +112,10 @@ function CanvasElements({ canvasC }: props) {
                   <DropdownMenuItem
                      onClick={() => {
                         if (!canvasC.current) return;
-                        canvasC.current.createNewShape(s.shape);
+                        canvasC.current.createNewShape({
+                           shapetype: s.shape,
+                           path: s.path,
+                        });
                      }}
                      key={i}
                      className="w-10 h-10 flex justify-center items-center"
@@ -112,4 +172,32 @@ function CanvasElements({ canvasC }: props) {
    );
 }
 
-export default CanvasElements;
+const whichOptions: { label: whichOption; I: LucideIcon }[] = [
+   { label: "images", I: Image },
+   { label: "text", I: CaseUpperIcon },
+   { label: "shapes", I: TriangleIcon },
+];
+function CanvasElementStandard() {
+   const { setWhichOption, which } = useWhichOptionsOpen();
+
+   return (
+      <div className="w-full flex flex-col divide-y-2">
+         {whichOptions.map((o, i) => (
+            <button
+               onClick={() => {
+                  setWhichOption(o.label);
+               }}
+               className={`${o.label === which && "bg-foreground/10"} flex py-2 flex-col items-center hover:bg-foreground/10 transition-all duration-75`}
+               key={i}
+            >
+               <o.I />
+               <span className="text-sm text-foreground/80">
+                  {o.label[0].toUpperCase() + o.label.slice(1, o.label.length)}
+               </span>
+            </button>
+         ))}
+      </div>
+   );
+}
+
+export { CanvasElementsMobile, CanvasElements };

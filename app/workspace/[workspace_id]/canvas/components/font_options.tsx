@@ -3,6 +3,9 @@ import {
    DropdownMenu,
    DropdownMenuContent,
    DropdownMenuLabel,
+   DropdownMenuSub,
+   DropdownMenuSubContent,
+   DropdownMenuSubTrigger,
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { debouncer } from "@/lib/utils";
@@ -15,7 +18,13 @@ import {
 } from "lucide-react";
 import { RefObject, useEffect, useState } from "react";
 import CanvasC from "../canvas";
-import { aligns, fonts, fontweights, textjustify } from "../constants";
+import {
+   aligns,
+   extra_fonts,
+   fonts,
+   fontweights,
+   textjustify,
+} from "../constants";
 import { useCanvasStore } from "../store";
 import { Align } from "../types";
 
@@ -105,12 +114,12 @@ function FontOptions({ canvasC }: props) {
             <DropdownMenuContent className="flex flex-col gap-1 w-32">
                <div className="flex items-center gap-2">
                   {/* {font weights} */}
-                  <DropdownMenu>
-                     <DropdownMenuTrigger>
+                  <DropdownMenuSub>
+                     <DropdownMenuSubTrigger>
                         <WeightIcon />
-                     </DropdownMenuTrigger>
-                     <DropdownMenuContent asChild>
-                        <div className="flex flex-col w-6">
+                     </DropdownMenuSubTrigger>
+                     <DropdownMenuSubContent>
+                        <div className="flex flex-col w-6 text-sm">
                            {fontweights.map((w, i) => (
                               <Button
                                  onClick={() => {
@@ -125,8 +134,8 @@ function FontOptions({ canvasC }: props) {
                               </Button>
                            ))}
                         </div>
-                     </DropdownMenuContent>
-                  </DropdownMenu>
+                     </DropdownMenuSubContent>
+                  </DropdownMenuSub>
 
                   <Button
                      onClick={() => {
@@ -155,11 +164,11 @@ function FontOptions({ canvasC }: props) {
                </div>
 
                {/* {text alligns} */}
-               <DropdownMenu>
-                  <DropdownMenuTrigger className="text-sm">
+               <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="text-sm">
                      Text Align
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="flex flex-col gap-1 items-center">
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="flex flex-col gap-1 items-center">
                      <div>
                         <DropdownMenuLabel>Align</DropdownMenuLabel>
                         {aligns.map((a, i) => (
@@ -199,16 +208,14 @@ function FontOptions({ canvasC }: props) {
                         ))}
                         I
                      </div>
-                  </DropdownMenuContent>
-               </DropdownMenu>
+                  </DropdownMenuSubContent>
+               </DropdownMenuSub>
 
-               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                     <Button className="h-6" size={"xs"} variant={"outline"}>
-                        {fontconf.family}
-                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="flex flex-col gap-0">
+               <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                     {fontconf.family}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="flex flex-col gap-0">
                      {fonts.map((f, i) => (
                         <Button
                            onClick={() => {
@@ -222,8 +229,24 @@ function FontOptions({ canvasC }: props) {
                            {f}
                         </Button>
                      ))}
-                  </DropdownMenuContent>
-               </DropdownMenu>
+                     {extra_fonts.map((f, i) => (
+                        <Button
+                           onClick={async () => {
+                              if (!canvasC.current) return;
+                              const fo = new FontFace(f.name, f.url, {});
+                              await fo.load();
+                              document.fonts.add(fo);
+                              handleFont_family(fo.family);
+                           }}
+                           variant={"outline"}
+                           size={"xs"}
+                           key={i}
+                        >
+                           {f.name}
+                        </Button>
+                     ))}
+                  </DropdownMenuSubContent>
+               </DropdownMenuSub>
                <input
                   className="w-full"
                   type="number"

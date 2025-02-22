@@ -1,5 +1,8 @@
+"use client";
+
 import { FabricObject } from "fabric";
 import { create } from "zustand";
+import { whichOption } from "./types";
 
 interface canvasInterface {
    width: number;
@@ -25,6 +28,16 @@ interface colorStoreInterface {
    setAlpha: (v: number) => void;
 }
 
+interface whichOptionOpenI {
+   which: whichOption | null;
+   setWhichOption: (v: whichOption | null) => void;
+}
+
+const useWhichOptionsOpen = create<whichOptionOpenI>((set) => ({
+   which: null,
+   setWhichOption: (v) => set({ which: v }),
+}));
+
 const useColorStore = create<colorStoreInterface>((set) => ({
    alpha: 1,
    recentColors: [],
@@ -42,7 +55,9 @@ const useColorStore = create<colorStoreInterface>((set) => ({
 }));
 
 const useCanvasStore = create<canvasInterface>((set) => ({
-   width: 700,
+   width: localStorage.getItem("canvas_width")
+      ? (JSON.parse(localStorage.getItem("canvas_width") || "") as number)
+      : 600,
    height: 600,
    activeObject: undefined,
    isDrawing: false,
@@ -50,7 +65,12 @@ const useCanvasStore = create<canvasInterface>((set) => ({
    hasPointerEvents: true,
 
    setPointerEvents: (v) => set({ hasPointerEvents: v }),
-   setWidth: (v) => set({ width: v }),
+   setWidth: (v) =>
+      set((state) => {
+         localStorage.setItem("canvas_width", JSON.stringify(v));
+         state.width = v;
+         return state;
+      }),
    setHeight: (v) => set({ height: v }),
    setDrawingMode: (v) => set({ isDrawing: v }),
    setFabricObject: (v) => set({ activeObject: v }),
@@ -63,4 +83,4 @@ const useCanvasStore = create<canvasInterface>((set) => ({
       }),
 }));
 
-export { useCanvasStore, useColorStore };
+export { useCanvasStore, useColorStore, useWhichOptionsOpen };
