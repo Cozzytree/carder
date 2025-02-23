@@ -185,7 +185,9 @@ function CanvasElementStandard() {
          {whichOptions.map((o, i) => (
             <button
                onClick={() => {
-                  setWhichOption(o.label);
+                  if (which == o.label) {
+                     setWhichOption(null);
+                  } else setWhichOption(o.label);
                }}
                className={`${o.label === which && "bg-foreground/10"} flex py-2 flex-col items-center hover:bg-foreground/10 transition-all duration-75`}
                key={i}
