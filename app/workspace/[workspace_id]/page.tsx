@@ -2,6 +2,7 @@
 import * as fabric from "fabric";
 import { useEffect, useRef, useState } from "react";
 import CanvasC from "./canvas/canvas";
+import { createApi } from "unsplash-js";
 import {
   DefaultCircle,
   DefaultCustomPath,
@@ -17,6 +18,18 @@ import WhichOContainer from "./canvas/components/which_option_container";
 
 const dbName = "carder_db";
 const db_version = 5;
+
+const unsplash = createApi({
+  accessKey: "WBZ8WCzpqldyqwgR6ZwdUiUZqKwcoUs_TuBwMtzOGgI",
+});
+
+const getPhotos = async () => {
+  const p = await unsplash.photos.getRandom({
+    count: 5,
+    query: "design",
+  });
+  console.log(p);
+};
 
 export default function Page() {
   const {
@@ -35,6 +48,16 @@ export default function Page() {
 
   useEffect(() => {
     if (!canvasRef.current) return;
+
+    try {
+      fabric.setFilterBackend(new fabric.WebGLFilterBackend());
+    } catch (err) {
+      console.error(err);
+      fabric.setFilterBackend(new fabric.Canvas2dFilterBackend());
+    }
+
+    fabric.initFilterBackend();
+
     const f = new fabric.Canvas(canvasRef.current, {
       width: width,
       height: height,

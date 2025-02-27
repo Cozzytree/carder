@@ -1,17 +1,24 @@
-import { Slider } from "@/components/ui/slider";
-import { useCanvasStore } from "../../store";
-import CanvasC from "../../canvas";
-import { RefObject } from "react";
-import { debouncer } from "@/lib/utils";
-import ColorOptions from "./color_options";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ColorStop, FabricObject, Gradient, Shadow } from "fabric";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 import UpDown from "@/components/updown";
+import { debouncer } from "@/lib/utils";
+import {
+  ActiveSelection,
+  ColorStop,
+  FabricObject,
+  Gradient,
+  Group,
+  Shadow,
+} from "fabric";
+import { RefObject } from "react";
+import CanvasC from "../../canvas";
+import { useCanvasStore } from "../../store";
+import ColorOptions from "./color_options";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -19,7 +26,24 @@ type props = {
 
 function OutlineAndShadow({ canvasC }: props) {
   const { activeObject, setFabricObject } = useCanvasStore();
-  const hasShadow: Shadow | null = activeObject?.get("shadow");
+  let hasShadow: Shadow | null = null;
+  let strokeWidth: number = 0;
+  let stroke: string = "";
+
+  if (
+    activeObject instanceof ActiveSelection ||
+    activeObject instanceof Group
+  ) {
+    const o = activeObject.getObjects()[0];
+    strokeWidth = o.get("strokeWidth") as number;
+    hasShadow = o.get("shadow");
+    stroke = o.get("stroke");
+  } else {
+    stroke = activeObject?.get("stroke");
+    strokeWidth = activeObject?.get("strokeWidth");
+    hasShadow = activeObject?.get("shadow");
+  }
+
   const shadow = new Shadow({
     blur: 4,
     offsetX: 3,
@@ -37,8 +61,8 @@ function OutlineAndShadow({ canvasC }: props) {
     if (!check()) return;
     const a = activeObject as FabricObject;
     if (hasShadow) {
-      canvasC.current?.changeCanvasProperties(a, "shadow", null);
-    } else canvasC.current?.changeCanvasProperties(a, "shadow", shadow);
+      canvasC.current?.changeCanvasProperties(a, { shadow: null });
+    } else canvasC.current?.changeCanvasProperties(a, { shadow: shadow });
     setFabricObject(activeObject);
   };
 
@@ -46,29 +70,23 @@ function OutlineAndShadow({ canvasC }: props) {
     if (!check() || !hasShadow) return;
     if (type == "X") {
       hasShadow.offsetX = n;
-      canvasC.current?.changeCanvasProperties(
-        activeObject as FabricObject,
-        "shadow",
-        hasShadow,
-      );
+      canvasC.current?.changeCanvasProperties(activeObject as FabricObject, {
+        shadow: hasShadow,
+      });
     } else {
       hasShadow.offsetY = n;
-      canvasC.current?.changeCanvasProperties(
-        activeObject as FabricObject,
-        "shadow",
-        hasShadow,
-      );
+      canvasC.current?.changeCanvasProperties(activeObject as FabricObject, {
+        shadow: hasShadow,
+      });
     }
     setFabricObject(activeObject);
   };
 
   const handleStroke = (v: number) => {
     if (!check()) return;
-    canvasC.current?.changeCanvasProperties(
-      activeObject as FabricObject,
-      "strokeWidth",
-      v,
-    );
+    canvasC.current?.changeCanvasProperties(activeObject as FabricObject, {
+      strokeWidth: v,
+    });
     setFabricObject(activeObject);
   };
 
@@ -77,9 +95,9 @@ function OutlineAndShadow({ canvasC }: props) {
       <div className="flex flex-col">
         <h4>Stroke</h4>
         <div className="flex items-center gap-1">
-          {activeObject?.get("strokeWidth")}
+          {strokeWidth}
           <Slider
-            defaultValue={[activeObject?.get("strokeWidth") || 0]}
+            defaultValue={[strokeWidth || 0]}
             max={50}
             step={2}
             min={0}
@@ -94,7 +112,7 @@ function OutlineAndShadow({ canvasC }: props) {
               <button
                 className="shrink-0 w-6 h-6 border border-foreground rounded-full"
                 style={{
-                  background: activeObject?.get("stroke"),
+                  background: stroke,
                 }}
               />
             </DropdownMenuTrigger>
@@ -102,11 +120,9 @@ function OutlineAndShadow({ canvasC }: props) {
               <ColorOptions
                 handleColor={(v) => {
                   if (!canvasC.current || !activeObject) return;
-                  canvasC.current.changeCanvasProperties(
-                    activeObject,
-                    "stroke",
-                    v,
-                  );
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    stroke: v,
+                  });
                   setFabricObject(activeObject);
                 }}
                 handleGradient={(color) => {
@@ -126,11 +142,9 @@ function OutlineAndShadow({ canvasC }: props) {
                     type: "linear",
                     colorStops: stops,
                   });
-                  canvasC.current.changeCanvasProperties(
-                    activeObject,
-                    "stroke",
-                    gradient,
-                  );
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    stroke: gradient,
+                  });
                   setFabricObject(activeObject);
                 }}
               />
@@ -185,8 +199,7 @@ function OutlineAndShadow({ canvasC }: props) {
               hasShadow.blur = e[0];
               canvasC.current?.changeCanvasProperties(
                 activeObject as FabricObject,
-                "shadow",
-                hasShadow,
+                { shadow: hasShadow },
               );
               setFabricObject(activeObject);
             }, 50)}
@@ -207,8 +220,7 @@ function OutlineAndShadow({ canvasC }: props) {
                   hasShadow.color = v;
                   canvasC.current?.changeCanvasProperties(
                     activeObject as FabricObject,
-                    "shadow",
-                    hasShadow,
+                    { shadow: hasShadow },
                   );
                 }}
               />

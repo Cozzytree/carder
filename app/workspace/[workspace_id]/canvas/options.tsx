@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 import FontOptionUpdated from "./components/font_option(updated)";
 import ShapeActions from "./components/canvas_options/shape_actions";
+import ImageFiltersOption from "./components/image_filter_options";
 
 type props = {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -98,6 +99,17 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                 </TooltipTrigger>
                 <TooltipContent>Stroke and Shadow</TooltipContent>
               </Tooltip>
+              {activeObj.type === "image" && (
+                <>
+                  <button
+                    onClick={() => {
+                      setWhichOption("image-filters");
+                    }}
+                  >
+                    Filters
+                  </button>
+                </>
+              )}
             </div>
           </TooltipProvider>
           <div className="z-50 p-1 border bg-secondary rounded-md absolute flex gap-2 items-center right-10 -bottom-14">

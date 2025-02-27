@@ -13,6 +13,7 @@ import {
   CopyIcon,
   FlipHorizontal2,
   FlipVertical2,
+  LockIcon,
   LucideBringToFront,
   LucideIcon,
   SendToBackIcon,
@@ -40,6 +41,7 @@ type props = {
 
 function ShapeActions({ canvasC }: props) {
   const { activeObject, setFabricObject } = useCanvasStore();
+  const isLocked = activeObject?.get("lockMovementX") || false;
 
   const check = () => {
     if (!canvasC || !activeObject) return false;
@@ -148,16 +150,13 @@ function ShapeActions({ canvasC }: props) {
             onClick={() => {
               if (!check()) return;
               if (activeObject?.get("flipX")) {
-                canvasC.current?.changeCanvasProperties(
-                  activeObject,
-                  "flipX",
-                  false,
-                );
+                canvasC.current?.changeCanvasProperties(activeObject, {
+                  flipX: false,
+                });
               } else {
                 canvasC.current?.changeCanvasProperties(
                   activeObject as FabricObject,
-                  "flipX",
-                  true,
+                  { flipX: true },
                 );
               }
             }}
@@ -166,6 +165,32 @@ function ShapeActions({ canvasC }: props) {
           </button>
         </TooltipTrigger>
         <TooltipContent>Flip Vertical</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            className={`${isLocked && "bg-foreground/80 text-background p-1 rounded-md"}`}
+            onClick={() => {
+              if (!check()) return;
+              const v = isLocked ? false : true;
+              canvasC.current?.changeCanvasProperties(
+                activeObject as FabricObject,
+                {
+                  lockScalingY: v,
+                  lockScalingX: v,
+                  lockRotation: v,
+                  lockMovementX: v,
+                  lockMovementY: v,
+                },
+              );
+              setFabricObject(activeObject);
+            }}
+          >
+            <LockIcon />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>Lock Movement</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   );

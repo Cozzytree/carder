@@ -53,7 +53,6 @@ class DefaultEllipse extends fabric.Ellipse {
       originY: "center",
       stroke: "white",
       strokeWidth: 4,
-      fill: "transparent",
       cornerColor: "transparent",
       transparentCorners: false,
       centeredRotation: true,
@@ -248,8 +247,10 @@ class DefaultImage extends fabric.FabricImage {
       strokeUniform: true,
       transparentCorners: false,
       cornerColor: "#2090a0",
+      filters: [new fabric.filters.BlackWhite()],
       ...props,
     });
+    this.applyFilters();
   }
 }
 
@@ -264,3 +265,13 @@ export {
   DefaultCircle,
   DefaultTriangle,
 };
+
+// var filters = ['grayscale', 'invert', 'remove-color', 'sepia', 'brownie',
+//                       'brightness', 'contrast', 'saturation', 'vibrance', 'noise', 'vintage',
+//                       'pixelate', 'blur', 'sharpen', 'emboss', 'technicolor',
+//                       'polaroid', 'blend-color', 'gamma', 'kodachrome',
+//                       'blackwhite', 'blend-image', 'hue', 'resize'];
+
+//       for (var i = 0; i < filters.length; i++) {
+//         $(filters[i]) && (
+//         $(filters[i]).checked = !!canvas.getActiveObject().filters[i]);

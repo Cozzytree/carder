@@ -1,9 +1,10 @@
 import { ColorStop, Gradient } from "fabric";
 import { ChevronLeft } from "lucide-react";
 import { RefObject, useEffect } from "react";
-import CanvasC from "../canvas";
 import { useCanvasStore, useWhichOptionsOpen } from "../store";
 import { canvasShapes, textTypes, WhichOptionEmum } from "../types";
+
+import CanvasC from "../canvas";
 import ColorOptions from "./which_option_items/color_options";
 import FontOptions from "./which_option_items/fonts_option(big)";
 import OutlineAndShadow from "./which_option_items/outlineandShaodow";
@@ -11,6 +12,8 @@ import ResizeCanvas from "./which_option_items/resize_canvas";
 import Shapes from "./which_option_items/shapes";
 import TextOptions from "./which_option_items/texts_o";
 import ImageOption from "./image_option";
+import DrawOptions from "./draw_options";
+import ImageFiltersOption from "./image_filter_options";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -30,16 +33,16 @@ function WhichOContainer({ canvasC }: props) {
     canvasC.current.createText(type);
   };
 
-  const handleObjProperty = (property: string, v: any) => {
+  const handleObjProperty = (v: any) => {
     if (!canvasC.current) return;
     if (!activeObject) {
       canvasC.current.changeCanvasColor(v);
     } else {
-      canvasC.current.changeCanvasProperties(activeObject, property, v);
+      canvasC.current.changeCanvasProperties(activeObject, { fill: v });
     }
     setFabricObject(activeObject);
   };
-  const handleGradient = (property: string, color: string[]) => {
+  const handleGradient = (color: string[]) => {
     if (!canvasC.current) return;
     if (activeObject) {
       const divide = 1 / (color.length - 1);
@@ -57,7 +60,9 @@ function WhichOContainer({ canvasC }: props) {
         type: "linear",
         colorStops: stops,
       });
-      canvasC.current.changeCanvasProperties(activeObject, property, gradient);
+      canvasC.current.changeCanvasProperties(activeObject, {
+        fill: gradient,
+      });
     } else {
       const gradient = new Gradient({
         coords: {
@@ -80,7 +85,8 @@ function WhichOContainer({ canvasC }: props) {
       which !== "images" &&
       which !== "shapes" &&
       which !== "text" &&
-      which !== "resize_canvas"
+      which !== "resize_canvas" &&
+      which !== "draw"
     ) {
       setWhichOption("color");
     }
@@ -98,16 +104,25 @@ function WhichOContainer({ canvasC }: props) {
       {which === WhichOptionEmum.TEXT && (
         <TextOptions handleNewText={handleNewText} />
       )}
+      {which === WhichOptionEmum.DRAW && (
+        <div className="px-2">
+          <DrawOptions canvasC={canvasC} />{" "}
+        </div>
+      )}
 
       {which === WhichOptionEmum.COLOR && (
         <ColorOptions
           handleGradient={(g) => {
-            handleGradient("fill", g);
+            handleGradient(g);
           }}
           handleColor={(v) => {
-            handleObjProperty("fill", v);
+            handleObjProperty(v);
           }}
         />
+      )}
+
+      {which === WhichOptionEmum.IMAGEFILTERS && (
+        <ImageFiltersOption canvasC={canvasC} />
       )}
 
       {which === WhichOptionEmum.RESIZE_CANVAS && (

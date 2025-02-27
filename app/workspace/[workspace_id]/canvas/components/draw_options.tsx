@@ -1,65 +1,81 @@
 import { RefObject, useState } from "react";
 import CanvasC from "../canvas";
 import { brushes } from "../constants";
-import ColorOptions from "./color_options";
-import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import ColorOptions from "./which_option_items/color_options";
+import { Slider } from "@/components/ui/slider";
+import { debouncer } from "@/lib/utils";
 
 type props = {
-   canvasC: RefObject<CanvasC | null>;
+  canvasC: RefObject<CanvasC | null>;
 };
 
 function DrawOptions({ canvasC }: props) {
-   const [currColor, setColor] = useState(
-      canvasC.current?.brush_props.stroke_color || "",
-   );
+  const strokeColor = canvasC.current?.brush_props.stroke_color || "";
+  const strokeWidth = canvasC.current?.brush_props.stroke || 0;
 
-   return (
-      <>
-         {brushes.map((b, i) => (
-            <div
-               key={i}
-               className="py-2 hover:scale-[1.4] cursor-pointer transition-all duration-150"
+  const check = () => {
+    if (!canvasC.current) return false;
+    return true;
+  };
+
+  return (
+    <>
+      <div className="">
+        {brushes.map((b, i) => (
+          <div key={i} className="py-2">
+            <button
+              className="hover:scale-[1.2] transition-all duration-150 cursor-pointer"
+              onClick={() => {
+                if (!canvasC.current) return;
+                canvasC.current.setBrushType(b.btype);
+              }}
             >
-               <button
-                  onClick={() => {
-                     if (!canvasC.current) return;
-                     canvasC.current.setBrushType(b.btype);
-                  }}
-               >
-                  <b.I />
-                  {/* <SprayCanIcon className="" /> */}
-               </button>
-            </div>
-         ))}
+              <b.I />
+              {/* <SprayCanIcon className="" /> */}
+            </button>
+          </div>
+        ))}
+      </div>
 
-         <ColorOptions
-            color={currColor}
-            fn={(v) => {
-               if (!canvasC.current) return;
-               canvasC.current.setBrushColor(v);
-               setColor(v);
-            }}
-         >
-            <button className="w-7 h-7 rounded-full border-2"></button>
-         </ColorOptions>
-         <input type="number" className="w-16 bg-transparent" />
-         {/* <div className="py-2 hover:scale-[1.4] cursor-pointer transition-all duration-150">
-            <button>
-               <SprayCanIcon className="" />
-            </button>
-         </div>
-         <div className="py-2 hover:scale-[1.4] cursor-pointer transition-all duration-150">
-            <button>
-               <PencilIcon className="" />
-            </button>
-         </div>
-         <div className="py-2 hover:scale-[1.4] cursor-pointer transition-all duration-150">
-            <button>
-               <EraserIcon className="" />
-            </button>
-         </div> */}
-      </>
-   );
+      <div className="flex flex-col">
+        <h4>Stroke color</h4>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="w-6 h-6 rounded-full bg-foreground/80"
+              style={{ background: strokeColor }}
+            />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="right" align="start">
+            <ColorOptions
+              handleColor={(c) => {
+                if (!check()) return;
+                canvasC.current?.setBrushColor(c);
+              }}
+            />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="flex flex-col">
+        <h4>Stroke Wifth</h4>
+        <Slider
+          defaultValue={[strokeWidth]}
+          onValueChange={debouncer((e: number[]) => {
+            if (!check()) return;
+            const n = e[0];
+            if (n < 0) return;
+            canvasC.current?.setBrushWidth(n);
+          })}
+        />
+      </div>
+    </>
+  );
 }
 
 export default DrawOptions;
