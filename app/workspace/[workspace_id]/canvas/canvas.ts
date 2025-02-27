@@ -4,6 +4,7 @@ import {
   CircleBrush,
   FabricImage,
   FabricObject,
+  filters,
   Gradient,
   Group,
   PencilBrush,
@@ -20,6 +21,7 @@ import {
   DefaultTriangle,
 } from "./default_styles";
 import { makeText } from "./utilfunc";
+import { filtersOptions } from "./constants";
 
 interface canvasInterface {
   canvas: Canvas;
@@ -78,24 +80,24 @@ class CanvasC {
       const active = canvas.getActiveObject();
       callbackSeleted(active);
     });
-    // this.canvas.on("mouse:up", () => {
-    //    const active = canvas.getActiveObject();
-    //    callbackSeleted(active);
-    // });
     this.canvas.on("object:moving", () => {
       // consol
     });
     this.canvas.on("object:removed", () => {
       callbackSeleted(undefined);
     });
-    if (window.innerWidth <= 480) {
-      this.canvas.selection = false;
-      this.canvas.on("mouse:move", this.canvasMouseMove.bind(this));
-      this.canvas.on("mouse:down", this.canvasMouseDown.bind(this));
-      this.canvas.on("mouse:up", this.canvasMouseup.bind(this));
-    } else {
-      this.canvas.selection = true;
-    }
+    this.canvas.on("path:created", (e) => {
+      e.path.set({
+        objectCaching: true,
+        cornerSize: 10,
+        cornerStyle: "circle",
+        padding: 1,
+        cornerStrokeColor: "#2020ff",
+        strokeUniform: true,
+        transparentCorners: false,
+        cornerColor: "#2090a0",
+      });
+    });
   }
 
   canvasMouseDown(e: TPointerEventInfo<TPointerEvent>) {
@@ -139,6 +141,12 @@ class CanvasC {
       image = await FabricImage.fromElement(img);
     } else {
       image = await FabricImage.fromURL(img);
+    }
+
+    if (image instanceof FabricImage) {
+      image.filters = Array.from({ length: filtersOptions.length });
+      // image.filters[0] = new filters.Sepia();
+      // image.applyFilters();
     }
     if (image) {
       image.set({
@@ -199,6 +207,7 @@ class CanvasC {
         shape = new DefaultCustomPath(path || "", {
           top: h / 2 - 50,
           left: w / 2 - 50,
+          strokeWidth: 3,
         });
     }
 
@@ -316,16 +325,29 @@ class CanvasC {
 
     this.canvas.freeDrawingBrush = this.draw_brush;
   }
-  changeCanvasProperties(obj: FabricObject, key: string, value?: any) {
+  changeCanvasProperties(obj: FabricObject, props: object) {
+    // Recursive function to handle groups and nested groups
+    const setPropertyRecursively = (object: FabricObject) => {
+      if (object instanceof Group) {
+        object.forEachObject((o) => {
+          setPropertyRecursively(o);
+        });
+      } else {
+        object.set({ ...props });
+      }
+    };
+
+    // Start the recursive process
     if (obj instanceof ActiveSelection || obj instanceof Group) {
       obj.forEachObject((o) => {
-        o.set(key, value);
+        setPropertyRecursively(o);
       });
-      this.canvas.requestRenderAll();
     } else {
-      obj.set(key, value);
-      this.canvas.requestRenderAll();
+      setPropertyRecursively(obj);
     }
+
+    // Request a re-render of the canvas after all properties are updated
+    this.canvas.requestRenderAll();
   }
 
   changeCanvasSize(t: "width" | "height", v: number) {
@@ -349,6 +371,23 @@ class CanvasC {
     });
     document.fonts.add(f);
     return true;
+  }
+
+  addFilterToImage(filter: any, index: number, activeObject?: FabricObject) {
+    if (activeObject instanceof FabricImage) {
+      if (!activeObject.filters[index]) {
+        if (filter) {
+          activeObject.filters[index] = filter;
+        }
+        activeObject.applyFilters();
+        this.canvas.requestRenderAll();
+      } else {
+        // @ts-expect-error not sure
+        activeObject.filters[index] = undefined;
+        activeObject.applyFilters();
+        this.canvas.requestRenderAll();
+      }
+    }
   }
 
   clear() {
