@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 import FontOptionUpdated from "./components/font_option(updated)";
 import ShapeActions from "./components/canvas_options/shape_actions";
-import ImageFiltersOption from "./components/image_filter_options";
+import { Button } from "@/components/ui/button";
 
 type props = {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -32,28 +32,19 @@ type props = {
   containerZoom: number;
 };
 
-function CanvasOptions({
-  canvasC,
-  containerRef,
-  setContainerZoom,
-  containerZoom,
-}: props) {
-  const { activeObject } = useCanvasStore();
+function CanvasOptions({ canvasC }: props) {
   const { isMobile } = useIsMobile();
 
-  return (
-    <>
-      {isMobile ? (
-        <OptionsMobile activeObject={activeObject} canvasC={canvasC} />
-      ) : (
-        <Options canvasC={canvasC} />
-      )}
-    </>
-  );
+  return <>{!isMobile && <Options canvasC={canvasC} />}</>;
 }
 
 function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
-  const { width, height, activeObject: activeObj } = useCanvasStore();
+  const {
+    width,
+    height,
+    activeObject: activeObj,
+    setFabricObject,
+  } = useCanvasStore();
   const { setWhichOption, which } = useWhichOptionsOpen();
 
   return (
@@ -99,6 +90,23 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                 </TooltipTrigger>
                 <TooltipContent>Stroke and Shadow</TooltipContent>
               </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger>
+                  <OpacityOption
+                    opacity={activeObj.get("opacity")}
+                    fn={(v) => {
+                      if (!canvasC.current || !activeObj) return;
+                      canvasC.current.changeCanvasProperties(activeObj, {
+                        opacity: v,
+                      });
+                      setFabricObject(activeObj);
+                    }}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>Opacity</TooltipContent>
+              </Tooltip>
+
               {activeObj.type === "image" && (
                 <>
                   <button
@@ -138,87 +146,20 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
           </button>
         </div>
       )}
-    </div>
-  );
-}
 
-function OptionsMobile({
-  activeObject,
-  canvasC,
-}: {
-  activeObject: FabricObject | undefined;
-  canvasC: RefObject<CanvasC | null>;
-}) {
-  return (
-    <div className="flex gap-2 md:hidden">
-      {activeObject && (
-        <>
-          {(activeObject.type === "text" ||
-            activeObject.type === "textbox" ||
-            activeObject.type === "i-text") && (
-            <FontOptions canvasC={canvasC} />
-          )}
-
-          <ShadowOption canvasC={canvasC} />
-
-          <OpacityOption
-            fn={(v) => {
-              if (!canvasC.current) return;
-              canvasC.current.changeCanvasProperties(
-                activeObject,
-                "opacity",
-                v,
-              );
-            }}
-            opacity={activeObject.get("opacity")}
-          />
-
-          <StrokeOptions
-            stroke={activeObject.stroke}
-            stroke_width={activeObject.strokeWidth}
-            fn={(v) => {
-              if (!canvasC.current) return;
-              canvasC.current.changeCanvasProperties(activeObject, "stroke", v);
-            }}
-            fnStroke={(v) => {
-              if (!canvasC.current) return;
-              canvasC.current.changeCanvasProperties(
-                activeObject,
-                "strokeWidth",
-                v,
-              );
-            }}
-          />
-          <FillOprions
-            fn={(v) => {
-              if (!canvasC.current) return;
-              canvasC.current.changeCanvasProperties(activeObject, "fill", v);
-            }}
-            stroke={activeObject.fill}
-          />
-          {activeObject.type !== "i-text" &&
-            activeObject.type !== "group" &&
-            activeObject.type !== "activeselection" && (
-              <RadiusOption
-                radiuses={activeObject?.rx}
-                fn={(v) => {
-                  if (!canvasC.current) return;
-                  canvasC.current.changeCanvasProperties(activeObject, "rx", v);
-                  canvasC.current.changeCanvasProperties(activeObject, "ry", v);
-                }}
-              />
-            )}
-        </>
-      )}
-      <CanvasBackgroundOption
-        fn={(v) => {
-          if (!canvasC.current) return;
-          canvasC.current.changeCanvasColor(v);
-        }}
-        color={canvasC.current?.canvas.backgroundColor || ""}
-      />
-
-      {activeObject && <CanvasActions canvasC={canvasC} />}
+      <div>
+        <Button
+          size={"xs"}
+          onClick={() => {
+            if (!canvasC.current) return;
+            canvasC.current.toggleCanvasSelection();
+          }}
+          variant={"outline"}
+          className="text-sm"
+        >
+          Disable Selection
+        </Button>
+      </div>
     </div>
   );
 }

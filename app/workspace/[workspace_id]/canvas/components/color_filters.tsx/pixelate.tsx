@@ -10,7 +10,7 @@ type props = {
   index: number;
 };
 
-function ContrastOption({
+function PixelateFilter({
   condition,
   disabled,
   fn,
@@ -23,12 +23,12 @@ function ContrastOption({
       style={{ opacity: disabled ? 0.5 : 1 }}
     >
       <Slider
-        max={1}
-        min={-1}
+        max={50}
+        min={0}
         defaultValue={[
           activeObject instanceof FabricImage &&
-          activeObject.filters[index] instanceof filters.Contrast
-            ? activeObject.filters[index].contrast
+          activeObject.filters[index] instanceof filters.Pixelate
+            ? activeObject.filters[index].blocksize
             : 0,
         ]}
         step={0.002}
@@ -37,9 +37,9 @@ function ContrastOption({
           if (condition) return;
           if (
             activeObject instanceof FabricImage &&
-            activeObject.filters[index] instanceof filters.Contrast
+            activeObject.filters[index] instanceof filters.Pixelate
           ) {
-            activeObject.filters[index].contrast = e[0];
+            activeObject.filters[index].blocksize = e[0];
             activeObject.applyFilters();
             fn();
           }
@@ -49,4 +49,4 @@ function ContrastOption({
   );
 }
 
-export default ContrastOption;
+export default PixelateFilter;

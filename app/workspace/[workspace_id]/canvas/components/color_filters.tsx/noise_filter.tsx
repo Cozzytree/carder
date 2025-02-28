@@ -10,25 +10,19 @@ type props = {
   index: number;
 };
 
-function ContrastOption({
-  condition,
-  disabled,
-  fn,
-  index,
-  activeObject,
-}: props) {
+function NoiseFilter({ condition, disabled, fn, index, activeObject }: props) {
   return (
     <div
       className="flex flex-col py-4 px-2 rounded-md bg-foreground/20"
       style={{ opacity: disabled ? 0.5 : 1 }}
     >
       <Slider
-        max={1}
-        min={-1}
+        max={50}
+        min={0}
         defaultValue={[
           activeObject instanceof FabricImage &&
-          activeObject.filters[index] instanceof filters.Contrast
-            ? activeObject.filters[index].contrast
+          activeObject.filters[index] instanceof filters.Noise
+            ? activeObject.filters[index].noise
             : 0,
         ]}
         step={0.002}
@@ -37,9 +31,9 @@ function ContrastOption({
           if (condition) return;
           if (
             activeObject instanceof FabricImage &&
-            activeObject.filters[index] instanceof filters.Contrast
+            activeObject.filters[index] instanceof filters.Noise
           ) {
-            activeObject.filters[index].contrast = e[0];
+            activeObject.filters[index].noise = e[0];
             activeObject.applyFilters();
             fn();
           }
@@ -49,4 +43,4 @@ function ContrastOption({
   );
 }
 
-export default ContrastOption;
+export default NoiseFilter;

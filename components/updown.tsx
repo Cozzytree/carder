@@ -1,14 +1,15 @@
 import { Minus, PlusIcon } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, ReactNode, useState } from "react";
 import { Button } from "./ui/button";
 
 type props = {
   onChange: (v: number) => void;
   defaultV?: number;
   disabled?: boolean;
+  children?: ReactNode;
 };
 
-function UpDown({ disabled = false, onChange, defaultV }: props) {
+function UpDown({ disabled = false, onChange, defaultV, children }: props) {
   const [val, setVal] = useState(defaultV || 0);
 
   return (
@@ -24,17 +25,22 @@ function UpDown({ disabled = false, onChange, defaultV }: props) {
       >
         <Minus />
       </Button>
-      <input
-        disabled={disabled}
-        className="max-w-16 p-1 bg-background rounded-md border"
-        value={val}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => {
-          const n = +e.target.value;
-          onChange(n);
-          setVal(n);
-        }}
-        type="number"
-      />
+
+      {children ? (
+        children
+      ) : (
+        <input
+          disabled={disabled}
+          className="max-w-16 p-1 bg-background rounded-md border"
+          value={val}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            const n = +e.target.value;
+            onChange(n);
+            setVal(n);
+          }}
+          type="number"
+        />
+      )}
       <Button
         disabled={disabled}
         onClick={() => {
