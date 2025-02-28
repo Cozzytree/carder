@@ -1,23 +1,32 @@
 "use client";
-import * as fabric from "fabric";
-import { useEffect, useRef, useState } from "react";
-import CanvasC from "./canvas/canvas";
-import { createApi } from "unsplash-js";
 import {
-  DefaultCircle,
-  DefaultCustomPath,
-  DefaultIText,
-  DefaultLine,
-  DefaultRect,
-} from "./canvas/default_styles";
-import { useCanvasStore, useWhichOptionsOpen } from "./canvas/store";
-import CanvasOptions from "./canvas/options";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import * as fabric from "fabric";
+import { SaveIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { createApi } from "unsplash-js";
+import CanvasC from "./canvas/canvas";
 import { CanvasElements } from "./canvas/components/elements";
-import { Slider } from "@/components/ui/slider";
 import WhichOContainer from "./canvas/components/which_option_container";
+import ZoomContainer from "./canvas/components/zoom_container";
+import { saveOptions } from "./canvas/constants";
+import CanvasOptions from "./canvas/options";
+import { useCanvasStore, useWhichOptionsOpen } from "./canvas/store";
+import { useIsMobile } from "./canvas/hooks/isMobile";
+import OptionsMobile from "./canvas/options_mobile";
 
-const dbName = "carder_db";
-const db_version = 5;
+// const dbName = "carder_db";
+// const db_version = 5;
 
 const unsplash = createApi({
   accessKey: "WBZ8WCzpqldyqwgR6ZwdUiUZqKwcoUs_TuBwMtzOGgI",
@@ -39,8 +48,10 @@ export default function Page() {
     setDrawingMode,
     containerScale,
     setPointerEvents,
+    activeObject,
   } = useCanvasStore();
   const { which } = useWhichOptionsOpen();
+  const { isMobile } = useIsMobile();
   const [containerZoom, setContainerZoom] = useState(1);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasC_ref = useRef<CanvasC | null>(null);
@@ -122,7 +133,6 @@ export default function Page() {
   // useEffect(() => {
   //    const res = indexedDB.open(dbName, db_version);
   //    res.onsuccess = (e) => {
-  //       console.log(e);
   //    };
   //    res.onupgradeneeded = (e) => {
   //       const dbInstance = (e.target as IDBRequest).result;
@@ -134,7 +144,59 @@ export default function Page() {
 
   return (
     <div className="w-full overflow-hidden h-screen flex flex-col">
-      <div className="w-full border-b-2 min-h-10">Home</div>
+      <div className="w-full flex justify-between items-center border-b-2 min-h-10 px-5">
+        <div>LOGO</div>
+        <div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <label htmlFor="loadfromfile">Load from File</label>
+                  <input
+                    className="hidden"
+                    onChange={async (e) => {
+                      if (e.target.files) {
+                        if (!canvasC_ref.current) return;
+                        e.target.files[0].text().then(async (d) => {
+                          await canvasC_ref.current?.loadFromFile(d);
+                        });
+                      }
+                    }}
+                    type="file"
+                    id="loadfromfile"
+                    accept=".json"
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Load from file</TooltipContent>
+            </Tooltip>
+
+            <DropdownMenu>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger>
+                    <SaveIcon />
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Save As</TooltipContent>
+              </Tooltip>
+              <DropdownMenuContent>
+                {saveOptions.map((o, i) => (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      if (!canvasC_ref.current) return;
+                      canvasC_ref.current.saveCanvasAs(o.t);
+                    }}
+                    key={i}
+                  >
+                    {o.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </TooltipProvider>
+        </div>
+      </div>
       <div className="w-ful h-full flex">
         {/* {left sidebar} */}
         <div className="h-full hidden md:flex">
@@ -179,25 +241,19 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="min-h-14 flex items-center bg-secondary">
-            <div className="w-48 flex items-center gap-1">
-              <span className="text-nowrap">
-                {(containerZoom * 100).toFixed(0)} %
-              </span>
-              <Slider
-                defaultValue={[containerZoom * 100]}
-                onValueChange={(e) => {
-                  const v = Number(e[0]);
-                  if (containerRef.current) {
-                    setContainerZoom(v / 100);
-                    containerRef.current.style.scale = `${v / 100}`;
-                  }
-                }}
-                min={20}
-                step={5}
-                max={300}
-              />
-            </div>
+          <div className="w-full min-h-14 flex items-center bg-secondary px-5">
+            {!isMobile && activeObject && (
+              <div className="flex items-center gap-1">
+                <ZoomContainer
+                  containerRef={containerRef}
+                  handleZoom={(v) => {
+                    setContainerZoom(v);
+                  }}
+                  zoomLevel={containerZoom}
+                />
+              </div>
+            )}
+            {isMobile && <OptionsMobile canvasC={canvasC_ref} />}
           </div>
         </div>
       </div>

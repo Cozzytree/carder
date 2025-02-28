@@ -1,15 +1,14 @@
 import {
-  ActiveSelection,
   Canvas,
   CircleBrush,
   FabricImage,
   FabricObject,
-  filters,
   Gradient,
   Group,
   PencilBrush,
   SprayBrush,
   TPointerEvent,
+  ActiveSelection,
   TPointerEventInfo,
 } from "fabric";
 import { brushTypes, canvasShapes, textTypes } from "./types";
@@ -388,6 +387,45 @@ class CanvasC {
         this.canvas.requestRenderAll();
       }
     }
+  }
+  toggleCanvasSelection() {
+    if (this.canvas.selection) {
+      this.canvas.selection = false;
+    } else {
+      this.canvas.selection = true;
+    }
+    console.log(this.canvas.selection);
+    this.canvas.requestRenderAll();
+  }
+
+  saveCanvasAs(t: "image" | "json") {
+    if (t == "image") {
+      const data = this.canvas.toDataURL({
+        format: "png",
+        quality: 100,
+        multiplier: 2,
+      });
+      const l = document.createElement("a");
+      l.href = data;
+      l.download = "canvas.png";
+      l.click();
+    } else {
+      const j = this.canvas.toJSON();
+      const jsonBlob = new Blob([JSON.stringify(j)], {
+        type: "application/json",
+      });
+      const l = document.createElement("a");
+      l.href = URL.createObjectURL(jsonBlob); // Create an object URL for the Blob
+      l.download = "data.json"; // Specify the filename
+      l.click(); // Trigger the download
+    }
+  }
+
+  async loadFromFile(json: string) {
+    await this.canvas.loadFromJSON(json, (v) => {
+      // console.log(v);
+    });
+    this.canvas.renderAll();
   }
 
   clear() {

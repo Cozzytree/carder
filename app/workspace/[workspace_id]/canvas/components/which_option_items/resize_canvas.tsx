@@ -2,18 +2,23 @@ import { ChangeEvent, RefObject } from "react";
 import { useCanvasStore } from "../../store";
 import CanvasC from "../../canvas";
 import { debouncer } from "@/lib/utils";
+import { useIsMobile } from "../../hooks/isMobile";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
 };
 function ResizeCanvas({ canvasC }: props) {
+  const { isMobile } = useIsMobile();
   const { width, height, setWidth, setHeight } = useCanvasStore();
   return (
-    <div className="w-full px-2 flex flex-col justify-center">
-      <div>
-        <span>Width </span>
+    <div
+      className={`w-fit px-2 flex ${isMobile ? "flex-row" : "flex-col"} justify-center gap-2`}
+    >
+      <div className={`${isMobile && "flex items-center"}`}>
+        <span>{isMobile ? "w" : "Width"} </span>
         <div className="flex items-end gap-1">
           <input
+            className={`${isMobile ? "w-16" : "w-full"} px-2`}
             type="number"
             defaultValue={width}
             // onChange={(e) => {}}
@@ -27,10 +32,11 @@ function ResizeCanvas({ canvasC }: props) {
           <span>px</span>
         </div>
       </div>
-      <div>
-        <span>Height</span>
+      <div className={`${isMobile && "flex items-center"}`}>
+        <span>{isMobile ? "h" : "Height"} </span>
         <div className="flex items-end gap-1">
           <input
+            className={`${isMobile ? "w-16" : "w-full"} px-2`}
             onChange={debouncer((e: ChangeEvent<HTMLInputElement>) => {
               if (!canvasC.current) return;
               const v = +e.target.value;

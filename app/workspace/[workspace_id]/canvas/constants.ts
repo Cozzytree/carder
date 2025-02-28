@@ -255,7 +255,17 @@ const filtersOptions: { label: string; filter: any }[] = [
   { label: "resize", filter: filters.Resize },
 ];
 
+const saveOptions: { label: string; t: "json" | "image" }[] = [
+  { label: "Save as JSON", t: "json" },
+  { label: "Save as Image", t: "image" },
+  // {label : "Save as "}
+];
+
+const zooms = [75, 100, 125, 150, 175, 200, 225, 250, 300];
+
 export {
+  zooms,
+  saveOptions,
   filtersOptions,
   gradients,
   extra_fonts,

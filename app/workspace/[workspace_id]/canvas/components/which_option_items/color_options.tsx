@@ -1,6 +1,8 @@
 import { ChangeEvent, useState } from "react";
 import { colors, gradients } from "../../constants";
 import { debouncer } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { CircleXIcon } from "lucide-react";
 
 type props = {
   handleColor: (v: string) => void;
@@ -31,6 +33,14 @@ function ColorOptions({ handleColor, handleGradient }: props) {
       </div>
 
       <div className="w-full grid grid-cols-5 gap-2">
+        <button
+          onClick={() => {
+            handleColor("");
+          }}
+          className="w-8 h-8 rounded-full"
+        >
+          <CircleXIcon className="w-8 h-8" fill="red" />
+        </button>
         {tab === "colors" ? (
           <>
             {colors.map((c, i) => (

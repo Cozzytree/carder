@@ -10,13 +10,7 @@ type props = {
   index: number;
 };
 
-function ContrastOption({
-  condition,
-  disabled,
-  fn,
-  index,
-  activeObject,
-}: props) {
+function HueFilter({ condition, disabled, fn, index, activeObject }: props) {
   return (
     <div
       className="flex flex-col py-4 px-2 rounded-md bg-foreground/20"
@@ -27,8 +21,8 @@ function ContrastOption({
         min={-1}
         defaultValue={[
           activeObject instanceof FabricImage &&
-          activeObject.filters[index] instanceof filters.Contrast
-            ? activeObject.filters[index].contrast
+          activeObject.filters[index] instanceof filters.HueRotation
+            ? activeObject.filters[index].rotation
             : 0,
         ]}
         step={0.002}
@@ -37,9 +31,9 @@ function ContrastOption({
           if (condition) return;
           if (
             activeObject instanceof FabricImage &&
-            activeObject.filters[index] instanceof filters.Contrast
+            activeObject.filters[index] instanceof filters.HueRotation
           ) {
-            activeObject.filters[index].contrast = e[0];
+            activeObject.filters[index].rotation = e[0];
             activeObject.applyFilters();
             fn();
           }
@@ -49,4 +43,4 @@ function ContrastOption({
   );
 }
 
-export default ContrastOption;
+export default HueFilter;

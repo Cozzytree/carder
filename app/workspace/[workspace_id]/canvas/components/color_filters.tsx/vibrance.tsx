@@ -10,13 +10,7 @@ type props = {
   index: number;
 };
 
-function ContrastOption({
-  condition,
-  disabled,
-  fn,
-  index,
-  activeObject,
-}: props) {
+function Vibrance({ condition, disabled, fn, index, activeObject }: props) {
   return (
     <div
       className="flex flex-col py-4 px-2 rounded-md bg-foreground/20"
@@ -25,21 +19,21 @@ function ContrastOption({
       <Slider
         max={1}
         min={-1}
+        step={0.002}
         defaultValue={[
           activeObject instanceof FabricImage &&
-          activeObject.filters[index] instanceof filters.Contrast
-            ? activeObject.filters[index].contrast
+          activeObject.filters[index] instanceof filters.Vibrance
+            ? activeObject.filters[index].vibrance
             : 0,
         ]}
-        step={0.002}
         disabled={disabled}
         onValueChange={debouncer((e: number[]) => {
-          if (condition) return;
+          if (condition || disabled) return;
           if (
             activeObject instanceof FabricImage &&
-            activeObject.filters[index] instanceof filters.Contrast
+            activeObject.filters[index] instanceof filters.Vibrance
           ) {
-            activeObject.filters[index].contrast = e[0];
+            activeObject.filters[index].vibrance = e[0];
             activeObject.applyFilters();
             fn();
           }
@@ -49,4 +43,4 @@ function ContrastOption({
   );
 }
 
-export default ContrastOption;
+export default Vibrance;

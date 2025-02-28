@@ -7,17 +7,143 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { FabricImage, filters } from "fabric";
+import { FabricImage, FabricObject, filters } from "fabric";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
 import Gamma from "./color_filters.tsx/gamma";
 import Brightness from "./color_filters.tsx/brightness";
 import ContrastOption from "./color_filters.tsx/contrast";
+import Vibrance from "./color_filters.tsx/vibrance";
+import BlurFilter from "./color_filters.tsx/blur";
+import Saturation from "./color_filters.tsx/saturation";
+import RemoveColor from "./color_filters.tsx/remove_color";
+import PixelateFilter from "./color_filters.tsx/pixelate";
+import NoiseFilter from "./color_filters.tsx/noise_filter";
+import HueFilter from "./color_filters.tsx/hue_filter";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
 };
+
+function renderFilter({
+  condition,
+  activeObject,
+  disabled,
+  fn,
+  index,
+  name,
+}: {
+  activeObject?: FabricObject;
+  fn: () => void;
+  condition: boolean;
+  disabled: boolean;
+  index: number;
+  name: string;
+}) {
+  switch (name) {
+    case "pixelate":
+      return (
+        <PixelateFilter
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+    case "remove-color":
+      return (
+        <RemoveColor
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+    case "contrast":
+      return (
+        <ContrastOption
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+    case "blur":
+      return (
+        <BlurFilter
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+    case "saturation":
+      return (
+        <Saturation
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+    case "vibrance":
+      return (
+        <Vibrance
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+    case "gamma":
+      return (
+        <Gamma
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+    case "brightness":
+      return (
+        <Brightness
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+    case "noise":
+      return (
+        <NoiseFilter
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+    case "hue":
+      return (
+        <HueFilter
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
+  }
+}
 
 function ImageFiltersOption({ canvasC }: props) {
   const [currFilter, setFilter] = useState<string | null>(null);
@@ -71,192 +197,21 @@ function ImageFiltersOption({ canvasC }: props) {
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent className="w-full px-2 py-2 bg-secondary">
-            {f.label == "contrast" && (
-              <ContrastOption
-                condition={!activeObject || !canvasC.current || !hasFilter(i)}
-                index={i}
-                fn={() => {
-                  canvasC.current?.canvas.requestRenderAll();
-                }}
-                disabled={!hasFilter(i)}
-                activeObject={activeObject}
-              />
-            )}
-            {f.label == "hue" && (
-              <div className="flex items-center gap-2">
-                <Slider
-                  onValueChange={debouncer((e: number[]) => {
-                    if (!hasFilter(i) || !canvasC.current || !activeObject)
-                      return;
-                    if (activeObject instanceof FabricImage) {
-                      if (
-                        activeObject.filters[i] instanceof filters.HueRotation
-                      ) {
-                        activeObject.filters[i].rotation = e[0];
-                        activeObject.applyFilters();
-                        canvasC.current.canvas.requestRenderAll();
-                      }
-                    }
-                  }, 50)}
-                  className="w-full"
-                  defaultValue={[0]}
-                  max={2}
-                  min={-2}
-                  step={0.002}
-                  disabled={!hasFilter(i)}
-                />
-              </div>
-            )}
-            {f.label == "blur" && (
-              <div className="flex items-center gap-2">
-                <Slider
-                  onValueChange={debouncer((e: number[]) => {
-                    if (!hasFilter(i) || !canvasC.current || !activeObject)
-                      return;
-                    if (activeObject instanceof FabricImage) {
-                      if (activeObject.filters[i] instanceof filters.Blur) {
-                        activeObject.filters[i].blur = e[0];
-                        activeObject.applyFilters();
-                        canvasC.current.canvas.requestRenderAll();
-                      }
-                    }
-                  }, 50)}
-                  className="w-full"
-                  defaultValue={[0]}
-                  max={1}
-                  min={-1}
-                  step={0.002}
-                  disabled={!hasFilter(i)}
-                />
-              </div>
-            )}
-            {f.label == "noise" && (
-              <div className="flex items-center gap-2">
-                <Slider
-                  onValueChange={debouncer((e: number[]) => {
-                    if (!hasFilter(i) || !canvasC.current || !activeObject)
-                      return;
-                    if (activeObject instanceof FabricImage) {
-                      if (activeObject.filters[i] instanceof filters.Noise) {
-                        activeObject.filters[i].noise = e[0];
-                        activeObject.applyFilters();
-                        canvasC.current.canvas.requestRenderAll();
-                      }
-                    }
-                  }, 100)}
-                  className="w-full"
-                  defaultValue={[0]}
-                  max={100}
-                  min={0}
-                  step={10}
-                  disabled={!hasFilter(i)}
-                />
-              </div>
-            )}
-            {f.label == "saturation" && (
-              <div className="flex items-center gap-2">
-                <Slider
-                  onValueChange={debouncer((e: number[]) => {
-                    if (!hasFilter(i) || !canvasC.current || !activeObject)
-                      return;
-                    if (activeObject instanceof FabricImage) {
-                      if (
-                        activeObject.filters[i] instanceof filters.Saturation
-                      ) {
-                        activeObject.filters[i].saturation = e[0];
-                        activeObject.applyFilters();
-                        canvasC.current.canvas.requestRenderAll();
-                      }
-                    }
-                  }, 50)}
-                  className="w-full"
-                  defaultValue={[0]}
-                  max={1}
-                  min={-1}
-                  step={0.02}
-                  disabled={!hasFilter(i)}
-                />
-              </div>
-            )}
-            {f.label == "vibrance" && (
-              <div className="flex items-center gap-2">
-                <Slider
-                  onValueChange={debouncer((e: number[]) => {
-                    if (!hasFilter(i) || !canvasC.current || !activeObject)
-                      return;
-                    if (activeObject instanceof FabricImage) {
-                      if (activeObject.filters[i] instanceof filters.Vibrance) {
-                        activeObject.filters[i].vibrance = e[0];
-                        activeObject.applyFilters();
-                        canvasC.current.canvas.requestRenderAll();
-                      }
-                    }
-                  }, 50)}
-                  className="w-full"
-                  defaultValue={[0]}
-                  max={1}
-                  min={-1}
-                  step={0.003}
-                  disabled={!hasFilter(i)}
-                />
-              </div>
-            )}
-            {f.label == "gamma" && (
-              <Gamma
-                index={i}
-                condition={!hasFilter(i) || !canvasC.current || !activeObject}
-                activeObject={activeObject}
-                fn={() => {
-                  canvasC?.current?.canvas.requestRenderAll();
-                }}
-                disabled={!hasFilter(i)}
-              />
-            )}
-            {f.label == "brightness" && (
-              <Brightness
-                condition={!activeObject || !canvasC.current || !hasFilter(i)}
-                index={i}
-                fn={() => {
-                  canvasC.current?.canvas.requestRenderAll();
-                }}
-                disabled={!hasFilter(i)}
-                activeObject={activeObject}
-              />
-            )}
+            {renderFilter({
+              condition: !activeObject || !canvasC.current || !hasFilter(i),
+              activeObject: activeObject,
+              disabled: !hasFilter(i),
+              fn: () => {
+                canvasC.current?.canvas.requestRenderAll();
+                setFabricObject(activeObject);
+              },
+              index: i,
+              name: f.label,
+            })}
           </CollapsibleContent>
         </Collapsible>
       ))}
     </div>
   );
 }
-
-// function SliderValue({
-//   defaultVal,
-//   disabled,
-//   fn,
-//   min,
-//   max,
-//   step,
-// }: {
-//   step: number;
-//   max: number;
-//   min: number;
-//   defaultVal: number;
-//   disabled: boolean;
-//   fn: (e: number) => void;
-// }) {
-//   return (
-//     <Slider
-//       step={step}
-//       max={max}
-//       min={min}
-//       defaultValue={[defaultVal]}
-//       disabled={disabled}
-//       onChange={debouncer((e: number[]) => {
-//         fn(e);
-//       }, 50)}
-//     />
-//   );
-// }
-
 export default ImageFiltersOption;
