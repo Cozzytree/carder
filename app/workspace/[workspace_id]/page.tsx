@@ -48,7 +48,6 @@ export default function Page() {
     setDrawingMode,
     containerScale,
     setPointerEvents,
-    activeObject,
   } = useCanvasStore();
   const { which } = useWhichOptionsOpen();
   const { isMobile } = useIsMobile();
