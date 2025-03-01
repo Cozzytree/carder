@@ -1,7 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import { colors, gradients } from "../../constants";
 import { debouncer } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { CircleXIcon } from "lucide-react";
 
 type props = {

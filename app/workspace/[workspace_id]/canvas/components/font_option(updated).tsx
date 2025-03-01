@@ -88,7 +88,7 @@ function FontOptionUpdated({ canvasC }: props) {
 
       <DropdownMenu>
         <DropdownMenuTrigger className="text-xs flex flex-col">
-          <span>Font Weight</span>
+          <span className="text-nowrap">Font Weight</span>
           {activeObject?.get("fontWeight")}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="">

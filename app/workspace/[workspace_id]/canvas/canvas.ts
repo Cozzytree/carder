@@ -16,11 +16,13 @@ import {
   DefaultCircle,
   DefaultCustomPath,
   DefaultImage,
+  DefaultLine,
   DefaultRect,
   DefaultTriangle,
 } from "./default_styles";
 import { makeText } from "./utilfunc";
 import { filtersOptions } from "./constants";
+import { ObjectMoving } from "./object-guides/object-guides";
 
 interface canvasInterface {
   canvas: Canvas;
@@ -39,6 +41,7 @@ class CanvasC {
   declare canvasElement: HTMLCanvasElement;
   declare changePointerEventsForCanvas: (v: boolean) => void;
 
+  guideLines: DefaultLine[] | [] = [];
   isDragging: boolean = false;
 
   brush_props: { stroke: number; stroke_color: string } = {
@@ -79,11 +82,28 @@ class CanvasC {
       const active = canvas.getActiveObject();
       callbackSeleted(active);
     });
-    this.canvas.on("object:moving", () => {
-      // consol
+    this.canvas.on("object:moving", (e) => {
+      if (this.guideLines.length) {
+        this.guideLines.forEach((l) => this.canvas.remove(l));
+      }
+      this.guideLines = ObjectMoving(e, this.canvas);
+      this.guideLines.forEach((l) => {
+        l.set("name", "guide");
+        this.canvas.add(l);
+      });
     });
-    this.canvas.on("object:removed", () => {
-      callbackSeleted(undefined);
+
+    this.canvas.on("object:modified", (e) => {
+      if (this.guideLines.length) {
+        this.guideLines.forEach((l) => this.canvas.remove(l));
+      }
+      callbackSeleted(e.target);
+    });
+
+    this.canvas.on("object:removed", (e) => {
+      if (e.target.get("name") !== "guide") {
+        callbackSeleted(undefined);
+      }
     });
     this.canvas.on("path:created", (e) => {
       e.path.set({
@@ -434,27 +454,5 @@ class CanvasC {
     this.canvas.dispose();
   }
 }
-
-// function handleObectMovingSnap({
-//    canvas,
-//    obj,
-//    snapD,
-// }: {
-//    snapD: number;
-//    obj: FabricObject;
-//    canvas: Canvas;
-// }) {
-//    const cW = canvas?.width;
-//    const cH = canvas?.height;
-//    const left = obj.left;
-//    const top = obj.top;
-//    const right = left + obj.width + obj.scaleX;
-//    const bottom = top + obj.height + obj.scaleY;
-
-//    const cebterX = left + (obj.width + obj.scaleX) / 2;
-//    const centerY = top + (obj.height + obj.scaleY) / 2;
-
-//    let newGuideLines = [];
-// }
 
 export default CanvasC;

@@ -3,13 +3,20 @@ import { ChangeEvent, ReactNode, useState } from "react";
 import { Button } from "./ui/button";
 
 type props = {
+  rate?: number;
   onChange: (v: number) => void;
   defaultV?: number;
   disabled?: boolean;
   children?: ReactNode;
 };
 
-function UpDown({ disabled = false, onChange, defaultV, children }: props) {
+function UpDown({
+  disabled = false,
+  onChange,
+  defaultV,
+  children,
+  rate = 2,
+}: props) {
   const [val, setVal] = useState(defaultV || 0);
 
   return (
@@ -17,8 +24,8 @@ function UpDown({ disabled = false, onChange, defaultV, children }: props) {
       <Button
         disabled={disabled}
         onClick={() => {
-          onChange(val - 2);
-          setVal(val - 2);
+          onChange(val - rate);
+          setVal(val - rate);
         }}
         size={"xs"}
         variant={"outline"}
@@ -44,8 +51,8 @@ function UpDown({ disabled = false, onChange, defaultV, children }: props) {
       <Button
         disabled={disabled}
         onClick={() => {
-          onChange(val + 2);
-          setVal(val + 2);
+          onChange(val + rate);
+          setVal(val + rate);
         }}
         size={"xs"}
         variant={"outline"}

@@ -1,16 +1,8 @@
 import CanvasC from "./canvas";
-import CanvasBackgroundOption from "./components/canvasb_options";
-import FillOprions from "./components/fill_options";
-import FontOptions from "./components/font_options";
 import OpacityOption from "./components/opacity_option";
-import RadiusOption from "./components/radius_option";
-import ShadowOption from "./components/shadow_option";
-import StrokeOptions from "./components/stroke_options";
 
-import { FabricObject } from "fabric";
 import { CircleIcon } from "lucide-react";
 import { Dispatch, RefObject, SetStateAction } from "react";
-import CanvasActions from "./components/canvas_actions";
 import { useCanvasStore, useWhichOptionsOpen } from "./store";
 import { useIsMobile } from "./hooks/isMobile";
 import ActiveColor from "./components/active_color";

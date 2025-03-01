@@ -24,6 +24,7 @@ class DefaultRect extends fabric.Rect {
       // objectCaching: true,
       ...params,
     });
+    this.set("id", `shape-${Date.now()}`);
   }
 }
 
