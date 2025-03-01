@@ -203,7 +203,9 @@ export default function Page() {
           <div className="h-full flex flex-col items-center min-w-20 bg-secondary border-r-2">
             <CanvasElements canvasC={canvasC_ref} />
           </div>
-          {which !== null && <WhichOContainer canvasC={canvasC_ref} />}
+          {which !== null && !isMobile && (
+            <WhichOContainer canvasC={canvasC_ref} />
+          )}
         </div>
 
         <div className="w-full h-full flex flex-col">
@@ -242,17 +244,16 @@ export default function Page() {
           </div>
 
           <div className="w-full min-h-14 flex items-center bg-secondary px-5">
-            {!isMobile && activeObject && (
-              <div className="flex items-center gap-1">
-                <ZoomContainer
-                  containerRef={containerRef}
-                  handleZoom={(v) => {
-                    setContainerZoom(v);
-                  }}
-                  zoomLevel={containerZoom}
-                />
-              </div>
-            )}
+            {/* {!isMobile && activeObject && ( */}
+            <div className="flex items-center gap-1">
+              <ZoomContainer
+                containerRef={containerRef}
+                handleZoom={(v) => {
+                  setContainerZoom(v);
+                }}
+                zoomLevel={containerZoom}
+              />
+            </div>
             {isMobile && <OptionsMobile canvasC={canvasC_ref} />}
           </div>
         </div>

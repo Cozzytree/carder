@@ -19,6 +19,11 @@ import { RefObject } from "react";
 import CanvasC from "../../canvas";
 import { useCanvasStore } from "../../store";
 import ColorOptions from "./color_options";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -107,16 +112,16 @@ function OutlineAndShadow({ canvasC }: props) {
               handleStroke(v);
             }, 100)}
           />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Popover>
+            <PopoverTrigger asChild>
               <button
                 className="shrink-0 w-6 h-6 border border-foreground rounded-full"
                 style={{
                   background: stroke,
                 }}
               />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            </PopoverTrigger>
+            <PopoverContent>
               <ColorOptions
                 handleColor={(v) => {
                   if (!canvasC.current || !activeObject) return;
@@ -148,9 +153,30 @@ function OutlineAndShadow({ canvasC }: props) {
                   setFabricObject(activeObject);
                 }}
               />
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </PopoverContent>
+          </Popover>
         </div>
+      </div>
+
+      <div>
+        <h4>Dash Stroke</h4>
+
+        <Slider
+          defaultValue={[
+            activeObject?.get("strokeDashArray")
+              ? activeObject?.get("strokeDashArray")[0]
+              : 0,
+          ]}
+          min={0}
+          step={2}
+          max={50}
+          onValueChange={debouncer((e: number[]) => {
+            if (!canvasC.current || !activeObject) return;
+            canvasC.current.changeCanvasProperties(activeObject, {
+              strokeDashArray: [e[0], e[0]],
+            });
+          }, 100)}
+        />
       </div>
 
       <div className="flex flex-col justify-between">
@@ -189,43 +215,48 @@ function OutlineAndShadow({ canvasC }: props) {
             />
           </div>
 
-          <h4>Shadow Blur</h4>
-          <Slider
-            max={50}
-            disabled={!hasShadow}
-            defaultValue={[hasShadow?.blur || 0]}
-            onValueChange={debouncer((e: number[]) => {
-              if (!check() || !hasShadow) return;
-              hasShadow.blur = e[0];
-              canvasC.current?.changeCanvasProperties(
-                activeObject as FabricObject,
-                { shadow: hasShadow },
-              );
-              setFabricObject(activeObject);
-            }, 50)}
-          />
+          <div className="w-full flex items-center justify-between">
+            <h4 className="flex-1 text-nowrap">Shadow Blur</h4>
+            <Slider
+              max={50}
+              disabled={!hasShadow}
+              defaultValue={[hasShadow?.blur || 0]}
+              onValueChange={debouncer((e: number[]) => {
+                if (!check() || !hasShadow) return;
+                hasShadow.blur = e[0];
+                canvasC.current?.changeCanvasProperties(
+                  activeObject as FabricObject,
+                  { shadow: hasShadow },
+                );
+                setFabricObject(activeObject);
+              }, 50)}
+            />
+          </div>
 
-          <h4>Shadow Color</h4>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                style={{ background: hasShadow?.color || "" }}
-                className="w-6 h-6 rounded-full border"
-              ></button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <ColorOptions
-                handleColor={(v) => {
-                  if (!check() || !hasShadow) return;
-                  hasShadow.color = v;
-                  canvasC.current?.changeCanvasProperties(
-                    activeObject as FabricObject,
-                    { shadow: hasShadow },
-                  );
-                }}
-              />
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="w-full flex items-center justify-between">
+            <h4>Shadow Color</h4>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  style={{ background: hasShadow?.color || "" }}
+                  className="w-6 h-6 rounded-full border border-foreground"
+                ></button>
+              </PopoverTrigger>
+              <PopoverContent>
+                <ColorOptions
+                  handleGradient={(v) => {}}
+                  handleColor={(v) => {
+                    if (!check() || !hasShadow) return;
+                    hasShadow.color = v;
+                    canvasC.current?.changeCanvasProperties(
+                      activeObject as FabricObject,
+                      { shadow: hasShadow },
+                    );
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
     </div>

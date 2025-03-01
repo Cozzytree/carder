@@ -28,7 +28,7 @@ function ZoomContainer({ handleZoom, zoomLevel, containerRef }: props) {
         }}
       >
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger className="text-nowrap text-sm">
             {(zoomLevel * 100).toFixed(0)} %
           </DropdownMenuTrigger>
           <DropdownMenuContent className="flex flex-col">

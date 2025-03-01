@@ -16,11 +16,13 @@ import {
   DefaultCircle,
   DefaultCustomPath,
   DefaultImage,
+  DefaultLine,
   DefaultRect,
   DefaultTriangle,
 } from "./default_styles";
 import { makeText } from "./utilfunc";
 import { filtersOptions } from "./constants";
+import { ObjectMoving } from "./object-guides/object-guides";
 
 interface canvasInterface {
   canvas: Canvas;
@@ -39,6 +41,7 @@ class CanvasC {
   declare canvasElement: HTMLCanvasElement;
   declare changePointerEventsForCanvas: (v: boolean) => void;
 
+  guideLines: DefaultLine[] | [] = [];
   isDragging: boolean = false;
 
   brush_props: { stroke: number; stroke_color: string } = {
@@ -79,9 +82,22 @@ class CanvasC {
       const active = canvas.getActiveObject();
       callbackSeleted(active);
     });
-    this.canvas.on("object:moving", () => {
-      // consol
+    this.canvas.on("object:moving", (e) => {
+      if (this.guideLines.length) {
+        this.guideLines.forEach((l) => this.canvas.remove(l));
+      }
+      this.guideLines = ObjectMoving(e, this.canvas);
+      this.guideLines.forEach((l) => {
+        this.canvas.add(l);
+      });
     });
+
+    this.canvas.on("object:modified", (e) => {
+      if (this.guideLines.length) {
+        this.guideLines.forEach((l) => this.canvas.remove(l));
+      }
+    });
+
     this.canvas.on("object:removed", () => {
       callbackSeleted(undefined);
     });

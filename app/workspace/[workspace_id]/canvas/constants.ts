@@ -242,7 +242,7 @@ const filtersOptions: { label: string; filter: any }[] = [
   { label: "vintage", filter: filters.Vintage },
   { label: "pixelate", filter: filters.Pixelate },
   { label: "blur", filter: filters.Blur },
-  // { label: "sharpen", filter: filters. },
+  { label: "sharpen", filter: filters.Convolute },
   // { label: "emboss", filter: filters. },
   { label: "technicolor", filter: filters.Technicolor },
   { label: "polaroid", filter: filters.Polaroid },
@@ -261,7 +261,7 @@ const saveOptions: { label: string; t: "json" | "image" }[] = [
   // {label : "Save as "}
 ];
 
-const zooms = [75, 100, 125, 150, 175, 200, 225, 250, 300];
+const zooms = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 300];
 
 export {
   zooms,

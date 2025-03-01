@@ -3,51 +3,35 @@ import { useCanvasStore } from "../../store";
 import CanvasC from "../../canvas";
 import { debouncer } from "@/lib/utils";
 import { useIsMobile } from "../../hooks/isMobile";
+import UpDown from "@/components/updown";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
 };
 function ResizeCanvas({ canvasC }: props) {
-  const { isMobile } = useIsMobile();
   const { width, height, setWidth, setHeight } = useCanvasStore();
   return (
     <div
-      className={`w-fit px-2 flex ${isMobile ? "flex-row" : "flex-col"} justify-center gap-2`}
+      className={`w-full px-2 flex flex-col justify-center items-center gap-2`}
     >
-      <div className={`${isMobile && "flex items-center"}`}>
-        <span>{isMobile ? "w" : "Width"} </span>
-        <div className="flex items-end gap-1">
-          <input
-            className={`${isMobile ? "w-16" : "w-full"} px-2`}
-            type="number"
-            defaultValue={width}
-            // onChange={(e) => {}}
-            onChange={debouncer((e: ChangeEvent<HTMLInputElement>) => {
-              if (!canvasC.current) return;
-              const v = +e.target.value;
-              setWidth(v);
-              canvasC.current.changeCanvasSize("width", v);
-            }, 10)}
-          />
-          <span>px</span>
-        </div>
+      <div className="w-full flex flex-col">
+        <span>width</span>
+        <UpDown
+          defaultV={width}
+          onChange={(v) => {
+            setWidth(v);
+          }}
+        />
       </div>
-      <div className={`${isMobile && "flex items-center"}`}>
-        <span>{isMobile ? "h" : "Height"} </span>
-        <div className="flex items-end gap-1">
-          <input
-            className={`${isMobile ? "w-16" : "w-full"} px-2`}
-            onChange={debouncer((e: ChangeEvent<HTMLInputElement>) => {
-              if (!canvasC.current) return;
-              const v = +e.target.value;
-              setHeight(v);
-              canvasC.current.changeCanvasSize("height", v);
-            }, 10)}
-            type="number"
-            defaultValue={height}
-          />{" "}
-          <span>px</span>
-        </div>
+
+      <div className="w-full flex flex-col">
+        <span>height</span>
+        <UpDown
+          defaultV={height}
+          onChange={(v) => {
+            setHeight(v);
+          }}
+        />
       </div>
     </div>
   );

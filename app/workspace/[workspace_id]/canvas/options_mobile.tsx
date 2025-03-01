@@ -1,24 +1,48 @@
 import CanvasC from "./canvas";
-import OpacityOption from "./components/opacity_option";
+import ImageOption from "./components/image_option";
 import RadiusOption from "./components/radius_option";
+import OpacityOption from "./components/opacity_option";
+import Shapes from "./components/which_option_items/shapes";
+import ImageFiltersOption from "./components/image_filter_options";
+import ShapeActions from "./components/canvas_options/shape_actions";
+import ColorOptions from "./components/which_option_items/color_options";
+import ResizeCanvas from "./components/which_option_items/resize_canvas";
 import FontOptions from "./components/which_option_items/fonts_option(big)";
+import OutlineAndShadow from "./components/which_option_items/outlineandShaodow";
 
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ColorStop, Gradient } from "fabric";
+import {
+  CaseUpper,
+  ImagesIcon,
+  PencilIcon,
+  PencilLine,
+  ShapesIcon,
+  Type,
+  TypeIcon,
+  TypeOutline,
+} from "lucide-react";
 import { RefObject } from "react";
 import { useCanvasStore } from "./store";
-import ResizeCanvas from "./components/which_option_items/resize_canvas";
-import ColorOptions from "./components/which_option_items/color_options";
+import DrawOptions from "./components/draw_options";
+import TextOptions from "./components/which_option_items/texts_o";
+import FontOptionUpdated from "./components/font_option(updated)";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ColorStop, Gradient } from "fabric";
-import Shapes from "./components/which_option_items/shapes";
-import { ImagesIcon, PencilLine, ShapesIcon } from "lucide-react";
-import OutlineAndShadow from "./components/which_option_items/outlineandShaodow";
-import ImageOption from "./components/image_option";
-import ShapeActions from "./components/canvas_options/shape_actions";
-import ImageFiltersOption from "./components/image_filter_options";
 
 function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
   const { activeObject, setFabricObject } = useCanvasStore();
@@ -61,13 +85,28 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
   };
 
   return (
-    <div className="w-full flex gap-2 md:hidden">
+    <div className="w-full flex gap-3 md:hidden">
       {activeObject ? (
         <>
           {(activeObject.type === "text" ||
             activeObject.type === "textbox" ||
             activeObject.type === "i-text") && (
-            <FontOptions canvasC={canvasC} />
+            <Popover>
+              <PopoverTrigger>
+                <TypeOutline />
+              </PopoverTrigger>
+              <PopoverContent className="space-y-2">
+                <FontOptionUpdated canvasC={canvasC} />
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="text-sm">
+                    Fonts
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" side="right">
+                    <FontOptions canvasC={canvasC} />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </PopoverContent>
+            </Popover>
           )}
 
           {/* <ShadowOption canvasC={canvasC} /> */}
@@ -82,33 +121,26 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             opacity={activeObject.get("opacity")}
           />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger>
+          {/* {stroke} */}
+          <Popover>
+            <PopoverTrigger>
               <PencilLine />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            </PopoverTrigger>
+            <PopoverContent>
               <OutlineAndShadow canvasC={canvasC} />
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </PopoverContent>
+          </Popover>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <ImagesIcon />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <ImageOption canvasC={canvasC} />
-            </DropdownMenuContent>
-          </DropdownMenu>
           {activeObject.type === "image" && (
-            <DropdownMenu>
-              <DropdownMenuTrigger>Filters</DropdownMenuTrigger>
-              <DropdownMenuContent
+            <Popover>
+              <PopoverTrigger>Filters</PopoverTrigger>
+              <PopoverContent
                 sideOffset={10}
                 className="p-4 w-[200px] max-h-[400px] overflow-y-auto"
               >
                 <ImageFiltersOption canvasC={canvasC} />
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </PopoverContent>
+            </Popover>
           )}
 
           {activeObject.type !== "i-text" &&
@@ -130,13 +162,73 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
         </>
       ) : (
         <>
-          <ResizeCanvas canvasC={canvasC} />
+          {/* {resize canvas} */}
+          <Popover>
+            <PopoverTrigger>Resize Canvas</PopoverTrigger>
+            <PopoverContent className="flex flex-col w-fit">
+              <ResizeCanvas canvasC={canvasC} />
+            </PopoverContent>
+          </Popover>
+
+          {/* {images} */}
+          <Drawer>
+            <DrawerTrigger>
+              <ImagesIcon />
+            </DrawerTrigger>
+            <DrawerContent className="px-5 pb-10">
+              <DrawerClose className="absolute right-3 top-3">
+                close
+              </DrawerClose>
+              <DrawerTitle>Images</DrawerTitle>
+              <ImageOption canvasC={canvasC} />
+            </DrawerContent>
+          </Drawer>
+
+          {/* {draw} */}
+          <Drawer>
+            <DrawerTrigger
+              onClick={() => {
+                if (!canvasC.current) return;
+                canvasC.current.canvasToggleDrawMode();
+              }}
+            >
+              <PencilIcon />
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerContent className="px-5 pb-10">
+                <DrawerClose className="absolute right-3 top-3">
+                  close
+                </DrawerClose>
+                <DrawerTitle>Draw</DrawerTitle>
+                <DrawOptions canvasC={canvasC} />
+              </DrawerContent>
+            </DrawerContent>
+          </Drawer>
+
+          {/* {text} */}
+          <Drawer>
+            <DrawerTrigger>
+              <TypeIcon />
+            </DrawerTrigger>
+            <DrawerContent className="px-5 pb-10">
+              <DrawerTitle>Text</DrawerTitle>
+              <DrawerClose className="absolute right-3 top-3">
+                close
+              </DrawerClose>
+              <TextOptions
+                handleNewText={(v) => {
+                  if (!canvasC.current) return;
+                  canvasC.current.createText(v);
+                }}
+              />
+            </DrawerContent>
+          </Drawer>
         </>
       )}
 
       {/* {colors} */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Popover>
+        <PopoverTrigger asChild>
           <button
             style={{
               background:
@@ -145,8 +237,8 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             }}
             className="w-6 h-6 rounded-full border-2 border-foreground"
           ></button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" side="top">
+        </PopoverTrigger>
+        <PopoverContent align="center" side="top">
           <ColorOptions
             handleGradient={(v) => {
               handleGradient(v);
@@ -163,39 +255,34 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
               setFabricObject(activeObject);
             }}
           />
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <DropdownMenu>
-        <DropdownMenuTrigger>
+        </PopoverContent>
+      </Popover>
+
+      <Drawer>
+        <DrawerTrigger>
           <ShapesIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        </DrawerTrigger>
+        <DrawerContent className="px-5 space-y-3 pb-6 pt-2">
+          <DrawerClose className="absolute right-3 top-3">close</DrawerClose>
+          <DrawerTitle>Shapes</DrawerTitle>
           <Shapes
             handleShape={(type, path) => {
               if (!canvasC.current) return;
               canvasC.current.createNewShape({ shapetype: type, path });
             }}
           />
-        </DropdownMenuContent>
-      </DropdownMenu>
-      {/*
-      <CanvasBackgroundOption
-        fn={(v) => {
-          if (!canvasC.current) return;
-          canvasC.current.changeCanvasColor(v);
-        }}
-        color={canvasC.current?.canvas.backgroundColor || ""}
-      /> */}
+        </DrawerContent>
+      </Drawer>
 
       {activeObject && (
-        <DropdownMenu>
-          <DropdownMenuTrigger className="pl-2 border-l-2 border-foreground/30">
+        <Popover>
+          <PopoverTrigger className="pl-2 border-l-2 border-foreground/30">
             Actions
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="flex gap-2">
+          </PopoverTrigger>
+          <PopoverContent sideOffset={20} className="flex gap-2 w-fit">
             <ShapeActions canvasC={canvasC} />
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </PopoverContent>
+        </Popover>
       )}
     </div>
   );

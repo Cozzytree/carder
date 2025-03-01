@@ -21,6 +21,7 @@ import RemoveColor from "./color_filters.tsx/remove_color";
 import PixelateFilter from "./color_filters.tsx/pixelate";
 import NoiseFilter from "./color_filters.tsx/noise_filter";
 import HueFilter from "./color_filters.tsx/hue_filter";
+import BlendColor from "./color_filters.tsx/blend-color";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -142,6 +143,16 @@ function renderFilter({
           activeObject={activeObject}
         />
       );
+    case "blend-color":
+      return (
+        <BlendColor
+          condition={condition}
+          disabled={disabled}
+          fn={fn}
+          index={index}
+          activeObject={activeObject}
+        />
+      );
   }
 }
 
@@ -158,7 +169,6 @@ function ImageFiltersOption({ canvasC }: props) {
   const handleGetFilterVal = (index: number) => {
     if (activeObject instanceof FabricImage) {
       if (activeObject.filters[index]) {
-        console.log(activeObject.filters[index]);
       }
     }
   };
@@ -171,7 +181,6 @@ function ImageFiltersOption({ canvasC }: props) {
     }
     return false;
   };
-
   return (
     <div className="flex flex-col w-full divide-y-2">
       {filtersOptions.map((f, i) => (
@@ -180,7 +189,10 @@ function ImageFiltersOption({ canvasC }: props) {
             <div className="w-full flex items-center justify-between">
               <button
                 onClick={() => {
-                  handleGetFilterVal(i);
+                  const exist = ["sepia", "vintage", "polaroid"].find(
+                    (v) => v == f.label,
+                  );
+                  if (exist) return;
                   setFilter((v) => (v === f.label ? null : f.label));
                 }}
                 key={i}
