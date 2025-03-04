@@ -8,9 +8,9 @@ type props = {
 
 function OpacityOption({ fn, opacity }: props) {
   return (
-    <div className="flex flex-col justify-center items-center w-32">
+    <div className="flex flex-col justify-start items-start w-fll">
+      <span className="w-12">Opacity</span>
       <div className="w-full flex items-center gap-1">
-        <span className="w-12">{opacity}</span>
         <Slider
           defaultValue={[opacity * 100]}
           onValueChange={debouncer((e) => {

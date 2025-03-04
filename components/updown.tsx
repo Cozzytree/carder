@@ -20,25 +20,23 @@ function UpDown({
   const [val, setVal] = useState(defaultV || 0);
 
   return (
-    <div className="w-full flex items-center gap-1">
-      <Button
+    <div className="w-full flex items-center justify-center gap-2">
+      <button
         disabled={disabled}
         onClick={() => {
           onChange(val - rate);
           setVal(val - rate);
         }}
-        size={"xs"}
-        variant={"outline"}
       >
-        <Minus />
-      </Button>
+        <Minus className="w-4 h-5" />
+      </button>
 
       {children ? (
         children
       ) : (
         <input
           disabled={disabled}
-          className="max-w-16 p-1 bg-background rounded-md border"
+          className="max-w-16 text-sm px-1 bg-background rounded-md border"
           value={val}
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             const n = +e.target.value;
@@ -48,17 +46,15 @@ function UpDown({
           type="number"
         />
       )}
-      <Button
+      <button
         disabled={disabled}
         onClick={() => {
           onChange(val + rate);
           setVal(val + rate);
         }}
-        size={"xs"}
-        variant={"outline"}
       >
-        <PlusIcon />
-      </Button>
+        <PlusIcon className="2-5 h-5" />
+      </button>
     </div>
   );
 }

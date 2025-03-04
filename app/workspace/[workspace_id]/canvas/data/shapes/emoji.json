@@ -1,0 +1,50 @@
+{
+  "icons": [
+    { "url": "/emoji/angry-face.svg", "label": "angry-face" },
+    { "url": "/emoji/smiling-face.svg", "label": "smiling-face" },
+    {
+      "url": "/emoji/beaming-face-with-smiling-eyes.svg",
+      "label": "beaming-face-with-smiling-eyes"
+    },
+    {
+      "url": "/emoji/confused-face.svg",
+      "label": "confused-face"
+    },
+    {
+      "url": "/emoji/crying-face.svg",
+      "label": "crying-face"
+    },
+    {
+      "url": "/emoji/dizzy-face.svg",
+      "label": "dizzy-face"
+    },
+    {
+      "url": "/emoji/downcast-face-with-sweat.svg",
+      "label": "downcast-face-with-sweat"
+    },
+    {
+      "url": "/emoji/face-savoring-food.svg",
+      "label": "face-savoring-food"
+    },
+    {
+      "url": "/emoji/face-with-medical-mask.svg",
+      "label": "face-with-medical-mask"
+    },
+    {
+      "url": "/emoji/grinning-face.svg",
+      "label": "grinning-face"
+    },
+    {
+      "url": "/emoji/hot-face.svg",
+      "label": "hot-face"
+    },
+    {
+      "url": "/emoji/partying-face.svg",
+      "label": "partying-face"
+    },
+    {
+      "url": "/emoji/smiling-face-with-halo.svg",
+      "label": "smiling-face-with-halo"
+    }
+  ]
+}

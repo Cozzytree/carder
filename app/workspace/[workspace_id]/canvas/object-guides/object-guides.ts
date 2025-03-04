@@ -77,9 +77,12 @@ function ObjectMoving(
 
   // midX
   if (Math.abs(centerX - canvasMidx) <= snapSize) {
-    lines.push(
-      new DefaultLine([canvasMidx, 0, canvasMidx, canvas.height], lineProp),
-    );
+    if (!vm) {
+      lines.push(
+        new DefaultLine([canvasMidx, 0, canvasMidx, canvas.height], lineProp),
+      );
+      vm = true;
+    }
     e.target.set({
       left: canvasMidx - width * 0.5,
     });
@@ -87,11 +90,12 @@ function ObjectMoving(
 
   // midY
   if (Math.abs(centerY - canvasMidy) <= 10) {
-    lines.push(
-      new DefaultLine([0, canvasMidy, canvas.width, canvasMidy], lineProp),
-    );
-
-    hm = true;
+    if (!hm) {
+      lines.push(
+        new DefaultLine([0, canvasMidy, canvas.width, canvasMidy], lineProp),
+      );
+      hm = true;
+    }
 
     e.target.set({
       top: canvasMidy - height * 0.5,

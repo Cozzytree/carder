@@ -43,6 +43,7 @@ class DefaultTriangle extends fabric.Triangle {
       // objectCaching: true,
       ...params,
     });
+    this.set("id", `shape-${Date.now()}`);
   }
 }
 
@@ -70,6 +71,7 @@ class DefaultEllipse extends fabric.Ellipse {
         color: "black",
       }),
     });
+    this.set("id", `shape-${Date.now()}`);
     this.width = params.width || 50;
     this.height = params.height || 50;
   }
@@ -100,6 +102,7 @@ class DefaultCircle extends fabric.Circle {
       }),
       ...params,
     });
+    this.set("id", `shape-${Date.now()}`);
   }
 }
 
@@ -120,6 +123,7 @@ class DefaultIText extends fabric.Textbox {
       // objectCaching: true,
       ...params,
     });
+    this.set("id", `shape-${Date.now()}`);
   }
 }
 
@@ -147,6 +151,7 @@ class DefaultPath extends fabric.Path {
         // objectCaching: true,
       },
     );
+    this.set("id", `shape-${Date.now()}`);
   }
 }
 
@@ -157,6 +162,7 @@ class DefaultLine extends fabric.Line {
   ) {
     super(points, { ...props });
     this.initilizeControls();
+    this.set("id", `shape-${Date.now()}`);
   }
 
   initilizeControls() {
@@ -228,6 +234,7 @@ class DefaultCustomPath extends fabric.Path {
       strokeUniform: true,
       transparentCorners: false,
     });
+    this.set("id", `shape-${Date.now()}`);
   }
 }
 
@@ -252,6 +259,7 @@ class DefaultImage extends fabric.FabricImage {
       ...props,
     });
     this.applyFilters();
+    this.set("id", `shape-${Date.now()}`);
   }
 }
 

@@ -1,0 +1,24 @@
+{
+  "icons": [
+    { "url": "/programming/arch.svg", "label": "arch" },
+    { "url": "/programming/c-plusplus.svg", "label": "c++" },
+    { "url": "/programming/c-sharp.svg", "label": "c#" },
+    { "url": "/programming/css.svg", "label": "css" },
+    { "url": "/programming/docker.svg", "label": "docker" },
+    { "url": "/programming/go.svg", "label": "go" },
+    { "url": "/programming/javascript.svg", "label": "javascript" },
+    { "url": "/programming/kubernetes.svg", "label": "kubernetes" },
+    { "url": "/programming/nginx.svg", "label": "nginx" },
+    { "url": "/programming/programing.svg", "label": "programing" },
+    { "url": "/programming/programming.svg", "label": "programming" },
+    { "url": "/programming/programming2.svg", "label": "programming2" },
+    { "url": "/programming/react.svg", "label": "react" },
+    { "url": "/programming/svelte.svg", "label": "svelte" },
+    { "url": "/programming/swift.svg", "label": "swift" },
+    { "url": "/programming/terraform.svg", "label": "terraform" },
+    { "url": "/programming/typescript.svg", "label": "typescript" },
+    { "url": "/programming/vim.svg", "label": "vim" },
+    { "url": "/programming/vscode.svg", "label": "vscode" },
+    { "url": "/programming/vue.svg", "label": "vue" }
+  ]
+}

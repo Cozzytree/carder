@@ -101,7 +101,7 @@ class CanvasC {
     });
 
     this.canvas.on("object:removed", (e) => {
-      if (e.target.get("name") !== "guide") {
+      if (e.target && e.target.get("name") !== "guide") {
         callbackSeleted(undefined);
       }
     });

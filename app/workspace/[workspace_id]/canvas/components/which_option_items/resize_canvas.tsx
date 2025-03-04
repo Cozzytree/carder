@@ -1,9 +1,7 @@
-import { ChangeEvent, RefObject } from "react";
-import { useCanvasStore } from "../../store";
+import { RefObject } from "react";
 import CanvasC from "../../canvas";
-import { debouncer } from "@/lib/utils";
-import { useIsMobile } from "../../hooks/isMobile";
 import UpDown from "@/components/updown";
+import { useCanvasStore } from "../../store";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -15,7 +13,7 @@ function ResizeCanvas({ canvasC }: props) {
       className={`w-full px-2 flex flex-col justify-center items-center gap-2`}
     >
       <div className="w-full flex flex-col">
-        <span>width</span>
+        <span className="text-sm">width</span>
         <UpDown
           defaultV={width}
           onChange={(v) => {
@@ -25,7 +23,7 @@ function ResizeCanvas({ canvasC }: props) {
       </div>
 
       <div className="w-full flex flex-col">
-        <span>height</span>
+        <span className="text-sm">height</span>
         <UpDown
           defaultV={height}
           onChange={(v) => {

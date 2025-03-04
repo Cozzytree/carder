@@ -1,7 +1,6 @@
 import CanvasC from "./canvas";
 import ImageOption from "./components/image_option";
 import RadiusOption from "./components/radius_option";
-import OpacityOption from "./components/opacity_option";
 import Shapes from "./components/which_option_items/shapes";
 import ImageFiltersOption from "./components/image_filter_options";
 import ShapeActions from "./components/canvas_options/shape_actions";
@@ -22,20 +21,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ColorStop, Gradient } from "fabric";
+import { ColorStop, Gradient, Rect } from "fabric";
 import {
-  CaseUpper,
+  BrushIcon,
+  FilterIcon,
   ImagesIcon,
+  MousePointer2,
   PencilIcon,
   PencilLine,
-  ShapesIcon,
-  Type,
   TypeIcon,
   TypeOutline,
 } from "lucide-react";
 import { RefObject } from "react";
 import { useCanvasStore } from "./store";
-import DrawOptions from "./components/draw_options";
 import TextOptions from "./components/which_option_items/texts_o";
 import FontOptionUpdated from "./components/font_option(updated)";
 import {
@@ -43,6 +41,11 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { brushes } from "./constants";
+import { Slider } from "@/components/ui/slider";
+import { debouncer } from "@/lib/utils";
 
 function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
   const { activeObject, setFabricObject } = useCanvasStore();
@@ -84,8 +87,104 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
     setFabricObject(activeObject);
   };
 
+  if (canvasC.current?.canvas.isDrawingMode) {
+    return (
+      <div className="w-full px-2 flex items-center gap-3 md:hidden">
+        <Popover>
+          <PopoverTrigger>
+            <BrushIcon className="2-5 h-5" />
+          </PopoverTrigger>
+          <PopoverContent className="w-fit">
+            {brushes.map((b, i) => (
+              <div key={i} className="py-2">
+                <button
+                  className="hover:scale-[1.2] transition-all duration-150 cursor-pointer"
+                  onClick={() => {
+                    if (!canvasC.current) return;
+                    canvasC.current.setBrushType(b.btype);
+                  }}
+                >
+                  <b.I className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className="w-5 h-5 rounded-full border border-foreground/50"
+              style={{ background: canvasC.current.brush_props.stroke_color }}
+            />
+          </PopoverTrigger>
+          <PopoverContent className="w-fit flex flex-col gap-2">
+            <ColorOptions
+              handleGradient={(e) => {}}
+              handleColor={(c) => {
+                if (!canvasC.current) return;
+                canvasC.current?.setBrushColor(c);
+              }}
+            />
+            <div>
+              <h4>Stroke</h4>
+              <Slider
+                min={1}
+                max={100}
+                step={1}
+                defaultValue={[canvasC.current.brush_props.stroke]}
+                onValueChange={debouncer((e: number[]) => {
+                  if (!canvasC.current) return;
+                  const n = e[0];
+                  if (n < 0) return;
+                  canvasC.current?.setBrushWidth(n);
+                })}
+              />
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <button
+          onClick={() => {
+            if (!canvasC.current) return;
+            canvasC.current.canvasToggleDrawMode();
+          }}
+        >
+          <MousePointer2 cursor={"pointer"} className="w-5 h-5" />
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full flex gap-3 md:hidden">
+    <div className="w-full px-2 flex items-center gap-3 md:hidden">
+      {/* {resize canvas} */}
+      <Popover>
+        <PopoverTrigger>
+          <Image
+            className="w-5 h-5"
+            src={"/board.svg"}
+            width={100}
+            height={100}
+            alt="canvas"
+          />
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col gap-2 w-fit">
+          <ResizeCanvas canvasC={canvasC} />
+          <Button
+            onClick={() => {
+              if (!canvasC.current) return;
+              canvasC.current.canvas.discardActiveObject();
+              canvasC.current.canvas.requestRenderAll();
+            }}
+            size={"xs"}
+            variant={"outline"}
+          >
+            clear selection
+          </Button>
+        </PopoverContent>
+      </Popover>
+
       {activeObject ? (
         <>
           {(activeObject.type === "text" ||
@@ -93,7 +192,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             activeObject.type === "i-text") && (
             <Popover>
               <PopoverTrigger>
-                <TypeOutline />
+                <TypeOutline className="w-4 h-4" />
               </PopoverTrigger>
               <PopoverContent className="space-y-2">
                 <FontOptionUpdated canvasC={canvasC} />
@@ -109,22 +208,10 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             </Popover>
           )}
 
-          {/* <ShadowOption canvasC={canvasC} /> */}
-
-          <OpacityOption
-            fn={(v) => {
-              if (!canvasC.current) return;
-              canvasC.current.changeCanvasProperties(activeObject, {
-                opacity: v,
-              });
-            }}
-            opacity={activeObject.get("opacity")}
-          />
-
           {/* {stroke} */}
           <Popover>
             <PopoverTrigger>
-              <PencilLine />
+              <PencilLine className="w-4 h-4" />
             </PopoverTrigger>
             <PopoverContent>
               <OutlineAndShadow canvasC={canvasC} />
@@ -133,7 +220,9 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
           {activeObject.type === "image" && (
             <Popover>
-              <PopoverTrigger>Filters</PopoverTrigger>
+              <PopoverTrigger>
+                <FilterIcon className="w-4 h-4" />
+              </PopoverTrigger>
               <PopoverContent
                 sideOffset={10}
                 className="p-4 w-[200px] max-h-[400px] overflow-y-auto"
@@ -143,39 +232,29 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             </Popover>
           )}
 
-          {activeObject.type !== "i-text" &&
-            activeObject.type !== "group" &&
-            activeObject.type !== "activeselection" && (
-              <RadiusOption
-                radiuses={activeObject?.rx}
-                fn={(v) => {
-                  if (!canvasC.current) return;
-                  canvasC.current.changeCanvasProperties(activeObject, {
-                    rx: v,
-                  });
-                  canvasC.current.changeCanvasProperties(activeObject, {
-                    ry: v,
-                  });
-                }}
-              />
-            )}
+          {activeObject.type == "rect" && (
+            <RadiusOption
+              radiuses={activeObject instanceof Rect ? activeObject?.rx : 0}
+              fn={(v) => {
+                if (!canvasC.current) return;
+                canvasC.current.changeCanvasProperties(activeObject, {
+                  rx: v,
+                });
+                canvasC.current.changeCanvasProperties(activeObject, {
+                  ry: v,
+                });
+              }}
+            />
+          )}
         </>
       ) : (
         <>
-          {/* {resize canvas} */}
-          <Popover>
-            <PopoverTrigger>Resize Canvas</PopoverTrigger>
-            <PopoverContent className="flex flex-col w-fit">
-              <ResizeCanvas canvasC={canvasC} />
-            </PopoverContent>
-          </Popover>
-
           {/* {images} */}
           <Drawer>
             <DrawerTrigger>
-              <ImagesIcon />
+              <ImagesIcon className="w-4 h-4" />
             </DrawerTrigger>
-            <DrawerContent className="px-5 pb-10">
+            <DrawerContent className="px-5 pb-10 h-[80vh]">
               <DrawerClose className="absolute right-3 top-3">
                 close
               </DrawerClose>
@@ -185,30 +264,19 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
           </Drawer>
 
           {/* {draw} */}
-          <Drawer>
-            <DrawerTrigger
-              onClick={() => {
-                if (!canvasC.current) return;
-                canvasC.current.canvasToggleDrawMode();
-              }}
-            >
-              <PencilIcon />
-            </DrawerTrigger>
-            <DrawerContent>
-              <DrawerContent className="px-5 pb-10">
-                <DrawerClose className="absolute right-3 top-3">
-                  close
-                </DrawerClose>
-                <DrawerTitle>Draw</DrawerTitle>
-                <DrawOptions canvasC={canvasC} />
-              </DrawerContent>
-            </DrawerContent>
-          </Drawer>
+          <button
+            onClick={() => {
+              if (!canvasC.current) return;
+              canvasC.current.canvasToggleDrawMode();
+            }}
+          >
+            <PencilIcon className="w-4 h-4" />
+          </button>
 
           {/* {text} */}
           <Drawer>
             <DrawerTrigger>
-              <TypeIcon />
+              <TypeIcon className="w-4 h-4" />
             </DrawerTrigger>
             <DrawerContent className="px-5 pb-10">
               <DrawerTitle>Text</DrawerTitle>
@@ -235,7 +303,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                 activeObject?.get("fill") ||
                 canvasC.current?.canvas.backgroundColor,
             }}
-            className="w-6 h-6 rounded-full border-2 border-foreground"
+            className="w-4 h-4 rounded-full border-2 border-foreground"
           ></button>
         </PopoverTrigger>
         <PopoverContent align="center" side="top">
@@ -260,7 +328,13 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
       <Drawer>
         <DrawerTrigger>
-          <ShapesIcon />
+          <Image
+            src={"/shapes_icon.svg"}
+            alt="shapes"
+            width={100}
+            height={100}
+            className="w-5 h-5"
+          />
         </DrawerTrigger>
         <DrawerContent className="px-5 space-y-3 pb-6 pt-2">
           <DrawerClose className="absolute right-3 top-3">close</DrawerClose>
@@ -276,7 +350,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
       {activeObject && (
         <Popover>
-          <PopoverTrigger className="pl-2 border-l-2 border-foreground/30">
+          <PopoverTrigger className="pl-2 text-sm border-l-2 border-foreground/30">
             Actions
           </PopoverTrigger>
           <PopoverContent sideOffset={20} className="flex gap-2 w-fit">

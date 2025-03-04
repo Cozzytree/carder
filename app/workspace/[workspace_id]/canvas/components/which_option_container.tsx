@@ -14,6 +14,7 @@ import TextOptions from "./which_option_items/texts_o";
 import ImageOption from "./image_option";
 import DrawOptions from "./draw_options";
 import ImageFiltersOption from "./image_filter_options";
+import ShapeActions from "./canvas_options/shape_actions";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -134,6 +135,10 @@ function WhichOContainer({ canvasC }: props) {
       )}
 
       {which === WhichOptionEmum.FONTS && <FontOptions canvasC={canvasC} />}
+
+      {which === WhichOptionEmum.OBJECTACTION && (
+        <ShapeActions canvasC={canvasC} />
+      )}
 
       <button className="border-2 rounded-full border-foreground/30 bg-secondary z-50 absolute -right-4 top-1/2 -translate-y-1/2">
         <ChevronLeft

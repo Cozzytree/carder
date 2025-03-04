@@ -226,11 +226,11 @@ export default function Page() {
               className="shrink-0 w-full h-full relative"
             >
               <div
-                className="w-full h-full absolute top-0 left-0 flex justify-center items-center px-5"
+                className="w-full h-full absolute top-0 left-0 flex justify-center items-center px-5 my-10"
                 style={{
                   translate:
                     containerZoom > 1
-                      ? `${(containerZoom - 1) * 200}px ${(containerZoom - 1) * 100}px`
+                      ? `${(containerZoom - 1) * 200}px ${(containerZoom - 1) * 1000}px`
                       : "0px",
                 }}
               >
