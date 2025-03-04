@@ -192,9 +192,6 @@ function CanvasElementStandard({
           onClick={() => {
             if (!canvasC.current) return;
             if (which == o.label) {
-              if (o.label === "draw") {
-                canvasC.current.canvasToggleDrawMode();
-              }
               setWhichOption(null);
             } else {
               if (o.label === "draw") {

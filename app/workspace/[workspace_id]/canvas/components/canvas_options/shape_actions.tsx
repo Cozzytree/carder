@@ -19,17 +19,18 @@ import {
   SendToBackIcon,
   TrashIcon,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useCanvasStore } from "../../store";
 import { Button } from "@/components/ui/button";
 import { FabricObject } from "fabric";
 import UpDown from "@/components/updown";
 import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
+import OpacityOption from "../opacity_option";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const index_options: { label: string; I: LucideIcon }[] = [
   { I: ArrowDown, label: "Send Backward" },
@@ -53,7 +54,7 @@ function ShapeActions({ canvasC }: props) {
 
   return (
     <TooltipProvider>
-      <div className="w-full flex flex-col gap-2 justify-center">
+      <div className="w-full flex flex-col p-2 gap-3 justify-center">
         <div className="flex gap-3">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -65,7 +66,7 @@ function ShapeActions({ canvasC }: props) {
                 }}
                 className="cursor-pointer"
               >
-                <CopyIcon />
+                <CopyIcon className="w-5 h-5" />
               </button>
             </TooltipTrigger>
             <TooltipContent>Duplicate</TooltipContent>
@@ -81,20 +82,20 @@ function ShapeActions({ canvasC }: props) {
                 }}
                 className="cursor-pointer"
               >
-                <TrashIcon />
+                <TrashIcon className="w-5 h-5" />
               </button>
             </TooltipTrigger>
             <TooltipContent>Deletel</TooltipContent>
           </Tooltip>
 
           <Tooltip>
-            <DropdownMenu>
-              <DropdownMenuTrigger>
+            <Popover>
+              <PopoverTrigger>
                 <TooltipTrigger asChild>
-                  <LucideBringToFront />
+                  <LucideBringToFront className="2-5 h-5" />
                 </TooltipTrigger>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              </PopoverTrigger>
+              <PopoverContent className="w-fit h-fit">
                 <TooltipProvider>
                   {index_options.map((o, i) => (
                     <Tooltip key={i}>
@@ -118,8 +119,8 @@ function ShapeActions({ canvasC }: props) {
                     </Tooltip>
                   ))}
                 </TooltipProvider>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </PopoverContent>
+            </Popover>
             <TooltipContent>Change Object index</TooltipContent>
           </Tooltip>
 
@@ -141,7 +142,7 @@ function ShapeActions({ canvasC }: props) {
                   setFabricObject(activeObject);
                 }}
               >
-                <FlipVertical2 />
+                <FlipVertical2 className="2-5 h-5" />
               </button>
             </TooltipTrigger>
             <TooltipContent>Flip Vertical</TooltipContent>
@@ -164,7 +165,7 @@ function ShapeActions({ canvasC }: props) {
                   }
                 }}
               >
-                <FlipHorizontal2 />
+                <FlipHorizontal2 className="2-5 h-5" />
               </button>
             </TooltipTrigger>
             <TooltipContent>Flip Vertical</TooltipContent>
@@ -190,7 +191,7 @@ function ShapeActions({ canvasC }: props) {
                   setFabricObject(activeObject);
                 }}
               >
-                <LockIcon />
+                <LockIcon className="w-5 h-5" />
               </button>
             </TooltipTrigger>
             <TooltipContent>Lock Movement</TooltipContent>
@@ -283,6 +284,15 @@ function ShapeActions({ canvasC }: props) {
             />
           </div>
         </div>
+        <OpacityOption
+          fn={(v) => {
+            if (!canvasC.current || !activeObject) return;
+            canvasC.current.changeCanvasProperties(activeObject, {
+              opacity: v,
+            });
+          }}
+          opacity={activeObject?.get("opacity")}
+        />
       </div>
     </TooltipProvider>
   );

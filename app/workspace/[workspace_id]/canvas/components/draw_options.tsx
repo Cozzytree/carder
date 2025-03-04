@@ -1,4 +1,4 @@
-import { RefObject, useState } from "react";
+import { RefObject } from "react";
 import CanvasC from "../canvas";
 import { brushes } from "../constants";
 import {
@@ -9,6 +9,7 @@ import {
 import ColorOptions from "./which_option_items/color_options";
 import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
+import ShapeActions from "./canvas_options/shape_actions";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -41,7 +42,6 @@ function DrawOptions({ canvasC }: props) {
           </div>
         ))}
       </div>
-
       <div className="flex flex-col">
         <h4>Stroke color</h4>
         <DropdownMenu>
@@ -53,6 +53,7 @@ function DrawOptions({ canvasC }: props) {
           </DropdownMenuTrigger>
           <DropdownMenuContent side="right" align="start">
             <ColorOptions
+              handleGradient={(e) => {}}
               handleColor={(c) => {
                 if (!check()) return;
                 canvasC.current?.setBrushColor(c);
@@ -61,7 +62,6 @@ function DrawOptions({ canvasC }: props) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
       <div className="flex flex-col">
         <h4>Stroke Wifth</h4>
         <Slider
