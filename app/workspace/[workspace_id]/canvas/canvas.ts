@@ -10,6 +10,7 @@ import {
   TPointerEvent,
   ActiveSelection,
   TPointerEventInfo,
+  FabricObjectProps,
 } from "fabric";
 import { brushTypes, canvasShapes, textTypes } from "./types";
 import {
@@ -41,6 +42,8 @@ class CanvasC {
   declare canvasElement: HTMLCanvasElement;
   declare changePointerEventsForCanvas: (v: boolean) => void;
 
+  history: any[][] = [];
+  historyRedo: any[][] = [];
   guideLines: DefaultLine[] | [] = [];
   isDragging: boolean = false;
 
@@ -81,6 +84,17 @@ class CanvasC {
     this.canvas.on("mouse:down", () => {
       const active = canvas.getActiveObject();
       callbackSeleted(active);
+
+      // store to history
+      const objs = [];
+      this.canvas.getObjects().forEach((o) => {
+        const r = o.getBoundingRect();
+
+        objs.push({ ...o.toObject(), left: r.left, top: r.top });
+      });
+      if (objs.length) {
+        this.history.push(objs);
+      }
     });
     this.canvas.on("object:moving", (e) => {
       if (this.guideLines.length) {
@@ -105,6 +119,7 @@ class CanvasC {
         callbackSeleted(undefined);
       }
     });
+
     this.canvas.on("path:created", (e) => {
       e.path.set({
         objectCaching: true,
@@ -116,6 +131,19 @@ class CanvasC {
         transparentCorners: false,
         cornerColor: "#2090a0",
       });
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.ctrlKey) {
+        if (e.key == "z") {
+          this.undo();
+        } else if (e.key == "y") {
+          this.redo();
+        } else if (e.key == "d") {
+          e.preventDefault();
+          this.duplicateCanvasObject();
+        }
+      }
     });
   }
 
@@ -154,7 +182,10 @@ class CanvasC {
     this.canvas.requestRenderAll();
   }
 
-  async createNewImage(img: string | HTMLImageElement) {
+  async createNewImage(
+    img: string | HTMLImageElement,
+    props?: Partila<FabricObjectProps>,
+  ) {
     let image: DefaultImage | null = null;
     if (img instanceof HTMLImageElement) {
       image = await FabricImage.fromElement(img);
@@ -179,6 +210,7 @@ class CanvasC {
         transparentCorners: false,
         cornerColor: "#2090a0",
         objectCaching: true,
+        ...props,
       });
 
       this.canvas.add(image);
@@ -238,7 +270,7 @@ class CanvasC {
     }
   }
 
-  changeCanvasColor(v: string | Gradient<unknown, "linear">) {
+  changeCanvasColor(v: string | Gradient<unknown, "linear" | "radial">) {
     this.canvas.set("backgroundColor", v);
     this.canvas.requestRenderAll();
   }
@@ -287,12 +319,28 @@ class CanvasC {
     if (c instanceof ActiveSelection || c instanceof Group) {
       c.forEachObject((s) => {
         s.canvas = this.canvas;
-        s.set({ top: s.top + 10, left: s.left + 10 });
+        s.set({
+          top: s.top + 10,
+          left: s.left + 10,
+          cornerSize: 10,
+          cornerStyle: "circle",
+          padding: 1,
+          transparentCorners: false,
+          cornerColor: "#2090a0",
+        });
         this.canvas.add(s);
       });
       c.setCoords();
     } else {
-      c.set({ top: c.top + 10, left: c.left + 10 });
+      c.set({
+        top: c.top + 10,
+        left: c.left + 10,
+        cornerSize: 10,
+        cornerStyle: "circle",
+        padding: 1,
+        transparentCorners: false,
+        cornerColor: "#2090a0",
+      });
       c.setCoords();
       this.canvas.add(c);
     }
@@ -344,25 +392,35 @@ class CanvasC {
 
     this.canvas.freeDrawingBrush = this.draw_brush;
   }
-  changeCanvasProperties(obj: FabricObject, props: object) {
-    // Recursive function to handle groups and nested groups
-    const setPropertyRecursively = (object: FabricObject) => {
+  changeCanvasProperties(obj: FabricObject, props: Record<string, any>) {
+    const setPropertyRecursively = (object: FabricObject, i: number) => {
       if (object instanceof Group) {
         object.forEachObject((o) => {
-          setPropertyRecursively(o);
+          setPropertyRecursively(o, i);
         });
       } else {
+        if (props.height) {
+          const currh = object.get("height");
+          object.set({ height: currh + (currh - props.height || 0) });
+          obj.setCoords();
+        } else if (props.width) {
+          const currw = object.get("width");
+          object.set({ width: currw + (currw - props.width || 0) });
+          obj.setCoords();
+        }
         object.set({ ...props });
       }
     };
 
     // Start the recursive process
-    if (obj instanceof ActiveSelection || obj instanceof Group) {
-      obj.forEachObject((o) => {
-        setPropertyRecursively(o);
+    if (props.left != null || props.top != null) {
+      obj.set({ ...props });
+    } else if (obj instanceof ActiveSelection || obj instanceof Group) {
+      obj.forEachObject((o, i) => {
+        setPropertyRecursively(o, i);
       });
     } else {
-      setPropertyRecursively(obj);
+      setPropertyRecursively(obj, 0);
     }
 
     // Request a re-render of the canvas after all properties are updated
@@ -391,7 +449,6 @@ class CanvasC {
     document.fonts.add(f);
     return true;
   }
-
   addFilterToImage(filter: any, index: number, activeObject?: FabricObject) {
     if (activeObject instanceof FabricImage) {
       if (!activeObject.filters[index]) {
@@ -446,6 +503,110 @@ class CanvasC {
       // console.log(v);
     });
     this.canvas.renderAll();
+  }
+
+  undo() {
+    if (!this.history.length) return;
+    const lastState = this.history.pop();
+    if (!lastState) return;
+
+    this.historyRedo.push(lastState);
+    this.canvas.discardActiveObject();
+    this.canvas.remove(...this.canvas.getObjects());
+
+    lastState.forEach((o: FabricObject) => {
+      let s: FabricObject | null = null;
+      switch (o.type) {
+        case "Rect":
+          s = new DefaultRect({
+            top: o.top,
+            left: o.left,
+            stroke: o.stroke,
+            fill: o.fill,
+            rx: o.rx,
+            ry: o.ry,
+            width: o.width,
+            height: o.height,
+            strokeWidth: o.strokeWidth,
+          });
+          break;
+        case "Path":
+          s = new DefaultCustomPath(o?.path?.join(" ") || "", {
+            left: o.left,
+            top: o.top,
+            width: o.width,
+            stroke: o.stroke,
+            strokeWidth: o.strokeWidth,
+            fill: o.fill,
+          });
+          break;
+        case "Image":
+          this.createNewImage(o.src as string, {
+            left: o.left,
+            top: o.top,
+            width: o.width,
+            stroke: o.stroke,
+            strokeWidth: o.strokeWidth,
+            fill: o.fill,
+          });
+          break;
+      }
+      if (s) {
+        this.canvas.add(s);
+      }
+    });
+    this.canvas.requestRenderAll();
+  }
+
+  redo() {
+    if (!this.historyRedo.length) return;
+    const lastState = this.historyRedo.pop();
+    if (!lastState) return;
+
+    this.history.push(lastState);
+    this.canvas.remove(...this.canvas.getObjects());
+    lastState.forEach((o: FabricObject) => {
+      let s: FabricObject | null = null;
+      switch (o.type) {
+        case "Rect":
+          s = new DefaultRect({
+            top: o.top,
+            left: o.left,
+            stroke: o.stroke,
+            fill: o.fill,
+            rx: o.rx,
+            ry: o.ry,
+            width: o.width,
+            height: o.height,
+            strokeWidth: o.strokeWidth,
+          });
+          break;
+        case "Path":
+          s = new DefaultCustomPath(o?.path?.join(" ") || "", {
+            left: o.left,
+            top: o.top,
+            width: o.width,
+            stroke: o.stroke,
+            strokeWidth: o.strokeWidth,
+            fill: o.fill,
+          });
+          break;
+        case "Image":
+          this.createNewImage(o.src as string, {
+            left: o.left,
+            top: o.top,
+            width: o.width,
+            stroke: o.stroke,
+            strokeWidth: o.strokeWidth,
+            fill: o.fill,
+          });
+          break;
+      }
+      if (s) {
+        this.canvas.add(s);
+      }
+    });
+    this.canvas.requestRenderAll();
   }
 
   clear() {

@@ -1,114 +1,119 @@
 import {
-  AlignCenterIcon,
-  AlignHorizontalJustifyCenter,
-  AlignHorizontalJustifyEnd,
-  AlignHorizontalJustifyStart,
-  AlignLeft,
-  AlignRightIcon,
-  ArrowBigRight,
-  ArrowRight,
-  BrushIcon,
-  CircleDot,
-  CircleIcon,
-  DiamondIcon,
-  HexagonIcon,
-  LucideIcon,
-  PencilIcon,
-  Square,
-  StarIcon,
-  TriangleIcon,
+   AlignCenterIcon,
+   AlignHorizontalJustifyCenter,
+   AlignHorizontalJustifyEnd,
+   AlignHorizontalJustifyStart,
+   AlignLeft,
+   AlignRightIcon,
+   ArrowBigRight,
+   ArrowRight,
+   BrushIcon,
+   CircleDot,
+   CircleIcon,
+   DiamondIcon,
+   HexagonIcon,
+   LucideIcon,
+   PencilIcon,
+   Square,
+   StarIcon,
+   TriangleIcon,
 } from "lucide-react";
-import { Align, brushTypes, canvasShapes, textTypes } from "./types";
+import { Align, brushTypes, canvasShapes } from "./types";
 import { filters } from "fabric";
+
+const canvasConfig = {
+   selectionWidth: 3,
+   selectionStroke: "#0000cd",
+};
 
 const basicColors = ["#101010", "#ef4040", "#20ff50", "#2050ef", "#9a9a10"];
 
 const gradients = [
-  ["#FF7E5F", "#FEB47B"], // Sunset Peach
-  ["#6A11CB", "#2575FC", "#6A11CB"], // Purple & Blue with a repeat
-  ["#00C9FF", "#92FE9D", "#00F260"], // Aquamarine with Green
-  ["#FF6A00", "#FFD200", "#FF512F"], // Orange to Yellow and Red
-  ["#00F260", "#0575E6"], // Green to Blue
-  ["#F09819", "#FF5858", "#FF9A8B"], // Coral to Pink with Peach
-  ["#1D2B64", "#F8CDDA", "#FF512F"], // Deep Blue to Light Pink and Red
-  ["#FF512F", "#DD2476"], // Red to Pink
-  ["#16BFFD", "#CB3066"], // Turquoise to Red
-  ["#2BC0E4", "#EAECC6", "#F7797D"], // Blue to Light Green with Red
-  ["#FBD3E9", "#BB377D", "#D4E5F9"], // Pink to Violet and Light Blue
-  ["#D4FC79", "#96E6A1", "#FF9A8B"], // Green to Light Green and Peach
-  ["#FF9A8B", "#FF6A00", "#FFD200"], // Peach to Orange and Yellow
-  ["#A1C4FD", "#C2E9FB"], // Light Blue to Light Cyan
-  ["#F7797D", "#FCE8A8", "#FF6A00"], // Red to Yellow and Orange
-  ["#56CCF2", "#2F80ED"], // Sky Blue to Deep Blue
-  ["#D38312", "#A83279", "#FF512F"], // Gold to Purple and Red
-  ["#D4E5F9", "#E1A8F0"], // Light Blue to Lavender
-  ["#AB83A1", "#B2D9C6", "#FF6A00"], // Rose to Mint and Orange
-  ["#00A8C6", "#1C92D2"], // Cyan to Blue
+   ["#FF7E5F", "#FEB47B"], // Sunset Peach
+   ["#6A11CB", "#2575FC", "#6A11CB"], // Purple & Blue with a repeat
+   ["#00C9FF", "#92FE9D", "#00F260"], // Aquamarine with Green
+   ["#FF6A00", "#FFD200", "#FF512F"], // Orange to Yellow and Red
+   ["#00F260", "#0575E6"], // Green to Blue
+   ["#F09819", "#FF5858", "#FF9A8B"], // Coral to Pink with Peach
+   ["#1D2B64", "#F8CDDA", "#FF512F"], // Deep Blue to Light Pink and Red
+   ["#FF512F", "#DD2476"], // Red to Pink
+   ["#16BFFD", "#CB3066"], // Turquoise to Red
+   ["#2BC0E4", "#EAECC6", "#F7797D"], // Blue to Light Green with Red
+   ["#FBD3E9", "#BB377D", "#D4E5F9"], // Pink to Violet and Light Blue
+   ["#D4FC79", "#96E6A1", "#FF9A8B"], // Green to Light Green and Peach
+   ["#FF9A8B", "#FF6A00", "#FFD200"], // Peach to Orange and Yellow
+   ["#A1C4FD", "#C2E9FB"], // Light Blue to Light Cyan
+   ["#F7797D", "#FCE8A8", "#FF6A00"], // Red to Yellow and Orange
+   ["#56CCF2", "#2F80ED"], // Sky Blue to Deep Blue
+   ["#D38312", "#A83279", "#FF512F"], // Gold to Purple and Red
+   ["#D4E5F9", "#E1A8F0"], // Light Blue to Lavender
+   ["#AB83A1", "#B2D9C6", "#FF6A00"], // Rose to Mint and Orange
+   ["#00A8C6", "#1C92D2"], // Cyan to Blue
 ];
 
 const colors = [
-  ...basicColors,
-  "#ff7f00", // vibrant orange
-  "#ff00ff", // magenta
-  "#00ffff", // cyan
-  "#8b00ff", // purple
-  "#00ff80", // lime green
-  "#ff0055", // pinkish red
-  "#d3d3d3", // light gray
-  "#000080", // navy blue
-  "#ffb6c1", // light pink
-  "#8a2be2", // blue violet
-  "#d2691e", // chocolate brown
-  "#cd5c5c", // indian red
-  "#f0e68c", // khaki
-  "#e0ffff", // light cyan
-  "#ff6347", // tomato
-  "#adff2f", // green yellow
+   ...basicColors,
+   "#ff7f00", // vibrant orange
+   "#ff00ff", // magenta
+   "#00ffff", // cyan
+   "#8b00ff", // purple
+   "#00ff80", // lime green
+   "#ff0055", // pinkish red
+   "#d3d3d3", // light gray
+   "#000080", // navy blue
+   "#ffb6c1", // light pink
+   "#8a2be2", // blue violet
+   "#d2691e", // chocolate brown
+   "#cd5c5c", // indian red
+   "#f0e68c", // khaki
+   "#e0ffff", // light cyan
+   "#ff6347", // tomato
+   "#adff2f", // green yellow
 ];
 const strokeStyles: [number, number][] = [
-  [0, 0],
-  [10, 10],
-  [5, 5],
+   [0, 0],
+   [10, 10],
+   [5, 5],
 ];
 const widths = [2, 4, 6];
 const radius = [2, 4, 6];
 const fonts = ["Arial", "monoscope", "sans serif", "Balsamiq Sans"];
 
 const extra_fonts = [
-  {
-    name: "Pacifico",
-    url: "https://fonts.googleapis.com/css2?family=Pacifico&display=swap",
-  },
-  {
-    name: "Cadarville",
-    url: "https://fonts.googleapis.com/css2?family=Cedarville+Cursive&display=swap",
-  },
-  {
-    name: "Pixilify",
-    url: "https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap",
-  },
+   {
+      name: "Pacifico",
+      url: "https://fonts.googleapis.com/css2?family=Pacifico&display=swap",
+   },
+   {
+      name: "Cadarville",
+      url: "https://fonts.googleapis.com/css2?family=Cedarville+Cursive&display=swap",
+   },
+   {
+      name: "Pixilify",
+      url: "https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap",
+   },
 ];
 const textjustify: { label: Align; I: LucideIcon }[] = [
-  { I: AlignHorizontalJustifyStart, label: "justify-left" },
-  { I: AlignHorizontalJustifyCenter, label: "justify" },
-  { I: AlignHorizontalJustifyEnd, label: "justify-right" },
+   { I: AlignHorizontalJustifyStart, label: "justify-left" },
+   { I: AlignHorizontalJustifyCenter, label: "justify" },
+   { I: AlignHorizontalJustifyEnd, label: "justify-right" },
 ];
 const aligns: { label: Align; I: LucideIcon }[] = [
-  { label: "left", I: AlignLeft },
-  { label: "center", I: AlignCenterIcon },
-  { label: "right", I: AlignRightIcon },
+   { label: "left", I: AlignLeft },
+   { label: "center", I: AlignCenterIcon },
+   { label: "right", I: AlignRightIcon },
 ];
 
 const fontweights = [100, 300, 500, 700, 900];
 const alphas = [0, 0.25, 0.5, 0.75, 1];
 const brushes: { btype: brushTypes; I: LucideIcon }[] = [
-  { btype: "pencil", I: PencilIcon },
-  { btype: "spray", I: BrushIcon },
-  { btype: "circle", I: CircleDot },
+   { btype: "pencil", I: PencilIcon },
+   { btype: "spray", I: BrushIcon },
+   { btype: "circle", I: CircleDot },
 ];
 
 const c_paths = {
-  quadrilateral: `
+   quadrilateral: `
    M 100 10
    L 200 10
    Q 205 10 210 15
@@ -120,7 +125,7 @@ const c_paths = {
    Q 93 10 100 10
    Z
    `,
-  star: `
+   star: `
    M 108, 0.0
    L 141 70
    L 218 70
@@ -134,7 +139,7 @@ const c_paths = {
    L 108 0
    Z
    `,
-  arrow_plane: `
+   arrow_plane: `
    M 105 50
    L 150 50
    Z
@@ -145,7 +150,7 @@ const c_paths = {
    L 145 55
    Z
    `,
-  diamond: `
+   diamond: `
    M 105 5
    L 145 45
    Q 150 50 145 55
@@ -156,7 +161,7 @@ const c_paths = {
    L 95 5
    Q 100 0 105 5
    `,
-  arrow_right: `
+   arrow_right: `
    M 50 200
    L 150 200
    L 150 195
@@ -167,7 +172,7 @@ const c_paths = {
    L 50 200
    Z
    `,
-  arrow_left: `M 50 200
+   arrow_left: `M 50 200
    L 150 200
    L 150 195
    L 170 205
@@ -176,7 +181,7 @@ const c_paths = {
    L 50 210
    L 50 200
    Z`,
-  parallelogram: `
+   parallelogram: `
    M 70 20
    L 150 20
    Q 155 20 150 30
@@ -186,7 +191,7 @@ const c_paths = {
    Q 48 65 50 60
    L 65 25
    Q 67 20 70 20`,
-  hexagon: `
+   hexagon: `
    M 70 20
    L 100 20
 
@@ -201,7 +206,7 @@ const c_paths = {
 
    L 70 20
    `,
-  triangle: `
+   triangle: `
    M 105 105
    L 145 145
    Q 150 150 145 150
@@ -214,73 +219,74 @@ const c_paths = {
 };
 
 const shapes: { type: canvasShapes; I: LucideIcon; path?: string }[] = [
-  { I: Square, type: "rect" },
-  { I: Square, type: "path", path: c_paths.parallelogram },
-  { I: DiamondIcon, type: "path", path: c_paths.diamond },
-  { I: TriangleIcon, type: "path", path: c_paths.triangle },
-  { I: CircleIcon, type: "circle" },
-  { I: HexagonIcon, type: "path", path: c_paths.hexagon },
-  { I: StarIcon, type: "path", path: c_paths.star },
+   { I: Square, type: "rect" },
+   { I: Square, type: "path", path: c_paths.parallelogram },
+   { I: DiamondIcon, type: "path", path: c_paths.diamond },
+   { I: TriangleIcon, type: "path", path: c_paths.triangle },
+   { I: CircleIcon, type: "circle" },
+   { I: HexagonIcon, type: "path", path: c_paths.hexagon },
+   { I: StarIcon, type: "path", path: c_paths.star },
 ];
 
 const lines: { type: canvasShapes; path?: string; I: LucideIcon }[] = [
-  { type: "path", I: ArrowBigRight, path: c_paths.arrow_right },
-  { type: "path", I: ArrowRight, path: c_paths.arrow_plane },
+   { type: "path", I: ArrowBigRight, path: c_paths.arrow_right },
+   { type: "path", I: ArrowRight, path: c_paths.arrow_plane },
 ];
 
 const filtersOptions: { label: string; filter: any }[] = [
-  { label: "grayscale", filter: filters.Grayscale },
-  { label: "invert", filter: filters.Invert },
-  { label: "remove-color", filter: filters.RemoveColor },
-  { label: "sepia", filter: filters.Sepia },
-  { label: "brownie", filter: filters.Brownie },
-  { label: "brightness", filter: filters.Brightness },
-  { label: "contrast", filter: filters.Contrast },
-  { label: "saturation", filter: filters.Saturation },
-  { label: "vibrance", filter: filters.Vibrance },
-  { label: "noise", filter: filters.Noise },
-  { label: "vintage", filter: filters.Vintage },
-  { label: "pixelate", filter: filters.Pixelate },
-  { label: "blur", filter: filters.Blur },
-  { label: "sharpen", filter: filters.Convolute },
-  // { label: "emboss", filter: filters. },
-  { label: "technicolor", filter: filters.Technicolor },
-  { label: "polaroid", filter: filters.Polaroid },
-  { label: "blend-color", filter: filters.BlendColor },
-  { label: "gamma", filter: filters.Gamma },
-  { label: "kodachrome", filter: filters.Kodachrome },
-  { label: "blackwhite", filter: filters.BlackWhite },
-  // { label: "blend-image", filter: filters.BlendImage },
-  { label: "hue", filter: filters.HueRotation },
-  { label: "resize", filter: filters.Resize },
+   { label: "grayscale", filter: filters.Grayscale },
+   { label: "invert", filter: filters.Invert },
+   { label: "remove-color", filter: filters.RemoveColor },
+   { label: "sepia", filter: filters.Sepia },
+   { label: "brownie", filter: filters.Brownie },
+   { label: "brightness", filter: filters.Brightness },
+   { label: "contrast", filter: filters.Contrast },
+   { label: "saturation", filter: filters.Saturation },
+   { label: "vibrance", filter: filters.Vibrance },
+   { label: "noise", filter: filters.Noise },
+   { label: "vintage", filter: filters.Vintage },
+   { label: "pixelate", filter: filters.Pixelate },
+   { label: "blur", filter: filters.Blur },
+   { label: "sharpen", filter: filters.Convolute },
+   // { label: "emboss", filter: filters. },
+   { label: "technicolor", filter: filters.Technicolor },
+   { label: "polaroid", filter: filters.Polaroid },
+   { label: "blend-color", filter: filters.BlendColor },
+   { label: "gamma", filter: filters.Gamma },
+   { label: "kodachrome", filter: filters.Kodachrome },
+   { label: "blackwhite", filter: filters.BlackWhite },
+   // { label: "blend-image", filter: filters.BlendImage },
+   { label: "hue", filter: filters.HueRotation },
+   { label: "resize", filter: filters.Resize },
 ];
 
 const saveOptions: { label: string; t: "json" | "image" }[] = [
-  { label: "Save as JSON", t: "json" },
-  { label: "Save as Image", t: "image" },
-  // {label : "Save as "}
+   { label: "Save as JSON", t: "json" },
+   { label: "Save as Image", t: "image" },
+   // {label : "Save as "}
 ];
 
 const zooms = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 300];
 
 export {
-  zooms,
-  saveOptions,
-  filtersOptions,
-  gradients,
-  extra_fonts,
-  shapes,
-  lines,
-  c_paths,
-  brushes,
-  basicColors,
-  radius,
-  colors,
-  strokeStyles,
-  widths,
-  fonts,
-  aligns,
-  textjustify,
-  fontweights,
-  alphas,
+   zooms,
+   canvasConfig,
+   saveOptions,
+   filtersOptions,
+   gradients,
+   extra_fonts,
+   shapes,
+   lines,
+   c_paths,
+   brushes,
+   basicColors,
+   radius,
+   colors,
+   strokeStyles,
+   widths,
+   fonts,
+   aligns,
+   textjustify,
+   fontweights,
+   alphas,
 };

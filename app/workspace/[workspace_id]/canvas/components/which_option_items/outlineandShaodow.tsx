@@ -1,9 +1,4 @@
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import UpDown from "@/components/updown";
 import { debouncer } from "@/lib/utils";
@@ -24,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import BtnWithColor from "../btn-with-color";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -31,7 +27,7 @@ type props = {
 
 function OutlineAndShadow({ canvasC }: props) {
   const { activeObject, setFabricObject } = useCanvasStore();
-  let hasShadow: Shadow | null = null;
+  let hasShadow: Shadow | null = activeObject?.get("shadow");
   let strokeWidth: number = 0;
   let stroke: string = "";
 
@@ -113,13 +109,8 @@ function OutlineAndShadow({ canvasC }: props) {
             }, 100)}
           />
           <Popover>
-            <PopoverTrigger asChild>
-              <button
-                className="shrink-0 w-6 h-6 border border-foreground rounded-full"
-                style={{
-                  background: stroke,
-                }}
-              />
+            <PopoverTrigger>
+              <BtnWithColor color={stroke} />
             </PopoverTrigger>
             <PopoverContent>
               <ColorOptions
@@ -188,7 +179,7 @@ function OutlineAndShadow({ canvasC }: props) {
             onCheckedChange={() => {
               handleToggleShadow();
             }}
-            defaultChecked={hasShadow ? true : false}
+            checked={hasShadow != null ? true : false}
             id="shadow"
           />
         </div>

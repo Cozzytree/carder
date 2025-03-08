@@ -1,6 +1,7 @@
 import { Minus, PlusIcon } from "lucide-react";
 import { ChangeEvent, ReactNode, useState } from "react";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 type props = {
   rate?: number;
@@ -34,7 +35,7 @@ function UpDown({
       {children ? (
         children
       ) : (
-        <input
+        <Input
           disabled={disabled}
           className="max-w-16 text-sm px-1 bg-background rounded-md border"
           value={val}

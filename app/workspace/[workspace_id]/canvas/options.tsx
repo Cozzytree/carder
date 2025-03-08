@@ -1,19 +1,12 @@
 import CanvasC from "./canvas";
 
-import { BrushIcon, CircleIcon, MousePointer2 } from "lucide-react";
+import { BrushIcon, MousePointer2 } from "lucide-react";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { useCanvasStore, useWhichOptionsOpen } from "./store";
 import { useIsMobile } from "./hooks/isMobile";
 import ActiveColor from "./components/active_color";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import FontOptionUpdated from "./components/font_option(updated)";
-import { Button } from "@/components/ui/button";
-import { WhichOptionEmum } from "./types";
 import {
   Popover,
   PopoverContent,
@@ -23,6 +16,8 @@ import { brushes } from "./constants";
 import ColorOptions from "./components/which_option_items/color_options";
 import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
+import BtnWithColor from "./components/btn-with-color";
+import { Gradient } from "fabric";
 
 type props = {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -39,28 +34,15 @@ function CanvasOptions({ canvasC }: props) {
 }
 
 function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
-  const {
-    width,
-    height,
-    activeObject: activeObj,
-    setFabricObject,
-  } = useCanvasStore();
+  const { width, height, activeObject: activeObj } = useCanvasStore();
   const { setWhichOption, which } = useWhichOptionsOpen();
 
   return (
     <div className="w-full relative px-2 min-h-16 bg-secondary border-b-2 gap-2 flex items-center">
-      {activeObj ? (
+      {/* {activeObj ? (
         <>
           <TooltipProvider>
             <div className="flex items-center gap-2">
-              <ActiveColor
-                fn={() => {
-                  setWhichOption("color");
-                }}
-                color={activeObj.get("fill")}
-                label="change color"
-              />
-
               {(activeObj.type === "i-text" ||
                 activeObj.type === "textbox") && (
                 <>
@@ -76,21 +58,6 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                 </>
               )}
 
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => {
-                      setWhichOption("outline");
-                    }}
-                    className="flex flex-col text-xs items-center"
-                  >
-                    <span className="">Stroke/outline</span>
-                    <CircleIcon className="w-5 h-5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Stroke and Shadow</TooltipContent>
-              </Tooltip>
-
               {activeObj.type === "image" && (
                 <>
                   <button
@@ -102,40 +69,42 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                   </button>
                 </>
               )}
-
-              <button
-                className="text-sm"
-                onClick={() => {
-                  setWhichOption(WhichOptionEmum.OBJECTACTION);
-                }}
-              >
-                actions
-              </button>
             </div>
           </TooltipProvider>
         </>
       ) : (
-        <div className="flex items-center gap-2 text-sm">
-          <ActiveColor
-            fn={() => {
-              setWhichOption("color");
-            }}
-            color={""}
-            label="change color"
-          />
-          <button
-            className="flex flex-col items-center text-sm"
-            onClick={() => {
-              setWhichOption("resize_canvas");
-            }}
-          >
-            <span className="text-sm text-nowrap">Resize Canvas</span>
-            <span className="text-sm text-nowrap">
-              {width} x {height}
-            </span>
-          </button>
-        </div>
-      )}
+        <></>
+      )} */}
+      <div className="flex items-center gap-2 text-sm">
+        <BtnWithColor
+          onClick={() => {
+            setWhichOption("color");
+          }}
+          color={
+            canvasC.current?.canvas.backgroundColor as
+              | string
+              | Gradient<"linear" | "radical">
+          }
+        />
+        {/* <ActiveColor
+          fn={() => {
+            setWhichOption("color");
+          }}
+          color={canvasC.current?.canvas.backgroundColor}
+          label="change color"
+        /> */}
+        <button
+          className="flex flex-col items-center text-sm"
+          onClick={() => {
+            setWhichOption("resize_canvas");
+          }}
+        >
+          <span className="text-sm text-nowrap">Resize Canvas</span>
+          <span className="text-sm text-nowrap">
+            {width} x {height}
+          </span>
+        </button>
+      </div>
 
       {canvasC.current?.canvas.isDrawingMode && (
         <div className="w-full px-2 flex items-center gap-3">
@@ -203,20 +172,6 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
           </button>
         </div>
       )}
-
-      <div>
-        <Button
-          size={"xs"}
-          onClick={() => {
-            if (!canvasC.current) return;
-            canvasC.current.toggleCanvasSelection();
-          }}
-          variant={"outline"}
-          className="text-sm"
-        >
-          Disable Selection
-        </Button>
-      </div>
     </div>
   );
 }

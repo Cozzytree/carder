@@ -26,11 +26,9 @@ export type whichOption =
   | "fonts"
   | "resize_canvas"
   | "outline"
-  | "image-filters"
-  | "object-action";
+  | "image-filters";
 
 export enum WhichOptionEmum {
-  OBJECTACTION = "object-action",
   SHAPE = "shapes",
   DRAW = "draw",
   TEXT = "text",

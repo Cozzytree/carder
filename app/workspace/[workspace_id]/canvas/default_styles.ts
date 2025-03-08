@@ -1,20 +1,24 @@
 import * as fabric from "fabric";
+import { canvasConfig } from "./constants";
 
 class DefaultRect extends fabric.Rect {
   declare hoverShape: fabric.Rect | null;
   constructor(params: Partial<fabric.RectProps>) {
     super({
-      fill: "transparent",
-      stroke: "black",
       rx: 10,
       ry: 10,
-      cornerSize: 10,
-      cornerStyle: "circle",
-      padding: 1,
-      cornerStrokeColor: "#2020ff",
+      stroke: "black",
+      fill: "transparent",
+      padding: 3,
+      cornerSize: 8,
       strokeUniform: true,
-      transparentCorners: false,
-      cornerColor: "#2090a0",
+      cornerStrokeColor: canvasConfig.selectionStroke,
+      borderScaleFactor: 2,
+      cornerStyle: "circle",
+
+      centeredRotation: true,
+
+      // transparentCorners: false,
       shadow: new fabric.Shadow({
         offsetX: 1,
         offsetY: 2,
@@ -31,15 +35,20 @@ class DefaultRect extends fabric.Rect {
 class DefaultTriangle extends fabric.Triangle {
   constructor(params: Partial<fabric.Triangle>) {
     super({
-      cornerSize: 10,
       fill: "transparent",
       stroke: "black",
       strokeWidth: 2,
-      cornerStyle: "circle",
-      padding: 1,
-      cornerStrokeColor: "#4040ef",
-      strokeUniform: true,
       transparentCorners: false,
+
+      padding: 3,
+      cornerSize: 8,
+      strokeUniform: true,
+      cornerStrokeColor: canvasConfig.selectionStroke,
+      borderScaleFactor: 2,
+      cornerStyle: "circle",
+
+      centeredRotation: true,
+
       // objectCaching: true,
       ...params,
     });
@@ -58,12 +67,15 @@ class DefaultEllipse extends fabric.Ellipse {
       cornerColor: "transparent",
       transparentCorners: false,
       centeredRotation: true,
-      cornerSize: 10,
       cornerStyle: "circle",
-      padding: 1,
-      cornerStrokeColor: "#4040ef",
-      strokeUniform: true,
       // objectCaching: true,
+
+      padding: 3,
+      cornerSize: 8,
+      strokeUniform: true,
+      cornerStrokeColor: canvasConfig.selectionStroke,
+
+      borderScaleFactor: 2,
       shadow: new fabric.Shadow({
         blur: 4,
         offsetX: 2,
@@ -87,13 +99,16 @@ class DefaultCircle extends fabric.Circle {
       strokeWidth: 3,
       fill: "transparent",
       cornerColor: "transparent",
-      cornerStrokeColor: "#5090ff",
-      cornerStyle: "circle",
-      cornerSize: 10,
-      padding: 1,
       transparentCorners: false,
-      strokeUniform: true,
       centeredRotation: true,
+
+      padding: 3,
+      cornerSize: 8,
+      strokeUniform: true,
+      cornerStrokeColor: canvasConfig.selectionStroke,
+      borderScaleFactor: 2,
+      cornerStyle: "circle",
+
       shadow: new fabric.Shadow({
         blur: 4,
         offsetX: 2,
@@ -110,17 +125,21 @@ class DefaultIText extends fabric.Textbox {
   constructor(text: string, params: Partial<fabric.ITextProps>) {
     super(text, {
       stroke: "black",
-      cornerSize: 10,
       fontFamily: "sans serif",
       // underline: true,
       cornerStyle: "circle",
       charSpacing: -1,
-      padding: 1,
       fontStyle: "italic",
-      cornerStrokeColor: "#4040ef",
-      strokeUniform: true,
       transparentCorners: false,
       // objectCaching: true,
+
+      centeredRotation: true,
+
+      padding: 3,
+      cornerSize: 8,
+      strokeUniform: true,
+      cornerStrokeColor: canvasConfig.selectionStroke,
+      borderScaleFactor: 2,
       ...params,
     });
     this.set("id", `shape-${Date.now()}`);
@@ -149,6 +168,7 @@ class DefaultPath extends fabric.Path {
         padding: 1,
         cornerStrokeColor: "#4040ef",
         // objectCaching: true,
+        centeredRotation: true,
       },
     );
     this.set("id", `shape-${Date.now()}`);
@@ -227,12 +247,16 @@ class DefaultCustomPath extends fabric.Path {
       ...props,
       fill: "transparent",
       stroke: "black",
-      cornerSize: 10,
-      cornerStyle: "circle",
-      padding: 1,
-      cornerStrokeColor: "#0000ff",
-      strokeUniform: true,
       transparentCorners: false,
+
+      padding: 3,
+      cornerSize: 8,
+      strokeUniform: true,
+      cornerStrokeColor: canvasConfig.selectionStroke,
+      borderScaleFactor: 2,
+      cornerStyle: "circle",
+
+      centeredRotation: true,
     });
     this.set("id", `shape-${Date.now()}`);
   }
@@ -255,6 +279,9 @@ class DefaultImage extends fabric.FabricImage {
       strokeUniform: true,
       transparentCorners: false,
       cornerColor: "#2090a0",
+
+      centeredRotation: true,
+
       filters: [new fabric.filters.BlackWhite()],
       ...props,
     });
