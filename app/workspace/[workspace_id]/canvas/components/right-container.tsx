@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ActiveSelection, Gradient } from "fabric";
+import { ActiveSelection, Gradient, Group } from "fabric";
 import { RefObject } from "react";
 import { useCanvasStore } from "../store";
 import { handleColorfill, handleGradient } from "../utilsfunc";
@@ -22,6 +22,19 @@ type props = {
 
 function RightContainer({ canvasC }: props) {
   const { activeObject, setFabricObject } = useCanvasStore();
+
+  const activeObjectFill =
+    activeObject instanceof ActiveSelection || activeObject instanceof Group
+      ? activeObject.getObjects()[0].get("fill")
+      : activeObject?.get("fill");
+  const activeObjectWidth =
+    activeObject instanceof ActiveSelection || activeObject instanceof Group
+      ? activeObject.getObjects()[0].width
+      : activeObject?.width;
+  const activeObjectHeight =
+    activeObject instanceof ActiveSelection || activeObject instanceof Group
+      ? activeObject.getObjects()[0].height
+      : activeObject?.height;
 
   return (
     <div
@@ -117,18 +130,25 @@ function RightContainer({ canvasC }: props) {
         <div className="flex flex-col items-start">
           <Popover>
             <PopoverTrigger>
-              <BtnWithColor color={activeObject?.get("fill")} />
+              <BtnWithColor
+                color={
+                  activeObject instanceof ActiveSelection ||
+                  activeObject instanceof Group
+                    ? activeObject.getObjects()[0].get("fill")
+                    : activeObject?.get("fill")
+                }
+              />
             </PopoverTrigger>
             <PopoverContent side="left" align="center">
               <ColorOptions
+                showGradient
+                showGradientOptions
                 forCanvas={false}
                 canvasC={canvasC}
-                height={activeObject?.height || 0}
-                width={activeObject?.width || 0}
+                height={activeObjectWidth || 0}
+                width={activeObjectHeight || 0}
                 color={
-                  activeObject?.get("fill") as
-                    | string
-                    | Gradient<"linear" | "gradient">
+                  activeObjectFill as string | Gradient<"linear" | "gradient">
                 }
                 handleColor={(v) => {
                   handleColorfill({
@@ -143,6 +163,7 @@ function RightContainer({ canvasC }: props) {
                 handleGradient={(c, t) => {
                   if (!activeObject) return;
                   handleGradient({
+                    params: "fill",
                     type: t ? t : "linear",
                     activeObject: activeObject,
                     canvasC: canvasC,

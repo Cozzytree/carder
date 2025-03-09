@@ -43,7 +43,9 @@ const handleGradient = ({
   canvasC,
   activeObject,
   gradientT,
+  params,
 }: {
+  params?: string;
   gradientT?: Gradient<"linear" | "radial">;
   type?: "radial" | "linear";
   color: string[];
@@ -59,7 +61,7 @@ const handleGradient = ({
     offset: divide * i,
   }));
 
-  if (activeObject) {
+  if (activeObject && params) {
     const coords =
       type === "linear"
         ? {
@@ -81,8 +83,9 @@ const handleGradient = ({
       coords,
       colorStops: stops,
     });
+
     canvasC.current.changeCanvasProperties(activeObject, {
-      fill: gradientT ? gradientT : gradient,
+      [params]: gradientT ? gradientT : gradient,
     });
   } else {
     const coords =
@@ -108,7 +111,6 @@ const handleGradient = ({
     });
     canvasC.current.changeCanvasColor(gradient);
   }
-
   fn();
 };
 

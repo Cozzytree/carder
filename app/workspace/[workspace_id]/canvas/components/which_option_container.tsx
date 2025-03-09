@@ -121,6 +121,8 @@ function WhichOContainer({ canvasC }: props) {
               | string
               | Gradient<"linear" | "radial">
           }
+          showGradient={true}
+          showGradientOptions={true}
           canvasC={canvasC}
           handleGradient={(g, t) => {
             handleGradient({

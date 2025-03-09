@@ -39,7 +39,7 @@ function UpDown({
           disabled={disabled}
           className="max-w-16 text-sm px-1 bg-background rounded-md border"
           value={val}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+          onChange={(e) => {
             const n = +e.target.value;
             onChange(n);
             setVal(n);

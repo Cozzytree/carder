@@ -4,9 +4,9 @@ import UpDown from "@/components/updown";
 import { debouncer } from "@/lib/utils";
 import {
   ActiveSelection,
-  ColorStop,
   FabricObject,
   Gradient,
+  GradientType,
   Group,
   Shadow,
 } from "fabric";
@@ -20,6 +20,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import BtnWithColor from "../btn-with-color";
+import { handleGradient } from "../../utilsfunc";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -30,6 +31,18 @@ function OutlineAndShadow({ canvasC }: props) {
   let hasShadow: Shadow | null = activeObject?.get("shadow");
   let strokeWidth: number = 0;
   let stroke: string = "";
+  const activeObjectStroke =
+    activeObject instanceof ActiveSelection || activeObject instanceof Group
+      ? activeObject.getObjects()[0]?.stroke
+      : activeObject?.stroke;
+  const activeObjectWidth =
+    activeObject instanceof ActiveSelection || activeObject instanceof Group
+      ? activeObject.getObjects()[0].width
+      : activeObject?.width;
+  const activeObjectHeight =
+    activeObject instanceof ActiveSelection || activeObject instanceof Group
+      ? activeObject.getObjects()[0].height
+      : activeObject?.height;
 
   if (
     activeObject instanceof ActiveSelection ||
@@ -114,10 +127,7 @@ function OutlineAndShadow({ canvasC }: props) {
             </PopoverTrigger>
             <PopoverContent side="left">
               <ColorOptions
-                color={activeObject?.get("stroke")}
-                forCanvas={false}
-                width={activeObject?.height || 0}
-                height={activeObject?.width || 0}
+                color={stroke}
                 handleColor={(v) => {
                   if (!canvasC.current || !activeObject) return;
                   canvasC.current.changeCanvasProperties(activeObject, {
@@ -125,27 +135,18 @@ function OutlineAndShadow({ canvasC }: props) {
                   });
                   setFabricObject(activeObject);
                 }}
-                handleGradient={(color) => {
-                  if (!canvasC.current || !activeObject) return;
-                  const divide = 1 / (color.length - 1);
-                  const stops: ColorStop[] = color.map((c, i) => ({
-                    color: c,
-                    offset: divide * i,
-                  }));
-                  const gradient = new Gradient({
-                    coords: {
-                      x1: 0,
-                      y1: 0,
-                      x2: 0,
-                      y2: activeObject.height,
-                    },
-                    type: "linear",
-                    colorStops: stops,
-                  });
-                  canvasC.current.changeCanvasProperties(activeObject, {
-                    stroke: gradient,
-                  });
-                  setFabricObject(activeObject);
+                handleGradient={(color, t) => {
+                  if (activeObject)
+                    handleGradient({
+                      activeObject: activeObject,
+                      canvasC: canvasC,
+                      color: color,
+                      fn: () => {
+                        setFabricObject(activeObject);
+                      },
+                      params: "stroke",
+                      type: t ? t : "linear",
+                    });
                 }}
               />
             </PopoverContent>
@@ -237,9 +238,14 @@ function OutlineAndShadow({ canvasC }: props) {
                   className="w-6 h-6 rounded-full border border-foreground"
                 ></button>
               </PopoverTrigger>
-              <PopoverContent>
+              <PopoverContent side="left">
                 <ColorOptions
-                  handleGradient={(v) => {}}
+                  showGradient={false}
+                  color={activeObjectStroke as string | Gradient<GradientType>}
+                  forCanvas={false}
+                  height={activeObjectHeight || 0}
+                  width={activeObjectWidth || 0}
+                  canvasC={canvasC}
                   handleColor={(v) => {
                     if (!check() || !hasShadow) return;
                     hasShadow.color = v;

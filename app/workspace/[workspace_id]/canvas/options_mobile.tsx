@@ -21,7 +21,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ColorStop, Gradient, Rect } from "fabric";
+import { ActiveSelection, Gradient, Rect } from "fabric";
 import {
   BrushIcon,
   FilterIcon,
@@ -41,12 +41,13 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import NextImage from "next/image";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { brushes } from "./constants";
 import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
 import { handleGradient } from "./utilsfunc";
+import BtnWithColor from "./components/btn-with-color";
 
 function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
   const { activeObject, setFabricObject } = useCanvasStore();
@@ -125,7 +126,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
       {/* {resize canvas} */}
       <Popover>
         <PopoverTrigger>
-          <Image
+          <NextImage
             className="w-5 h-5"
             src={"/board.svg"}
             width={100}
@@ -146,6 +147,30 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
           >
             clear selection
           </Button>
+          <label
+            htmlFor="c-img"
+            className={buttonVariants({ variant: "outline", size: "xs" })}
+          >
+            change background
+          </label>
+          <input
+            onChange={(e) => {
+              if (!e.target.files?.length) return;
+              const file = e.target.files[0];
+              const reader = new FileReader();
+              const i = new Image();
+              reader.onload = async (e) => {
+                i.src = e.target?.result as string;
+
+                await canvasC.current?.changeCanvasBackground(i.src);
+              };
+              reader.readAsDataURL(file);
+            }}
+            className="hidden"
+            id="c-img"
+            type="file"
+            accept=".png, .jpeg, .webp"
+          />
         </PopoverContent>
       </Popover>
 
@@ -260,30 +285,45 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
       {/* {colors} */}
       <Popover>
-        <PopoverTrigger asChild>
-          <button
-            style={{
-              background:
-                activeObject?.get("fill") ||
-                canvasC.current?.canvas.backgroundColor,
-            }}
-            className="w-4 h-4 rounded-full border-2 border-foreground"
-          ></button>
+        <PopoverTrigger>
+          <BtnWithColor
+            w={23}
+            h={23}
+            color={
+              activeObject instanceof ActiveSelection
+                ? activeObject.getObjects()[0].get("fill")
+                : activeObject?.get("fill")
+            }
+          />
         </PopoverTrigger>
-        <PopoverContent align="center" side="top" className="bg-secondary/10">
+        <PopoverContent align="center" side="top" className="bg-secondary/30">
           <ColorOptions
-            forCanvas={false}
-            height={activeObject?.height || 0}
-            width={activeObject?.width || 0}
+            showGradient={true}
+            showGradientOptions={true}
+            forCanvas={activeObject ? false : true}
+            height={
+              activeObject
+                ? activeObject?.height
+                : canvasC.current?.canvas.width || 0
+            }
+            width={
+              activeObject
+                ? activeObject?.width
+                : canvasC.current?.canvas.height || 0
+            }
             canvasC={canvasC}
             color={
-              activeObject?.get("fill") as
-                | string
-                | Gradient<"linear" | "radial">
+              activeObject instanceof ActiveSelection
+                ? activeObject.getObjects()[0].get("fill")
+                : activeObject?.get("fill") ||
+                  (canvasC.current?.canvas.backgroundColor as
+                    | string
+                    | Gradient<"linear" | "radial">)
             }
             handleGradient={(v, gra) => {
-              if (activeObject)
+              if (activeObject) {
                 handleGradient({
+                  params: "fill",
                   activeObject: activeObject,
                   canvasC: canvasC,
                   color: v,
@@ -292,6 +332,18 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                   },
                   type: gra,
                 });
+              } else {
+                handleGradient({
+                  params: "fill",
+                  activeObject: null,
+                  canvasC: canvasC,
+                  color: v,
+                  fn: () => {
+                    setFabricObject(activeObject);
+                  },
+                  type: gra,
+                });
+              }
             }}
             handleColor={(v) => {
               if (!canvasC.current) return;
@@ -310,7 +362,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
       <Drawer>
         <DrawerTrigger>
-          <Image
+          <NextImage
             src={"/shapes_icon.svg"}
             alt="shapes"
             width={100}

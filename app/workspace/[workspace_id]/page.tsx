@@ -23,7 +23,7 @@ import RightContainer from "./canvas/components/right-container";
 // const db_version = 5;
 
 const unsplash = createApi({
-  accessKey: "WBZ8WCzpqldyqwgR6ZwdUiUZqKwcoUs_TuBwMtzOGgI",
+  accessKey: process.env.NEXT_PUBLIC_UNSPLASH_ACCESSKEY || "",
 });
 
 const getPhotos = async () => {
@@ -35,15 +35,13 @@ const getPhotos = async () => {
 };
 
 export default function Page() {
-  const {
-    setFabricObject,
-    width,
-    height,
-    activeObject,
-    setDrawingMode,
-    containerScale,
-    setPointerEvents,
-  } = useCanvasStore();
+  const width = useCanvasStore((state) => state.width);
+  const height = useCanvasStore((state) => state.height);
+  const setFabricObject = useCanvasStore((state) => state.setFabricObject);
+  const setDrawingMode = useCanvasStore((state) => state.setDrawingMode);
+  const containerScale = useCanvasStore((state) => state.containerScale);
+  const setPointerEvents = useCanvasStore((state) => state.setPointerEvents);
+
   const { which } = useWhichOptionsOpen();
   const { isMobile } = useIsMobile();
   const [containerZoom, setContainerZoom] = useState(1);
