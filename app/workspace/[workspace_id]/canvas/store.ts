@@ -25,7 +25,9 @@ interface canvasInterface {
 interface colorStoreInterface {
   alpha: number;
   recentColors: string[];
+  recentGradients: string[][];
 
+  setRecentGradient: (v: string[]) => void;
   setRecentColors: (v: string) => void;
   setAlpha: (v: number) => void;
 }
@@ -43,14 +45,23 @@ const useWhichOptionsOpen = create<whichOptionOpenI>((set) => ({
 const useColorStore = create<colorStoreInterface>((set) => ({
   alpha: 1,
   recentColors: [],
+  recentGradients: [],
 
+  setRecentGradient: (v) =>
+    set((state) => {
+      if (state.recentGradients.length >= 5) {
+        state.recentGradients.pop();
+      }
+      state.recentGradients.unshift(v);
+      return state;
+    }),
   setAlpha: (v) => set({ alpha: v }),
   setRecentColors: (v) => {
     set((state) => {
-      if (state.recentColors.length > 5) {
+      if (state.recentColors.length >= 5) {
         state.recentColors.pop();
       }
-      state.recentColors.push(v);
+      state.recentColors.unshift(v);
       return state;
     });
   },

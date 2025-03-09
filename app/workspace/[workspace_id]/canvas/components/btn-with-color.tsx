@@ -1,11 +1,20 @@
-import { Gradient } from "fabric";
+import { Gradient, GradientType } from "fabric";
 
 type props = {
+  gradientType?: GradientType;
   onClick?: () => void;
-  color: string | Gradient<"linear" | "radical">;
+  w?: number;
+  h?: number;
+  color: string | Gradient<"linear" | "radical"> | string[];
 };
 
-function BtnWithColor({ color, onClick }: props) {
+function BtnWithColor({
+  color,
+  onClick,
+  gradientType = "linear",
+  w = 32,
+  h = 32,
+}: props) {
   let gradientClass: string[] | string;
 
   if (color instanceof Gradient) {
@@ -20,10 +29,12 @@ function BtnWithColor({ color, onClick }: props) {
       onClick={onClick}
       style={{
         background: Array.isArray(gradientClass)
-          ? `linear-gradient(${gradientClass.join(",")})`
+          ? `${gradientType}-gradient(${gradientClass.join(",")})`
           : gradientClass,
+        width: w + "px",
+        height: h + "px",
       }}
-      className={`${gradientClass} w-6 h-6 rounded-full border-2 border-foreground/30`}
+      className={`${gradientClass}  rounded-full border-2 border-foreground/30`}
     ></div>
   );
 }

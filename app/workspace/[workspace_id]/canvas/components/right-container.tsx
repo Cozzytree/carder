@@ -10,10 +10,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ActiveSelection } from "fabric";
+import { ActiveSelection, Gradient } from "fabric";
 import { RefObject } from "react";
 import { useCanvasStore } from "../store";
 import { handleColorfill, handleGradient } from "../utilsfunc";
+import ShapeActions from "./canvas_options/shape_actions";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -28,7 +29,7 @@ function RightContainer({ canvasC }: props) {
     >
       <div aria-disabled={activeObject == null} className="flex flex-col gap-2">
         <InputWithValue
-          val={activeObject?.get("left") || 0}
+          val={activeObject ? activeObject?.get("left") : 0}
           change={(e) => {
             if (!canvasC.current || !activeObject) return;
             canvasC.current.changeCanvasProperties(activeObject, {
@@ -118,8 +119,17 @@ function RightContainer({ canvasC }: props) {
             <PopoverTrigger>
               <BtnWithColor color={activeObject?.get("fill")} />
             </PopoverTrigger>
-            <PopoverContent side="left" align="start">
+            <PopoverContent side="left" align="center">
               <ColorOptions
+                forCanvas={false}
+                canvasC={canvasC}
+                height={activeObject?.height || 0}
+                width={activeObject?.width || 0}
+                color={
+                  activeObject?.get("fill") as
+                    | string
+                    | Gradient<"linear" | "gradient">
+                }
                 handleColor={(v) => {
                   handleColorfill({
                     activeObject: activeObject,
@@ -148,6 +158,13 @@ function RightContainer({ canvasC }: props) {
         </div>
 
         <OutlineAndShadow canvasC={canvasC} />
+
+        <div className="w-full border border-foreground/30" />
+
+        <div className="px-2 text-md">
+          <h4 className="font-semibold">Actions</h4>
+          <ShapeActions canvasC={canvasC} />
+        </div>
       </div>
     </div>
   );

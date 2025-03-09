@@ -46,46 +46,10 @@ import { Button } from "@/components/ui/button";
 import { brushes } from "./constants";
 import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
+import { handleGradient } from "./utilsfunc";
 
 function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
   const { activeObject, setFabricObject } = useCanvasStore();
-
-  const handleGradient = (color: string[]) => {
-    if (!canvasC.current) return;
-    const divide = 1 / (color.length - 1);
-    if (activeObject) {
-      const stops: ColorStop[] = color.map((c, i) => ({
-        color: c,
-        offset: divide * i,
-      }));
-      const gradient = new Gradient({
-        coords: {
-          x1: 0,
-          y1: 0,
-          x2: 0,
-          y2: activeObject.height,
-        },
-        type: "linear",
-        colorStops: stops,
-      });
-      canvasC.current.changeCanvasProperties(activeObject, {
-        fill: gradient,
-      });
-    } else {
-      const gradient = new Gradient({
-        coords: {
-          x1: 0,
-          y1: 0,
-          x2: 0,
-          y2: canvasC.current.canvas.height,
-        },
-        type: "linear",
-        colorStops: color.map((c, i) => ({ color: c, offset: divide * i })),
-      });
-      canvasC.current.changeCanvasColor(gradient);
-    }
-    setFabricObject(activeObject);
-  };
 
   if (canvasC.current?.canvas.isDrawingMode) {
     return (
@@ -306,10 +270,28 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             className="w-4 h-4 rounded-full border-2 border-foreground"
           ></button>
         </PopoverTrigger>
-        <PopoverContent align="center" side="top">
+        <PopoverContent align="center" side="top" className="bg-secondary/10">
           <ColorOptions
-            handleGradient={(v) => {
-              handleGradient(v);
+            forCanvas={false}
+            height={activeObject?.height || 0}
+            width={activeObject?.width || 0}
+            canvasC={canvasC}
+            color={
+              activeObject?.get("fill") as
+                | string
+                | Gradient<"linear" | "radial">
+            }
+            handleGradient={(v, gra) => {
+              if (activeObject)
+                handleGradient({
+                  activeObject: activeObject,
+                  canvasC: canvasC,
+                  color: v,
+                  fn: () => {
+                    setFabricObject(activeObject);
+                  },
+                  type: gra,
+                });
             }}
             handleColor={(v) => {
               if (!canvasC.current) return;

@@ -94,7 +94,7 @@ function OutlineAndShadow({ canvasC }: props) {
   return (
     <div className="flex gap-3 flex-col py-2 px-2">
       <div className="flex flex-col">
-        <h4>Stroke</h4>
+        <h4 className="font-semibold text-lg">Stroke</h4>
         <div className="flex items-center gap-1">
           {strokeWidth}
           <Slider
@@ -112,8 +112,12 @@ function OutlineAndShadow({ canvasC }: props) {
             <PopoverTrigger>
               <BtnWithColor color={stroke} />
             </PopoverTrigger>
-            <PopoverContent>
+            <PopoverContent side="left">
               <ColorOptions
+                color={activeObject?.get("stroke")}
+                forCanvas={false}
+                width={activeObject?.height || 0}
+                height={activeObject?.width || 0}
                 handleColor={(v) => {
                   if (!canvasC.current || !activeObject) return;
                   canvasC.current.changeCanvasProperties(activeObject, {

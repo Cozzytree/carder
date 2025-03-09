@@ -106,6 +106,9 @@ class CanvasC {
         this.canvas.add(l);
       });
     });
+    this.canvas.on("object:added", (e) => {
+      callbackSeleted(e.target);
+    });
 
     this.canvas.on("object:modified", (e) => {
       if (this.guideLines.length) {

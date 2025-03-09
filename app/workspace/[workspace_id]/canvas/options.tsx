@@ -4,9 +4,6 @@ import { BrushIcon, MousePointer2 } from "lucide-react";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { useCanvasStore, useWhichOptionsOpen } from "./store";
 import { useIsMobile } from "./hooks/isMobile";
-import ActiveColor from "./components/active_color";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import FontOptionUpdated from "./components/font_option(updated)";
 import {
   Popover,
   PopoverContent,
@@ -138,6 +135,11 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             </PopoverTrigger>
             <PopoverContent className="w-fit flex flex-col gap-2">
               <ColorOptions
+                color={
+                  canvasC.current.canvas.backgroundColor as
+                    | string
+                    | Gradient<"linear" | "radial">
+                }
                 handleGradient={(e) => {}}
                 handleColor={(c) => {
                   if (!canvasC.current) return;
