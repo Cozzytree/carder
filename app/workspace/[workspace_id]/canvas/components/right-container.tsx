@@ -10,10 +10,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ActiveSelection } from "fabric";
+import { ActiveSelection, Gradient, Group } from "fabric";
 import { RefObject } from "react";
 import { useCanvasStore } from "../store";
 import { handleColorfill, handleGradient } from "../utilsfunc";
+import ShapeActions from "./canvas_options/shape_actions";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -22,13 +23,26 @@ type props = {
 function RightContainer({ canvasC }: props) {
   const { activeObject, setFabricObject } = useCanvasStore();
 
+  const activeObjectFill =
+    activeObject instanceof ActiveSelection || activeObject instanceof Group
+      ? activeObject.getObjects()[0].get("fill")
+      : activeObject?.get("fill");
+  const activeObjectWidth =
+    activeObject instanceof ActiveSelection || activeObject instanceof Group
+      ? activeObject.getObjects()[0].width
+      : activeObject?.width;
+  const activeObjectHeight =
+    activeObject instanceof ActiveSelection || activeObject instanceof Group
+      ? activeObject.getObjects()[0].height
+      : activeObject?.height;
+
   return (
     <div
       className={`${activeObject == null ? "opacity-50" : " bg-secondary"} lg:w-[200px] xl:w-[250px] border border-l-foreground/40 p-2`}
     >
       <div aria-disabled={activeObject == null} className="flex flex-col gap-2">
         <InputWithValue
-          val={activeObject?.get("left") || 0}
+          val={activeObject ? activeObject?.get("left") : 0}
           change={(e) => {
             if (!canvasC.current || !activeObject) return;
             canvasC.current.changeCanvasProperties(activeObject, {
@@ -116,10 +130,26 @@ function RightContainer({ canvasC }: props) {
         <div className="flex flex-col items-start">
           <Popover>
             <PopoverTrigger>
-              <BtnWithColor color={activeObject?.get("fill")} />
+              <BtnWithColor
+                color={
+                  activeObject instanceof ActiveSelection ||
+                  activeObject instanceof Group
+                    ? activeObject.getObjects()[0].get("fill")
+                    : activeObject?.get("fill")
+                }
+              />
             </PopoverTrigger>
-            <PopoverContent side="left" align="start">
+            <PopoverContent side="left" align="center">
               <ColorOptions
+                showGradient
+                showGradientOptions
+                forCanvas={false}
+                canvasC={canvasC}
+                height={activeObjectWidth || 0}
+                width={activeObjectHeight || 0}
+                color={
+                  activeObjectFill as string | Gradient<"linear" | "gradient">
+                }
                 handleColor={(v) => {
                   handleColorfill({
                     activeObject: activeObject,
@@ -133,6 +163,7 @@ function RightContainer({ canvasC }: props) {
                 handleGradient={(c, t) => {
                   if (!activeObject) return;
                   handleGradient({
+                    params: "fill",
                     type: t ? t : "linear",
                     activeObject: activeObject,
                     canvasC: canvasC,
@@ -148,6 +179,13 @@ function RightContainer({ canvasC }: props) {
         </div>
 
         <OutlineAndShadow canvasC={canvasC} />
+
+        <div className="w-full border border-foreground/30" />
+
+        <div className="px-2 text-md">
+          <h4 className="font-semibold">Actions</h4>
+          <ShapeActions canvasC={canvasC} />
+        </div>
       </div>
     </div>
   );

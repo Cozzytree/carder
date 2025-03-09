@@ -1,21 +1,49 @@
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
-import { ColorStop, FabricObject, Gradient } from "fabric";
+import { ColorStop, Gradient, GradientType } from "fabric";
 import { CircleXIcon, PlusCircle, XCircle } from "lucide-react";
 import { ChangeEvent, RefObject, useState } from "react";
-import { colors, gradients } from "../../constants";
-import { useCanvasStore } from "../../store";
 import CanvasC from "../../canvas";
+import { colors, gradients } from "../../constants";
+import { useCanvasStore, useColorStore } from "../../store";
+import BtnWithColor from "../btn-with-color";
 
 type props = {
   handleColor: (v: string) => void;
   canvasC?: RefObject<CanvasC | null>;
-  handleGradient: (g: string[], type?: "radial" | "linear") => void;
+
+  // to check if color is changed for canvas or object
+  forCanvas?: boolean;
+
+  color?: string | Gradient<"linear" | "radial">;
+
+  showGradient?: boolean;
+  showGradientOptions?: boolean;
+
+  // object or canvas props for gradient adjustemnt
+  width?: number;
+  height?: number;
+
+  handleGradient?: (g: string[], type?: "radial" | "linear") => void;
 };
 
-function ColorOptions({ handleColor, handleGradient, canvasC }: props) {
+function ColorOptions({
+  handleColor,
+  handleGradient,
+  canvasC,
+  color,
+  width,
+  height,
+  forCanvas,
+  showGradient = true,
+  showGradientOptions = false,
+}: props) {
   const [tab, setTab] = useState<"colors" | "gradient">("colors");
-  const activeObject = useCanvasStore((state) => state.activeObject);
+  const setRecentColor = useColorStore((state) => state.setRecentColors);
+  const setRecentGradient = useColorStore((state) => state.setRecentGradient);
+  const recentColors = useColorStore((state) => state.recentColors);
+  const recentGradients = useColorStore((state) => state.recentGradients);
 
   return (
     <div className="w-full flex flex-col gap-2 items-center justify-center">
@@ -28,77 +56,142 @@ function ColorOptions({ handleColor, handleGradient, canvasC }: props) {
         >
           Standard
         </button>
-        <button
-          onClick={() => {
-            setTab("gradient");
-          }}
-          className={`${tab === "gradient" && "font-bold text-md"} text-sm md:text-lg p-1`}
-        >
-          Gradient
-        </button>
+        {showGradient && (
+          <button
+            onClick={() => {
+              setTab("gradient");
+            }}
+            className={`${tab === "gradient" && "font-bold text-md"} text-sm md:text-lg p-1`}
+          >
+            Gradient
+          </button>
+        )}
       </div>
 
-      <div className="w-full">
+      <div className="w-full flex flex-col">
         {tab === "colors" ? (
-          <div className="grid grid-cols-5 gap-2">
-            <button
-              onClick={() => {
-                handleColor("");
-              }}
-              className="w-8 h-8 rounded-full"
-            >
-              <CircleXIcon className="w-8 h-8" fill="red" />
-            </button>
-            {colors.map((c, i) => (
+          <>
+            <div className="mb-4">
+              <h4 className="font-semibold">Recent</h4>
+              <div className="w-full grid grid-cols-5 gap-2">
+                {recentColors.map((c, i) => (
+                  <BtnWithColor
+                    onClick={() => {
+                      handleColor(c);
+                    }}
+                    w={32}
+                    h={32}
+                    color={c}
+                    key={i}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* {///} */}
+
+            <div className="grid grid-cols-5 gap-2">
               <button
                 onClick={() => {
-                  handleColor(c);
+                  handleColor("");
                 }}
-                className="w-8 h-8 rounded-full border-foreground/40 border-2"
-                key={i}
-                style={{ background: c }}
-              />
-            ))}
-            <label
-              htmlFor="customcolor"
-              className="gradient w-8 h-8 cursor-pointer rounded-full bg-foreground"
-            ></label>
-            <input
-              onChange={debouncer((e: ChangeEvent<HTMLInputElement>) => {
-                handleColor(e.target.value);
-              }, 50)}
-              type="color"
-              id="customcolor"
-              className="hidden"
-            />
-          </div>
-        ) : (
-          <div className="flex w-full flex-col gap-3">
-            <div className="w-full grid grid-cols-5 gap-2">
-              {gradients.map((g, i) => (
+                className="w-8 h-8 rounded-full"
+              >
+                <CircleXIcon className="w-8 h-8" fill="red" />
+              </button>
+              {colors.map((c, i) => (
                 <button
                   onClick={() => {
-                    handleGradient(g);
+                    handleColor(c);
+                    setRecentColor(c);
                   }}
-                  key={i}
                   className="w-8 h-8 rounded-full border-foreground/40 border-2"
-                  style={{ background: `linear-gradient(${g[0]},${g[1]})` }}
+                  key={i}
+                  style={{ background: c }}
                 />
               ))}
+              <label
+                htmlFor="customcolor"
+                className="gradient w-8 h-8 cursor-pointer rounded-full bg-foreground"
+              ></label>
+              <input
+                onChange={debouncer((e: ChangeEvent<HTMLInputElement>) => {
+                  handleColor(e.target.value);
+                  setRecentColor(e.target.value);
+                }, 50)}
+                type="color"
+                id="customcolor"
+                className="hidden"
+              />
             </div>
-            <GradientToggle
-              canvasC={canvasC}
-              handleToggle={(v) => {
-                const stops = activeObject?.get("fill")
-                  .colorStops as ColorStop[];
-                if (!Array.isArray(stops)) return;
-                const c = stops.map((col) => col.color);
-                handleGradient(c, v);
-              }}
-              activeObject={activeObject}
-            />
-            <CustomGradientColor handleGradient={handleGradient} />
-          </div>
+          </>
+        ) : (
+          <>
+            {showGradient && color && (
+              <div className="flex w-full flex-col gap-3">
+                <div className="flex flex-col gap-1 mb-2">
+                  {recentGradients.length && (
+                    <>
+                      <h4>Recent</h4>
+                      <div className="grid grid-cols-5 gap-2">
+                        {recentGradients.map((g, i) => (
+                          <BtnWithColor
+                            onClick={() => {
+                              handleGradient?.(
+                                g,
+                                color instanceof Gradient
+                                  ? color.type
+                                  : "linear",
+                              );
+                            }}
+                            color={g}
+                            key={i}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="w-full grid grid-cols-5 gap-2">
+                  {gradients.map((g, i) => (
+                    <BtnWithColor
+                      gradientType={
+                        color instanceof Gradient ? color.type : "linear"
+                      }
+                      key={i}
+                      onClick={() => {
+                        handleGradient?.(
+                          g,
+                          color instanceof Gradient ? color.type : "linear",
+                        );
+                        setRecentGradient(g);
+                      }}
+                      color={g}
+                    />
+                  ))}
+                </div>
+                <GradientToggle
+                  showOptions={showGradientOptions}
+                  forCanvas={!!forCanvas}
+                  canvasC={canvasC}
+                  width={width || 100}
+                  height={height || 100}
+                  color={color}
+                  handleToggle={(v) => {
+                    if (color instanceof Gradient) {
+                      const stops = color.colorStops as ColorStop[];
+                      if (!Array.isArray(stops)) return;
+                      const c = stops.map((col) => col.color);
+                      handleGradient?.(c, v);
+                      setRecentGradient(c);
+                    }
+                  }}
+                />
+                <CustomGradientColor handleGradient={handleGradient} />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -108,7 +201,7 @@ function ColorOptions({ handleColor, handleGradient, canvasC }: props) {
 function CustomGradientColor({
   handleGradient,
 }: {
-  handleGradient: (v: string[]) => void;
+  handleGradient?: (v: string[]) => void;
 }) {
   const [colors, setColors] = useState<string[] | []>([]);
   const [color, setColor] = useState<string | null>("#202018");
@@ -182,7 +275,7 @@ function CustomGradientColor({
         <Button
           onClick={() => {
             if (colors.length >= 2) {
-              handleGradient(colors);
+              handleGradient?.(colors);
             }
           }}
           variant={"outline"}
@@ -197,57 +290,236 @@ function CustomGradientColor({
 }
 
 function GradientToggle({
-  activeObject,
   handleToggle,
+  color,
+  height,
+  width,
   canvasC,
+  forCanvas,
+  showOptions,
 }: {
-  activeObject?: FabricObject;
   canvasC?: RefObject<CanvasC | null>;
+  color: string | Gradient<"linear" | "radial">;
   handleToggle: (v: "radial" | "linear") => void;
+  width: number;
+  height: number;
+  forCanvas: boolean;
+  showOptions: boolean;
 }) {
-  const camvasGradient: Gradient<"radial" | "linear"> | string =
-    canvasC?.current?.canvas.backgroundColor;
+  const { activeObject, setFabricObject } = useCanvasStore();
+  const gradient = color instanceof Gradient ? color : null;
+
   return (
     <div className="w-full flex flex-col gap-2">
       <h4>Gradient type</h4>
-      <div>
-        <Button
-          onClick={() => {
-            handleToggle("linear");
-          }}
-          variant={
-            activeObject
-              ? activeObject?.get("fill")?.type === "linear"
-                ? "default"
+      <div className="flex">
+        <div>
+          <Button
+            onClick={() => {
+              handleToggle("linear");
+            }}
+            variant={
+              gradient
+                ? gradient.type === "linear"
+                  ? "default"
+                  : "outline"
                 : "outline"
-              : camvasGradient?.type == "linear"
-                ? "default"
+            }
+            size={"xs"}
+          >
+            linear
+          </Button>
+          <Button
+            onClick={() => {
+              handleToggle("radial");
+            }}
+            variant={
+              gradient
+                ? gradient.type === "radial"
+                  ? "default"
+                  : "outline"
                 : "outline"
-          }
-          size={"xs"}
-        >
-          linear
-        </Button>
-        <Button
-          onClick={() => {
-            handleToggle("radial");
-          }}
-          variant={
-            activeObject
-              ? activeObject?.get("fill")?.type === "radial"
-                ? "default"
-                : "outline"
-              : camvasGradient?.type == "radial"
-                ? "default"
-                : "outline"
-          }
-          size={"xs"}
-        >
-          Radial
-        </Button>
+            }
+            size={"xs"}
+          >
+            Radial
+          </Button>
+        </div>
       </div>
+
+      {showOptions && (
+        <>
+          {/* {adjust inner and outer circle} */}
+          <div className="mt-1 flex flex-col gap-3">
+            {gradient && (
+              <>
+                {[
+                  { label: "start-x", l: "x1", df: gradient.coords.x1 },
+                  { label: "start-y", l: "y1", df: gradient.coords.y1 },
+                  { label: "end-x", l: "x1", df: gradient.coords.x2 },
+                  { label: "end-y", l: "y1", df: gradient.coords.y2 },
+                ].map((v, i) => (
+                  <div key={i} className="flex flex-col">
+                    <span className="text-sm">{v.label}</span>
+                    <RadialPropertyChange
+                      color={gradient}
+                      defaultVal={v.df}
+                      fn={(g) => {
+                        if (!canvasC?.current) return;
+                        const newG = new Gradient({
+                          colorStops: gradient.colorStops,
+                          offsetX: gradient.offsetX,
+                          offsetY: gradient.offsetY,
+                          type: gradient.type,
+                          coords: { ...gradient.coords, [v.l]: g },
+                        });
+
+                        if (forCanvas) {
+                          canvasC.current.changeCanvasColor(newG);
+                        } else if (activeObject) {
+                          canvasC.current.changeCanvasProperties(activeObject, {
+                            fill: newG,
+                          });
+                        }
+                        setFabricObject(activeObject);
+                      }}
+                      max={width}
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+
+            {gradient && gradient.type == "radial" && (
+              <>
+                {[
+                  {
+                    label: "inner-circle",
+                    l: "r1",
+                    df: gradient.coords?.r1 || 0,
+                  },
+                  {
+                    label: "outer-circle",
+                    l: "r2",
+                    df: gradient.coords?.r2 || 0,
+                  },
+                ].map((v, i) => (
+                  <div key={i} className="flex flex-col">
+                    <span className="text-sm">{v.label}</span>
+                    <RadialPropertyChange
+                      color={gradient}
+                      defaultVal={v.df}
+                      fn={(g) => {
+                        if (!canvasC?.current) return;
+                        const newG = new Gradient({
+                          colorStops: gradient.colorStops,
+                          offsetX: gradient.offsetX,
+                          offsetY: gradient.offsetY,
+                          type: gradient.type,
+                          coords: { ...gradient.coords, [v.l]: g },
+                        });
+
+                        if (forCanvas) {
+                          canvasC.current.changeCanvasColor(newG);
+                        } else if (activeObject) {
+                          canvasC.current.changeCanvasProperties(activeObject, {
+                            fill: newG,
+                          });
+                        }
+                        setFabricObject(activeObject);
+                      }}
+                      max={width}
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+
+          {/* {gradient offset} */}
+          <div className="space-y-3">
+            {gradient && (
+              <>
+                <h4 className="font-semibold">Gradient offset</h4>
+                {[
+                  {
+                    label: "offset x",
+                    prop: "offsetX",
+                    max: width,
+                    min: -width / 2,
+                    df: gradient.offsetX,
+                  },
+                  {
+                    label: "offset y",
+                    prop: "offsetY",
+                    max: height,
+                    min: -height / 2,
+                    df: gradient.offsetY,
+                  },
+                ].map((offset, i) => (
+                  <div key={i} className="flex flex-col ghap-2">
+                    <span>{offset.label}</span>
+                    <RadialPropertyChange
+                      min={offset.min}
+                      color={gradient}
+                      defaultVal={offset.df}
+                      fn={(v) => {
+                        if (!canvasC?.current || gradient == null) return;
+                        const newG: Gradient<GradientType> = new Gradient({
+                          colorStops: gradient.colorStops,
+                          offsetY: gradient.offsetY,
+                          type: gradient.type,
+                          coords: gradient.coords,
+                        });
+                        if (offset.prop == "offsetX") {
+                          newG.offsetX = v;
+                        } else {
+                          newG.offsetY = v;
+                        }
+                        if (forCanvas) {
+                          canvasC.current.changeCanvasColor(newG);
+                        } else if (activeObject) {
+                          canvasC.current.changeCanvasProperties(activeObject, {
+                            fill: newG,
+                          });
+                        }
+                        setFabricObject(activeObject);
+                      }}
+                      max={offset.max}
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
+function RadialPropertyChange({
+  fn,
+  max,
+  defaultVal,
+  min = 0,
+}: {
+  min?: number;
+  defaultVal: number;
+  max: number;
+  fn: (e: number) => void;
+  color: Gradient<GradientType>;
+}) {
+  return (
+    <Slider
+      onValueChange={debouncer((e) => {
+        fn(e[0]);
+      }, 10)}
+      defaultValue={[defaultVal || 0]}
+      max={max}
+      min={min}
+      step={2}
+    />
+  );
+}
 export default ColorOptions;

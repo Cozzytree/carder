@@ -111,8 +111,18 @@ function WhichOContainer({ canvasC }: props) {
         </div>
       )}
 
-      {which === WhichOptionEmum.COLOR && (
+      {which === WhichOptionEmum.COLOR && canvasC.current != null && (
         <ColorOptions
+          forCanvas
+          width={canvasC.current.canvas.width}
+          height={canvasC.current.canvas.height}
+          color={
+            canvasC.current.canvas.backgroundColor as
+              | string
+              | Gradient<"linear" | "radial">
+          }
+          showGradient={true}
+          showGradientOptions={true}
           canvasC={canvasC}
           handleGradient={(g, t) => {
             handleGradient({

@@ -7,7 +7,10 @@ type props = {
   canvasC: RefObject<CanvasC | null>;
 };
 function ResizeCanvas({ canvasC }: props) {
-  const { width, height, setWidth, setHeight } = useCanvasStore();
+  const setWidth = useCanvasStore((state) => state.setWidth);
+  const setHeight = useCanvasStore((state) => state.setHeight);
+  const width = useCanvasStore((state) => state.width);
+  const height = useCanvasStore((state) => state.height);
   return (
     <div
       className={`w-full px-2 flex flex-col justify-center items-center gap-2`}

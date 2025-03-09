@@ -2,11 +2,8 @@ import CanvasC from "./canvas";
 
 import { BrushIcon, MousePointer2 } from "lucide-react";
 import { Dispatch, RefObject, SetStateAction } from "react";
-import { useCanvasStore, useWhichOptionsOpen } from "./store";
+import { useCanvasStore, useColorStore, useWhichOptionsOpen } from "./store";
 import { useIsMobile } from "./hooks/isMobile";
-import ActiveColor from "./components/active_color";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import FontOptionUpdated from "./components/font_option(updated)";
 import {
   Popover,
   PopoverContent,
@@ -18,6 +15,7 @@ import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
 import BtnWithColor from "./components/btn-with-color";
 import { Gradient } from "fabric";
+import { buttonVariants } from "@/components/ui/button";
 
 type props = {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -34,8 +32,9 @@ function CanvasOptions({ canvasC }: props) {
 }
 
 function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
-  const { width, height, activeObject: activeObj } = useCanvasStore();
-  const { setWhichOption, which } = useWhichOptionsOpen();
+  const width = useCanvasStore((state) => state.width);
+  const height = useCanvasStore((state) => state.height);
+  const { setWhichOption } = useWhichOptionsOpen();
 
   return (
     <div className="w-full relative px-2 min-h-16 bg-secondary border-b-2 gap-2 flex items-center">
@@ -104,6 +103,31 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             {width} x {height}
           </span>
         </button>
+
+        <label
+          htmlFor="c-img"
+          className={buttonVariants({ variant: "outline", size: "xs" })}
+        >
+          change background
+        </label>
+        <input
+          onChange={(e) => {
+            if (!e.target.files?.length) return;
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            const i = new Image();
+            reader.onload = async (e) => {
+              i.src = e.target?.result as string;
+
+              await canvasC.current?.changeCanvasBackground(i.src);
+            };
+            reader.readAsDataURL(file);
+          }}
+          className="hidden"
+          id="c-img"
+          type="file"
+          accept=".png, .jpeg, .webp"
+        />
       </div>
 
       {canvasC.current?.canvas.isDrawingMode && (
@@ -138,6 +162,11 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             </PopoverTrigger>
             <PopoverContent className="w-fit flex flex-col gap-2">
               <ColorOptions
+                color={
+                  canvasC.current.canvas.backgroundColor as
+                    | string
+                    | Gradient<"linear" | "radial">
+                }
                 handleGradient={(e) => {}}
                 handleColor={(c) => {
                   if (!canvasC.current) return;

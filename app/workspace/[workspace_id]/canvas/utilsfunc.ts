@@ -42,7 +42,11 @@ const handleGradient = ({
   type,
   canvasC,
   activeObject,
+  gradientT,
+  params,
 }: {
+  params?: string;
+  gradientT?: Gradient<"linear" | "radial">;
   type?: "radial" | "linear";
   color: string[];
   activeObject: FabricObject | null;
@@ -57,7 +61,7 @@ const handleGradient = ({
     offset: divide * i,
   }));
 
-  if (activeObject) {
+  if (activeObject && params) {
     const coords =
       type === "linear"
         ? {
@@ -71,17 +75,17 @@ const handleGradient = ({
             y1: activeObject.height / 2,
             x2: activeObject.width / 2,
             y2: activeObject.height / 2,
-            r1: activeObject.width / 7, // inner circle radius
-            r2: activeObject.width / 2, // outer circle radius
+            r1: activeObject.width / 6, // inner circle radius
+            r2: activeObject.width / 1.2, // outer circle radius
           };
-
     const gradient = new Gradient({
       type: type,
       coords,
       colorStops: stops,
     });
+
     canvasC.current.changeCanvasProperties(activeObject, {
-      fill: gradient,
+      [params]: gradientT ? gradientT : gradient,
     });
   } else {
     const coords =
@@ -107,8 +111,11 @@ const handleGradient = ({
     });
     canvasC.current.changeCanvasColor(gradient);
   }
-
   fn();
 };
+
+const changeGradientProperties = ({}: {
+  canvasC: RefObject<CanvasC | null>;
+}) => {};
 
 export { changeWidth, handleGradient, handleColorfill };

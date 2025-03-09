@@ -106,6 +106,9 @@ class CanvasC {
         this.canvas.add(l);
       });
     });
+    this.canvas.on("object:added", (e) => {
+      callbackSeleted(e.target);
+    });
 
     this.canvas.on("object:modified", (e) => {
       if (this.guideLines.length) {
@@ -184,7 +187,7 @@ class CanvasC {
 
   async createNewImage(
     img: string | HTMLImageElement,
-    props?: Partila<FabricObjectProps>,
+    props?: Partial<FabricObjectProps>,
   ) {
     let image: DefaultImage | null = null;
     if (img instanceof HTMLImageElement) {
@@ -273,6 +276,42 @@ class CanvasC {
   changeCanvasColor(v: string | Gradient<unknown, "linear" | "radial">) {
     this.canvas.set("backgroundColor", v);
     this.canvas.requestRenderAll();
+  }
+  async changeCanvasBackground(v: HTMLImageElement | string) {
+    let img: DefaultImage | null = null;
+    console.log(v);
+    if (typeof v == "string") {
+      img = await FabricImage.fromURL(v);
+    } else if (v instanceof HTMLImageElement) {
+      img = await FabricImage.fromElement(v);
+    }
+
+    if (img) {
+      // Get the aspect ratio of the image
+      const imgAspectRatio = img.width / img.height;
+      const canvasAspectRatio = this.canvas.width / this.canvas.height;
+
+      let newWidth = this.canvas.width;
+      let newHeight = this.canvas.height;
+
+      // Scale the image to fit the canvas while maintaining the aspect ratio
+      if (imgAspectRatio > canvasAspectRatio) {
+        // Image is wider than canvas, scale based on width
+        newHeight = this.canvas.width / imgAspectRatio;
+      } else {
+        // Image is taller than canvas, scale based on height
+        newWidth = this.canvas.height * imgAspectRatio;
+      }
+
+      // Apply the new scaled dimensions to the image
+      img.set({
+        scaleX: newWidth / img.width,
+        scaleY: newHeight / img.height,
+      });
+
+      this.canvas.backgroundImage = img;
+      this.canvas.requestRenderAll();
+    }
   }
 
   deleteObject() {
