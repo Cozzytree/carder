@@ -1,6 +1,6 @@
 "use client";
 import * as fabric from "fabric";
-import { MenuIcon } from "lucide-react";
+import { CheckCircle, MenuIcon, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createApi } from "unsplash-js";
 import CanvasC from "./canvas/canvas";
@@ -18,6 +18,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import RightContainer from "./canvas/components/right-container";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 // const dbName = "carder_db";
 // const db_version = 5;
@@ -36,6 +42,8 @@ const getPhotos = async () => {
 
 export default function Page() {
   const width = useCanvasStore((state) => state.width);
+  const snap = useCanvasStore((state) => state.snapping);
+  const setSnap = useCanvasStore((state) => state.setSnap);
   const height = useCanvasStore((state) => state.height);
   const setFabricObject = useCanvasStore((state) => state.setFabricObject);
   const setDrawingMode = useCanvasStore((state) => state.setDrawingMode);
@@ -176,7 +184,7 @@ export default function Page() {
       <div className="w-full h-full flex">
         {/* {left sidebar} */}
         <div className="h-full hidden md:flex relative">
-          <div className="h-full flex flex-col items-center min-w-14 bg-secondary border-r-2">
+          <div className="h-full flex flex-col items-center w-[75px] bg-secondary border-r-2">
             <CanvasElements canvasC={canvasC_ref} />
           </div>
           {which !== null && !isMobile && (
@@ -197,6 +205,7 @@ export default function Page() {
           </div>
 
           {/* {canvas container} */}
+
           <div className="w-full h-full flex justify-center overflow-auto">
             <div
               ref={containerRef}
@@ -211,16 +220,31 @@ export default function Page() {
                 style={{
                   width: `${containerZoom > 1 ? width + containerZoom * 1500 + "px" : "100%"}`,
                   height: `${containerZoom > 1 ? height + containerZoom * 1000 + "px" : "100%"}`,
-                  // translate:
-                  //   containerZoom > 1
-                  //     ? `${(containerZoom - 1) * 200}px ${(containerZoom - 1) * 1000}px`
-                  //     : "0px",
                 }}
               >
-                <canvas
-                  ref={canvasRef}
-                  className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`}
-                />
+                <ContextMenu>
+                  <ContextMenuTrigger>
+                    <canvas
+                      ref={canvasRef}
+                      className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`}
+                    />
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem
+                      onClick={() => {
+                        if (!canvasC_ref.current) return;
+                        canvasC_ref.current.snapping = canvasC_ref.current
+                          .snapping
+                          ? false
+                          : true;
+                        setSnap(canvasC_ref.current.snapping);
+                      }}
+                    >
+                      {snap ? "Disable " : "Enable "}
+                      snapping
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
               </div>
             </div>
           </div>

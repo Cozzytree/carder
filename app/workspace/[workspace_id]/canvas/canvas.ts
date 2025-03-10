@@ -11,6 +11,7 @@ import {
   ActiveSelection,
   TPointerEventInfo,
   FabricObjectProps,
+  Rect,
 } from "fabric";
 import { brushTypes, canvasShapes, textTypes } from "./types";
 import {
@@ -41,11 +42,12 @@ class CanvasC {
   declare callbackDrawMode: (v: boolean) => void;
   declare canvasElement: HTMLCanvasElement;
   declare changePointerEventsForCanvas: (v: boolean) => void;
+  declare snapping: boolean;
 
   history: any[][] = [];
   historyRedo: any[][] = [];
-  guideLines: DefaultLine[] | [] = [];
   isDragging: boolean = false;
+  guideLines: DefaultLine[] | [] = [];
 
   brush_props: { stroke: number; stroke_color: string } = {
     stroke: 10,
@@ -64,6 +66,7 @@ class CanvasC {
     this.callbackDrawMode = callbackDrawMode;
     this.canvasElement = canvasElement;
     this.changePointerEventsForCanvas = changePointerEventsForCanvas;
+    this.snapping = false;
 
     this.canvas.on("selection:created", () => {
       const selected = this.canvas.getActiveObject();
@@ -97,14 +100,16 @@ class CanvasC {
       }
     });
     this.canvas.on("object:moving", (e) => {
-      if (this.guideLines.length) {
-        this.guideLines.forEach((l) => this.canvas.remove(l));
+      if (this.snapping) {
+        if (this.guideLines.length) {
+          this.guideLines.forEach((l) => this.canvas.remove(l));
+        }
+        this.guideLines = ObjectMoving(e, this.canvas);
+        this.guideLines.forEach((l) => {
+          l.set("name", "guide");
+          this.canvas.add(l);
+        });
       }
-      this.guideLines = ObjectMoving(e, this.canvas);
-      this.guideLines.forEach((l) => {
-        l.set("name", "guide");
-        this.canvas.add(l);
-      });
     });
     this.canvas.on("object:added", (e) => {
       callbackSeleted(e.target);
@@ -608,17 +613,19 @@ class CanvasC {
       let s: FabricObject | null = null;
       switch (o.type) {
         case "Rect":
-          s = new DefaultRect({
-            top: o.top,
-            left: o.left,
-            stroke: o.stroke,
-            fill: o.fill,
-            rx: o.rx,
-            ry: o.ry,
-            width: o.width,
-            height: o.height,
-            strokeWidth: o.strokeWidth,
-          });
+          if (o instanceof Rect) {
+            s = new DefaultRect({
+              top: o.top,
+              left: o.left,
+              stroke: o.stroke,
+              fill: o.fill,
+              rx: o.rx,
+              ry: o.ry,
+              width: o.width,
+              height: o.height,
+              strokeWidth: o.strokeWidth,
+            });
+          }
           break;
         case "Path":
           s = new DefaultCustomPath(o?.path?.join(" ") || "", {

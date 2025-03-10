@@ -1,7 +1,6 @@
 import CanvasC from "../canvas";
 import BtnWithColor from "./btn-with-color";
 import InputWithValue from "./input-with-value";
-import OpacityOption from "./opacity_option";
 import ColorOptions from "./which_option_items/color_options";
 import OutlineAndShadow from "./which_option_items/outlineandShaodow";
 
@@ -15,6 +14,7 @@ import { RefObject } from "react";
 import { useCanvasStore } from "../store";
 import { handleColorfill, handleGradient } from "../utilsfunc";
 import ShapeActions from "./canvas_options/shape_actions";
+import FontOptions from "./font_options";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -38,9 +38,9 @@ function RightContainer({ canvasC }: props) {
 
   return (
     <div
-      className={`${activeObject == null ? "opacity-50" : " bg-secondary"} lg:w-[200px] xl:w-[250px] border border-l-foreground/40 p-2`}
+      className={`${activeObject == null ? "opacity-50" : " bg-secondary"} overflow-y-auto pb-10 px-2 py-2 lg:w-[200px] xl:w-[250px] border border-l-foreground/40 p-2`}
     >
-      <div aria-disabled={activeObject == null} className="flex flex-col gap-2">
+      <div aria-disabled={activeObject == null} className="flex flex-col gap-1">
         <InputWithValue
           val={activeObject ? activeObject?.get("left") : 0}
           change={(e) => {
@@ -117,20 +117,12 @@ function RightContainer({ canvasC }: props) {
           <span>height</span>
         </InputWithValue>
 
-        <OpacityOption
-          fn={(v) => {
-            if (!canvasC.current || !activeObject) return;
-            canvasC.current.changeCanvasProperties(activeObject, {
-              opacity: v,
-            });
-          }}
-          opacity={activeObject?.get("opacity") || 1}
-        />
-
-        <div className="flex flex-col items-start">
+        <div className="flex items-center gap-2">
           <Popover>
             <PopoverTrigger>
               <BtnWithColor
+                w={28}
+                h={28}
                 color={
                   activeObject instanceof ActiveSelection ||
                   activeObject instanceof Group
@@ -139,7 +131,7 @@ function RightContainer({ canvasC }: props) {
                 }
               />
             </PopoverTrigger>
-            <PopoverContent side="left" align="center">
+            <PopoverContent side="left" align="center" className="w-fit">
               <ColorOptions
                 showGradient
                 showGradientOptions
@@ -176,6 +168,10 @@ function RightContainer({ canvasC }: props) {
               />
             </PopoverContent>
           </Popover>
+          {(activeObject?.type == "textbox" ||
+            activeObject?.type == "i-text") && (
+            <FontOptions canvasC={canvasC} />
+          )}
         </div>
 
         <OutlineAndShadow canvasC={canvasC} />

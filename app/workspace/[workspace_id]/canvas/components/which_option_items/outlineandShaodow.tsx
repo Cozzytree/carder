@@ -107,10 +107,11 @@ function OutlineAndShadow({ canvasC }: props) {
   return (
     <div className="flex gap-3 flex-col py-2 px-2">
       <div className="flex flex-col">
-        <h4 className="font-semibold text-lg">Stroke</h4>
+        <h4 className="font-semibold text-sm md:text-lg">Stroke</h4>
         <div className="flex items-center gap-1">
           {strokeWidth}
           <Slider
+            disabled={!!!activeObject}
             defaultValue={[strokeWidth || 0]}
             max={50}
             step={2}
@@ -123,7 +124,7 @@ function OutlineAndShadow({ canvasC }: props) {
           />
           <Popover>
             <PopoverTrigger>
-              <BtnWithColor color={stroke} />
+              <BtnWithColor color={stroke} w={25} h={25} />
             </PopoverTrigger>
             <PopoverContent side="left">
               <ColorOptions
@@ -155,9 +156,10 @@ function OutlineAndShadow({ canvasC }: props) {
       </div>
 
       <div>
-        <h4>Dash Stroke</h4>
+        <h4 className="font-semibold text-sm md:text-lg">Dash Stroke</h4>
 
         <Slider
+          disabled={!!!activeObject}
           defaultValue={[
             activeObject?.get("strokeDashArray")
               ? activeObject?.get("strokeDashArray")[0]

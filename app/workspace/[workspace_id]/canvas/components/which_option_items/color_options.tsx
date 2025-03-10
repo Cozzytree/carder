@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { debouncer } from "@/lib/utils";
+import { cn, debouncer } from "@/lib/utils";
 import { ColorStop, Gradient, GradientType } from "fabric";
 import { CircleXIcon, PlusCircle, XCircle } from "lucide-react";
 import { ChangeEvent, RefObject, useState } from "react";
@@ -52,7 +52,7 @@ function ColorOptions({
           onClick={() => {
             setTab("colors");
           }}
-          className={`${tab === "colors" && "font-bold text-md"} text-sm md:text-lg p-1`}
+          className={`${tab === "colors" && "font-bold text-md"} text-xs md:text-lg p-1`}
         >
           Standard
         </button>
@@ -73,14 +73,14 @@ function ColorOptions({
           <>
             <div className="mb-4">
               <h4 className="font-semibold">Recent</h4>
-              <div className="w-full grid grid-cols-5 gap-2">
+              <div className="w-full grid grid-cols-5 gap-1">
                 {recentColors.map((c, i) => (
                   <BtnWithColor
                     onClick={() => {
                       handleColor(c);
                     }}
-                    w={32}
-                    h={32}
+                    w={28}
+                    h={28}
                     color={c}
                     key={i}
                   />
@@ -90,14 +90,14 @@ function ColorOptions({
 
             {/* {///} */}
 
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-5 w-fit gap-1">
               <button
                 onClick={() => {
                   handleColor("");
                 }}
-                className="w-8 h-8 rounded-full"
+                className="rounded-full"
               >
-                <CircleXIcon className="w-8 h-8" fill="red" />
+                <CircleXIcon className="w-7 h-7 md:w-8 md:h-8" fill="red" />
               </button>
               {colors.map((c, i) => (
                 <button
@@ -105,7 +105,7 @@ function ColorOptions({
                     handleColor(c);
                     setRecentColor(c);
                   }}
-                  className="w-8 h-8 rounded-full border-foreground/40 border-2"
+                  className="w-7 h-7 md:w-8 md:h-8 rounded-full border-foreground/40 border-2"
                   key={i}
                   style={{ background: c }}
                 />
@@ -128,7 +128,7 @@ function ColorOptions({
         ) : (
           <>
             {showGradient && color && (
-              <div className="flex w-full flex-col gap-3">
+              <div className="flex w-full flex-col gap-1">
                 <div className="flex flex-col gap-1 mb-2">
                   {recentGradients.length && (
                     <>
@@ -136,6 +136,8 @@ function ColorOptions({
                       <div className="grid grid-cols-5 gap-2">
                         {recentGradients.map((g, i) => (
                           <BtnWithColor
+                            w={28}
+                            h={28}
                             onClick={() => {
                               handleGradient?.(
                                 g,
@@ -153,9 +155,11 @@ function ColorOptions({
                   )}
                 </div>
 
-                <div className="w-full grid grid-cols-5 gap-2">
+                <div className="w-full grid grid-cols-5 gap-1">
                   {gradients.map((g, i) => (
                     <BtnWithColor
+                      w={28}
+                      h={28}
                       gradientType={
                         color instanceof Gradient ? color.type : "linear"
                       }
@@ -188,7 +192,14 @@ function ColorOptions({
                     }
                   }}
                 />
-                <CustomGradientColor handleGradient={handleGradient} />
+                <CustomGradientColor
+                  handleGradient={(c) =>
+                    handleGradient?.(
+                      c,
+                      color instanceof Gradient ? color.type : "linear",
+                    )
+                  }
+                />
               </div>
             )}
           </>
@@ -310,47 +321,47 @@ function GradientToggle({
   const gradient = color instanceof Gradient ? color : null;
 
   return (
-    <div className="w-full flex flex-col gap-2">
-      <h4>Gradient type</h4>
+    <div className="w-full flex flex-col gap-1 mt-2">
+      <h4 className="font-semibold text-sm md:text-md">Gradient type</h4>
       <div className="flex">
         <div>
-          <Button
+          <button
             onClick={() => {
               handleToggle("linear");
             }}
-            variant={
+            className={cn(
               gradient
                 ? gradient.type === "linear"
-                  ? "default"
-                  : "outline"
-                : "outline"
-            }
-            size={"xs"}
+                  ? "bg-foreground text-background"
+                  : "bg-secondary"
+                : "bg-secondary",
+              "text-sm px-2 rounded-sm py-[2px] md:py-1",
+            )}
           >
             linear
-          </Button>
-          <Button
+          </button>
+          <button
+            className={cn(
+              gradient
+                ? gradient.type === "radial"
+                  ? "bg-foreground text-background"
+                  : "bg-secondary"
+                : "bg-secondary",
+              "text-sm px-2 rounded-sm py-[2px] md:py-1",
+            )}
             onClick={() => {
               handleToggle("radial");
             }}
-            variant={
-              gradient
-                ? gradient.type === "radial"
-                  ? "default"
-                  : "outline"
-                : "outline"
-            }
-            size={"xs"}
           >
-            Radial
-          </Button>
+            radial
+          </button>
         </div>
       </div>
 
       {showOptions && (
         <>
           {/* {adjust inner and outer circle} */}
-          <div className="mt-1 flex flex-col gap-3">
+          <div className="mt-1 flex flex-col gap-1">
             {gradient && (
               <>
                 {[
@@ -359,8 +370,8 @@ function GradientToggle({
                   { label: "end-x", l: "x1", df: gradient.coords.x2 },
                   { label: "end-y", l: "y1", df: gradient.coords.y2 },
                 ].map((v, i) => (
-                  <div key={i} className="flex flex-col">
-                    <span className="text-sm">{v.label}</span>
+                  <div key={i} className="flex flex-col gap-1">
+                    <span className="text-sm text-nowrap">{v.label}</span>
                     <RadialPropertyChange
                       color={gradient}
                       defaultVal={v.df}
@@ -437,7 +448,7 @@ function GradientToggle({
           </div>
 
           {/* {gradient offset} */}
-          <div className="space-y-3">
+          <div className="space-y-1 mt-2">
             {gradient && (
               <>
                 <h4 className="font-semibold">Gradient offset</h4>

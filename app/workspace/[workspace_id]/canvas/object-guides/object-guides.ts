@@ -7,7 +7,7 @@ import {
 } from "fabric";
 import { DefaultLine } from "../default_styles";
 
-const snapSize = 10;
+const snapSize = 8;
 const lineProp: Partial<FabricObjectProps> = {
   selectable: false,
   strokeDashArray: [3, 3],
@@ -103,212 +103,238 @@ function ObjectMoving(
   }
 
   // Object snapping to other objects
-  // canvas.getObjects().forEach((o) => {
-  //   if (o.get("id") === e.target.get("id")) return;
+  canvas.getObjects().forEach((o) => {
+    if (o.get("id") === e.target.get("id")) return;
 
-  //   const t = o.top;
-  //   const l = o.left;
-  //   const oHeight = o.height * o.scaleY;
-  //   const oWidth = o.width * o.scaleX;
+    const t = o.top;
+    const l = o.left;
+    const oHeight = o.height * o.scaleY;
+    const oWidth = o.width * o.scaleX;
 
-  //   // top part other object
-  //   if (Math.abs(t - top) <= snapSize) {
-  //     if (!ht) {
-  //       lines.push(new DefaultLine([0, t, canvas.width, t], lineProp));
-  //       ht = true;
-  //     }
-  //     e.target.set({
-  //       top: t,
-  //     });
-  //   }
-  //   if (Math.abs(t - (top + height / 2)) <= snapSize) {
-  //     if (!hm) {
-  //       lines.push(new DefaultLine([0, t, canvas.width, t], lineProp));
-  //       hm = true;
-  //     }
-  //     e.target.set({
-  //       top: t - height / 2,
-  //     });
-  //   }
-  //   if (Math.abs(t - (top + height)) <= snapSize) {
-  //     if (!hb) {
-  //       lines.push(new DefaultLine([0, t, canvas.width, t], lineProp));
-  //       hb = true;
-  //     }
-  //     e.target.set({
-  //       top: t - height,
-  //     });
-  //   }
+    // top part other object
+    // if (Math.abs(t - top) <= snapSize) {
+    //   if (!ht) {
+    //     lines.push(new DefaultLine([0, t, canvas.width, t], lineProp));
+    //     ht = true;
+    //   }
+    //   e.target.set({
+    //     top: t,
+    //   });
+    // }
+    if (Math.abs(t - (top + height / 2)) <= snapSize) {
+      if (!hm) {
+        lines.push(
+          new DefaultLine(
+            [l + oWidth * 0.5, t, left + width * 0.5, t],
+            lineProp,
+          ),
+        );
+        hm = true;
+      }
+      e.target.set({
+        top: t - height / 2,
+      });
+    }
+    // if (Math.abs(t - (top + height)) <= snapSize) {
+    //   if (!hb) {
+    //     lines.push(new DefaultLine([0, t, canvas.width, t], lineProp));
+    //     hb = true;
+    //   }
+    //   e.target.set({
+    //     top: t - height,
+    //   });
+    // }
 
-  //   // mid of others
-  //   if (Math.abs(t + oHeight * 0.5 - top) <= snapSize) {
-  //     if (!ht) {
-  //       lines.push(
-  //         new DefaultLine(
-  //           [0, t + oHeight * 0.5, canvasWidth, t + oHeight * 0.5],
-  //           lineProp,
-  //         ),
-  //       );
-  //       ht = true;
-  //     }
-  //     e.target.set({
-  //       top: t + oHeight * 0.5,
-  //     });
-  //   }
-  //   if (Math.abs(t + oHeight * 0.5 - (top + height * 0.5)) <= snapSize) {
-  //     if (!hm) {
-  //       lines.push(
-  //         new DefaultLine(
-  //           [0, t + oHeight * 0.5, canvasWidth, t + oHeight * 0.5],
-  //           lineProp,
-  //         ),
-  //       );
-  //       hm = true;
-  //     }
-  //     e.target.set({
-  //       top: t + oHeight * 0.5 - height * 0.5,
-  //     });
-  //   }
-  //   if (Math.abs(t + oHeight * 0.5 - (top + height)) <= snapSize) {
-  //     if (!hb) {
-  //       lines.push(
-  //         new DefaultLine(
-  //           [0, t + oHeight * 0.5, canvasWidth, t + oHeight * 0.5],
-  //           lineProp,
-  //         ),
-  //       );
-  //       hb = true;
-  //     }
-  //     e.target.set({
-  //       top: t + oHeight * 0.5 - height,
-  //     });
-  //   }
+    // mid of others
+    // if (Math.abs(t + oHeight * 0.5 - top) <= snapSize) {
+    //   if (!ht) {
+    //     lines.push(
+    //       new DefaultLine(
+    //         [0, t + oHeight * 0.5, canvasWidth, t + oHeight * 0.5],
+    //         lineProp,
+    //       ),
+    //     );
+    //     ht = true;
+    //   }
+    //   e.target.set({
+    //     top: t + oHeight * 0.5,
+    //   });
+    // }
+    if (Math.abs(t + oHeight * 0.5 - (top + height * 0.5)) <= snapSize) {
+      if (!hm) {
+        lines.push(
+          new DefaultLine(
+            [
+              l + oWidth * 0.5,
+              t + oHeight * 0.5,
+              left + width * 0.5,
+              t + oHeight * 0.5,
+            ],
+            lineProp,
+          ),
+        );
+        hm = true;
+      }
+      e.target.set({
+        top: t + oHeight * 0.5 - height * 0.5,
+      });
+    }
+    // if (Math.abs(t + oHeight * 0.5 - (top + height)) <= snapSize) {
+    //   if (!hb) {
+    //     lines.push(
+    //       new DefaultLine(
+    //         [0, t + oHeight * 0.5, canvasWidth, t + oHeight * 0.5],
+    //         lineProp,
+    //       ),
+    //     );
+    //     hb = true;
+    //   }
+    //   e.target.set({
+    //     top: t + oHeight * 0.5 - height,
+    //   });
+    // }
 
-  //   // bottom others
-  //   if (Math.abs(t + oHeight - top) <= snapSize) {
-  //     if (!ht) {
-  //       lines.push(
-  //         new DefaultLine([0, t + oHeight, canvasWidth, t + oHeight], lineProp),
-  //       );
-  //       ht = true;
-  //     }
-  //     e.target.set({
-  //       top: t + oHeight,
-  //     });
-  //   }
-  //   if (Math.abs(t + oHeight - (top + height * 0.5)) <= snapSize) {
-  //     if (!hm) {
-  //       lines.push(
-  //         new DefaultLine([0, t + oHeight, canvasWidth, t + oHeight], lineProp),
-  //       );
-  //       hm = true;
-  //     }
-  //     e.target.set({
-  //       top: t + oHeight - height * 0.5,
-  //     });
-  //   }
-  //   if (Math.abs(t + oHeight - (top + height)) <= snapSize) {
-  //     if (!hb) {
-  //       lines.push(
-  //         new DefaultLine([0, t + oHeight, canvasWidth, t + oHeight], lineProp),
-  //       );
-  //       hb = true;
-  //     }
-  //     e.target.set({
-  //       top: t + oHeight - height,
-  //     });
-  //   }
+    // bottom others
+    // if (Math.abs(t + oHeight - top) <= snapSize) {
+    //   if (!ht) {
+    //     lines.push(
+    //       new DefaultLine([0, t + oHeight, canvasWidth, t + oHeight], lineProp),
+    //     );
+    //     ht = true;
+    //   }
+    //   e.target.set({
+    //     top: t + oHeight,
+    //   });
+    // }
+    if (Math.abs(t + oHeight - (top + height * 0.5)) <= snapSize) {
+      if (!hm) {
+        lines.push(
+          new DefaultLine(
+            [l + oWidth * 0.5, t + oHeight, left + width * 0.5, t + oHeight],
+            lineProp,
+          ),
+        );
+        hm = true;
+      }
+      e.target.set({
+        top: t + oHeight - height * 0.5,
+      });
+    }
+    // if (Math.abs(t + oHeight - (top + height)) <= snapSize) {
+    //   if (!hb) {
+    //     lines.push(
+    //       new DefaultLine([0, t + oHeight, canvasWidth, t + oHeight], lineProp),
+    //     );
+    //     hb = true;
+    //   }
+    //   e.target.set({
+    //     top: t + oHeight - height,
+    //   });
+    // }
 
-  //   // vertical left other
-  //   if (Math.abs(l - left) <= snapSize) {
-  //     if (!vl) {
-  //       lines.push(new DefaultLine([l, 0, l, canvasHeight], lineProp));
-  //       vl = true;
-  //     }
-  //     e.target.set("left", l);
-  //   }
-  //   if (Math.abs(l - (left + width * 0.5)) <= snapSize) {
-  //     if (!vm) {
-  //       lines.push(new DefaultLine([l, 0, l, canvasHeight], lineProp));
-  //       vm = true;
-  //     }
-  //     e.target.set("left", l - width * 0.5);
-  //   }
-  //   if (Math.abs(l - (left + width)) <= snapSize) {
-  //     if (!vr) {
-  //       lines.push(new DefaultLine([l, 0, l, canvasHeight], lineProp));
-  //       vr = true;
-  //     }
-  //     e.target.set("left", l - width);
-  //   }
+    // vertical left other
+    // if (Math.abs(l - left) <= snapSize) {
+    //   if (!vl) {
+    //     lines.push(new DefaultLine([l, 0, l, canvasHeight], lineProp));
+    //     vl = true;
+    //   }
+    //   e.target.set("left", l);
+    // }
+    if (Math.abs(l - (left + width * 0.5)) <= snapSize) {
+      if (!vm) {
+        lines.push(
+          new DefaultLine(
+            [l, t + oHeight * 0.5, l, top + height * 0.5],
+            lineProp,
+          ),
+        );
+        vm = true;
+      }
+      e.target.set("left", l - width * 0.5);
+    }
+    // if (Math.abs(l - (left + width)) <= snapSize) {
+    //   if (!vr) {
+    //     lines.push(new DefaultLine([l, 0, l, canvasHeight], lineProp));
+    //     vr = true;
+    //   }
+    //   e.target.set("left", l - width);
+    // }
 
-  //   // vertical mid other
-  //   if (Math.abs(l + oWidth * 0.5 - left) <= snapSize) {
-  //     if (!vl) {
-  //       lines.push(
-  //         new DefaultLine(
-  //           [l + oWidth * 0.5, 0, l + oWidth * 0.5, canvasHeight],
-  //           lineProp,
-  //         ),
-  //       );
-  //       vl = true;
-  //     }
-  //     e.target.set("left", l + oWidth * 0.5);
-  //   }
-  //   if (Math.abs(l + oWidth * 0.5 - (left + width * 0.5)) <= snapSize) {
-  //     if (!vm) {
-  //       lines.push(
-  //         new DefaultLine(
-  //           [l + oWidth * 0.5, 0, l + oWidth * 0.5, canvasHeight],
-  //           lineProp,
-  //         ),
-  //       );
-  //       vm = true;
-  //     }
-  //     e.target.set("left", l + oWidth * 0.5 - width * 0.5);
-  //   }
-  //   if (Math.abs(l + oWidth * 0.5 - (left + width)) <= snapSize) {
-  //     if (!vr) {
-  //       lines.push(
-  //         new DefaultLine(
-  //           [l + oWidth * 0.5, 0, l + oWidth * 0.5, canvasHeight],
-  //           lineProp,
-  //         ),
-  //       );
-  //       vr = true;
-  //     }
-  //     e.target.set("left", l + oWidth * 0.5 - width);
-  //   }
+    // vertical mid other
+    // if (Math.abs(l + oWidth * 0.5 - left) <= snapSize) {
+    //   if (!vl) {
+    //     lines.push(
+    //       new DefaultLine(
+    //         [l + oWidth * 0.5, 0, l + oWidth * 0.5, canvasHeight],
+    //         lineProp,
+    //       ),
+    //     );
+    //     vl = true;
+    //   }
+    //   e.target.set("left", l + oWidth * 0.5);
+    // }
+    if (Math.abs(l + oWidth * 0.5 - (left + width * 0.5)) <= snapSize) {
+      if (!vm) {
+        lines.push(
+          new DefaultLine(
+            [
+              l + oWidth * 0.5,
+              t + oHeight * 0.5,
+              l + oWidth * 0.5,
+              top + height * 0.5,
+            ],
+            lineProp,
+          ),
+        );
+        vm = true;
+      }
+      e.target.set("left", l + oWidth * 0.5 - width * 0.5);
+    }
+    // if (Math.abs(l + oWidth * 0.5 - (left + width)) <= snapSize) {
+    //   if (!vr) {
+    //     lines.push(
+    //       new DefaultLine(
+    //         [l + oWidth * 0.5, 0, l + oWidth * 0.5, canvasHeight],
+    //         lineProp,
+    //       ),
+    //     );
+    //     vr = true;
+    //   }
+    //   e.target.set("left", l + oWidth * 0.5 - width);
+    // }
 
-  //   // vertical end other
-  //   if (Math.abs(l + oWidth - left) <= snapSize) {
-  //     if (!vl) {
-  //       lines.push(
-  //         new DefaultLine([l + oWidth, 0, l + oWidth, canvasHeight], lineProp),
-  //       );
-  //       vl = true;
-  //     }
-  //     e.target.set("left", l + oWidth);
-  //   }
-  //   if (Math.abs(l + oWidth - (left + width * 0.5)) <= snapSize) {
-  //     if (!vm) {
-  //       lines.push(
-  //         new DefaultLine([l + oWidth, 0, l + oWidth, canvasHeight], lineProp),
-  //       );
-  //       vm = true;
-  //     }
-  //     e.target.set("left", l + oWidth - width * 0.5);
-  //   }
-  //   if (Math.abs(l + oWidth - (left + width)) <= snapSize) {
-  //     if (!vr) {
-  //       lines.push(
-  //         new DefaultLine([l + oWidth, 0, l + oWidth, canvasHeight], lineProp),
-  //       );
-  //       vr = true;
-  //     }
-  //     e.target.set("left", l + oWidth - width);
-  //   }
-  // });
+    // vertical end other
+    // if (Math.abs(l + oWidth - left) <= snapSize) {
+    //   if (!vl) {
+    //     lines.push(
+    //       new DefaultLine([l + oWidth, 0, l + oWidth, canvasHeight], lineProp),
+    //     );
+    //     vl = true;
+    //   }
+    //   e.target.set("left", l + oWidth);
+    // }
+    if (Math.abs(l + oWidth - (left + width * 0.5)) <= snapSize) {
+      if (!vm) {
+        lines.push(
+          new DefaultLine(
+            [l + oWidth, t + oHeight * 0.5, l + oWidth, top + height * 0.5],
+            lineProp,
+          ),
+        );
+        vm = true;
+      }
+      e.target.set("left", l + oWidth - width * 0.5);
+    }
+    // if (Math.abs(l + oWidth - (left + width)) <= snapSize) {
+    //   if (!vr) {
+    //     lines.push(
+    //       new DefaultLine([l + oWidth, 0, l + oWidth, canvasHeight], lineProp),
+    //     );
+    //     vr = true;
+    //   }
+    //   e.target.set("left", l + oWidth - width);
+    // }
+  });
 
   return lines;
 }

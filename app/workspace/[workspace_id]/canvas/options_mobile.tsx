@@ -141,6 +141,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
               if (!canvasC.current) return;
               canvasC.current.canvas.discardActiveObject();
               canvasC.current.canvas.requestRenderAll();
+              setFabricObject(null);
             }}
             size={"xs"}
             variant={"outline"}
@@ -296,7 +297,11 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             }
           />
         </PopoverTrigger>
-        <PopoverContent align="center" side="top" className="bg-secondary/30">
+        <PopoverContent
+          align="center"
+          side="top"
+          className="w-fit px-2 bg-background/90"
+        >
           <ColorOptions
             showGradient={true}
             showGradientOptions={true}
