@@ -35,7 +35,7 @@ function CanvasElementStandard({
   const { setWhichOption, which } = useWhichOptionsOpen();
 
   return (
-    <div className="w-full flex flex-col divide-y-2">
+    <div className="w-full h-full flex flex-col divide-y divide-foreground/50 border-r">
       {whichOptions.map((o, i) => (
         <button
           onClick={() => {
@@ -49,7 +49,7 @@ function CanvasElementStandard({
               setWhichOption(o.label);
             }
           }}
-          className={`${o.label === which && "bg-foreground/10"} flex py-2 flex-col items-center hover:bg-foreground/10 transition-all duration-75`}
+          className={`${o.label === which && "bg-foreground/10"} flex py-[0.58rem] flex-col items-center hover:bg-foreground/10 transition-all duration-75`}
           key={i}
         >
           <o.I />

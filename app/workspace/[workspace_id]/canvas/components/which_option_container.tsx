@@ -1,4 +1,4 @@
-import { ColorStop, Gradient } from "fabric";
+import { Gradient } from "fabric";
 import { ChevronLeft } from "lucide-react";
 import { RefObject, useEffect } from "react";
 import { useCanvasStore, useWhichOptionsOpen } from "../store";
@@ -24,9 +24,19 @@ function WhichOContainer({ canvasC }: props) {
   const { activeObject, setFabricObject } = useCanvasStore();
   const { setWhichOption, which } = useWhichOptionsOpen();
 
-  const handleCreateShape = (type: canvasShapes, path?: string) => {
+  const handleCreateShape = ({
+    scale,
+    type,
+    path,
+    points,
+  }: {
+    type: canvasShapes;
+    path?: string;
+    points?: { x: number; y: number }[];
+    scale: number;
+  }) => {
     if (!canvasC.current) return;
-    canvasC.current.createNewShape({ shapetype: type, path });
+    canvasC.current.createNewShape({ shapetype: type, path, points, scale });
   };
 
   const handleNewText = (type: textTypes) => {
@@ -113,17 +123,17 @@ function WhichOContainer({ canvasC }: props) {
 
       {which === WhichOptionEmum.COLOR && canvasC.current != null && (
         <ColorOptions
-          forCanvas
+          forCanvas={true}
+          canvasC={canvasC}
+          showGradient={true}
+          showGradientOptions={true}
           width={canvasC.current.canvas.width}
           height={canvasC.current.canvas.height}
           color={
-            canvasC.current.canvas.backgroundColor as
+            (canvasC.current.canvas.backgroundColor as
               | string
-              | Gradient<"linear" | "radial">
+              | Gradient<"linear" | "radial">) || "#ffffff"
           }
-          showGradient={true}
-          showGradientOptions={true}
-          canvasC={canvasC}
           handleGradient={(g, t) => {
             handleGradient({
               type: t ? t : "linear",

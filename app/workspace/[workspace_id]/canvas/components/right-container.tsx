@@ -25,20 +25,20 @@ function RightContainer({ canvasC }: props) {
 
   const activeObjectFill =
     activeObject instanceof ActiveSelection || activeObject instanceof Group
-      ? activeObject.getObjects()[0].get("fill")
-      : activeObject?.get("fill");
+      ? activeObject?.getObjects()[0].get("fill")
+      : activeObject?.get("fill") || null;
   const activeObjectWidth =
     activeObject instanceof ActiveSelection || activeObject instanceof Group
-      ? activeObject.getObjects()[0].width
-      : activeObject?.width;
+      ? activeObject?.getObjects()[0].width
+      : activeObject?.width || 0;
   const activeObjectHeight =
     activeObject instanceof ActiveSelection || activeObject instanceof Group
-      ? activeObject.getObjects()[0].height
-      : activeObject?.height;
+      ? activeObject?.getObjects()[0].height
+      : activeObject?.height || 0;
 
   return (
     <div
-      className={`${activeObject == null ? "opacity-50" : " bg-secondary"} overflow-y-auto pb-10 px-2 py-2 lg:w-[200px] xl:w-[250px] border border-l-foreground/40 p-2`}
+      className={`${activeObject == null ? "text-foreground/20" : ""} overflow-y-auto pb-10 px-2 py-2 lg:w-[250px] xl:w-[350px] border-l border-l-foreground/50 p-2 bg-secondary`}
     >
       <div aria-disabled={activeObject == null} className="flex flex-col gap-1">
         <InputWithValue
@@ -68,6 +68,38 @@ function RightContainer({ canvasC }: props) {
         >
           <span>y-axis</span>
         </InputWithValue>
+
+        <InputWithValue
+          change={(e) => {
+            if (!canvasC.current || !activeObject) return;
+            canvasC.current.changeCanvasProperties(activeObject, { scaleX: e });
+            activeObject.setCoords();
+            setFabricObject(activeObject);
+          }}
+          val={
+            activeObject instanceof ActiveSelection
+              ? activeObject.getObjects()[0].get("scaleX")
+              : activeObject?.get("scaleX") || 0
+          }
+        >
+          <span> scale X</span>
+        </InputWithValue>
+        <InputWithValue
+          change={(e) => {
+            if (!canvasC.current || !activeObject) return;
+            canvasC.current.changeCanvasProperties(activeObject, { scaleY: e });
+            activeObject.setCoords();
+            setFabricObject(activeObject);
+          }}
+          val={
+            activeObject instanceof ActiveSelection
+              ? activeObject.getObjects()[0].get("scaleY")
+              : activeObject?.get("scaleY") || 0
+          }
+        >
+          <span>scale Y</span>
+        </InputWithValue>
+
         <InputWithValue
           val={activeObject?.get("angle") || 0}
           change={(e) => {
@@ -131,7 +163,11 @@ function RightContainer({ canvasC }: props) {
                 }
               />
             </PopoverTrigger>
-            <PopoverContent side="left" align="center" className="w-fit">
+            <PopoverContent
+              side="left"
+              align="center"
+              className="w-fit bg-secondary/90 border-foreground/20"
+            >
               <ColorOptions
                 showGradient
                 showGradientOptions

@@ -21,12 +21,14 @@ import {
 } from "@/components/ui/popover";
 import BtnWithColor from "../btn-with-color";
 import { handleGradient } from "../../utilsfunc";
+import { useIsMobile } from "../../hooks/isMobile";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
 };
 
 function OutlineAndShadow({ canvasC }: props) {
+  const { isMobile } = useIsMobile();
   const { activeObject, setFabricObject } = useCanvasStore();
   let hasShadow: Shadow | null = activeObject?.get("shadow");
   let strokeWidth: number = 0;
@@ -101,6 +103,7 @@ function OutlineAndShadow({ canvasC }: props) {
     canvasC.current?.changeCanvasProperties(activeObject as FabricObject, {
       strokeWidth: v,
     });
+    activeObject?.setCoords();
     setFabricObject(activeObject);
   };
 
@@ -126,7 +129,10 @@ function OutlineAndShadow({ canvasC }: props) {
             <PopoverTrigger>
               <BtnWithColor color={stroke} w={25} h={25} />
             </PopoverTrigger>
-            <PopoverContent side="left">
+            <PopoverContent
+              side={isMobile ? "top" : "left"}
+              className="bg-secondary border-foreground/20"
+            >
               <ColorOptions
                 color={stroke}
                 handleColor={(v) => {
@@ -240,7 +246,10 @@ function OutlineAndShadow({ canvasC }: props) {
                   className="w-6 h-6 rounded-full border border-foreground"
                 ></button>
               </PopoverTrigger>
-              <PopoverContent side="left">
+              <PopoverContent
+                className="bg-secondary border-foreground/20"
+                side={isMobile ? "top" : "left"}
+              >
                 <ColorOptions
                   showGradient={false}
                   color={activeObjectStroke as string | Gradient<GradientType>}

@@ -4,7 +4,8 @@ export type canvasShapes =
   | "ellipse"
   | "circle"
   | "path"
-  | "triangle";
+  | "triangle"
+  | "polygon";
 
 export type Align =
   | "left"

@@ -4,6 +4,12 @@ import { FabricObject } from "fabric";
 import { create } from "zustand";
 import { whichOption } from "./types";
 
+interface canvasPages {
+  pages: string[];
+  setCreatePage: () => void;
+  deletePage: () => void;
+}
+
 interface canvasInterface {
   width: number;
   height: number;
@@ -76,7 +82,7 @@ const useCanvasStore = create<canvasInterface>((set) => ({
   isDrawing: false,
   containerScale: 1,
   hasPointerEvents: true,
-  snapping: false,
+  snapping: true,
 
   setSnap: (v) => set({ snapping: v }),
   setPointerEvents: (v) => set({ hasPointerEvents: v }),

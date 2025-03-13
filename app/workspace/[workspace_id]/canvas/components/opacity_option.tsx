@@ -8,7 +8,7 @@ type props = {
 
 function OpacityOption({ fn, opacity }: props) {
   return (
-    <div className="flex flex-col justify-start items-start w-fll">
+    <div className="flex flex-col justify-start items-start w-full">
       <span className="w-12">Opacity</span>
       <div className="w-full flex items-center gap-1">
         <Slider

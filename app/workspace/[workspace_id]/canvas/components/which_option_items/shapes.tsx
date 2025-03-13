@@ -1,28 +1,48 @@
 import { Button } from "@/components/ui/button";
-import { lines, shapes } from "../../constants";
+import { lines, others_shapes, shapes } from "../../constants";
 import { canvasShapes } from "../../types";
-import { CylinderIcon } from "lucide-react";
-import paths from "../../data/paths.json";
+import Image from "next/image";
 
 type props = {
-  handleShape: (type: canvasShapes, path?: string) => void;
+  handleShape: ({
+    type,
+    path,
+    points,
+    scale,
+  }: {
+    type: canvasShapes;
+    path?: string;
+    points?: { x: number; y: number }[];
+    scale?: number;
+  }) => void;
 };
 
 function Shapes({ handleShape }: props) {
   return (
     <div className="flex flex-col">
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-2 rounded-md">
         {shapes.map((s, i) => (
-          <Button
+          <button
             onClick={() => {
-              handleShape(s.type, s.path);
+              handleShape({
+                type: s.type as canvasShapes,
+                path: s.path,
+                points: s.points,
+                scale: s.scale,
+              });
             }}
-            className="h-16"
-            variant={"outline"}
+            className="flex border py-3 justify-center items-center"
             key={i}
           >
-            <s.I className="scale-[2]" />
-          </Button>
+            <Image
+              src={s.I}
+              alt={s.type}
+              width={100}
+              height={100}
+              quality={30}
+              className="w-12"
+            />
+          </button>
         ))}
       </div>
       <h3 className="font-semibold pt-2">Lines</h3>
@@ -30,27 +50,44 @@ function Shapes({ handleShape }: props) {
         {lines.map((s, i) => (
           <Button
             onClick={() => {
-              handleShape(s.type, s.path);
+              handleShape({ type: s.type, path: s.path, scale: s.scale });
             }}
-            className="h-16"
+            className="h-16 py-3"
             variant={"outline"}
             key={i}
           >
-            <s.I className="scale-[2]" />
+            <Image
+              src={s.I}
+              alt={s.type}
+              width={100}
+              height={100}
+              quality={30}
+              className="w-12"
+            />
           </Button>
         ))}
       </div>
       <h3 className="font-semibold pt-2">Others</h3>
       <div className="grid grid-cols-2">
-        <Button
-          onClick={() => {
-            handleShape("path", paths.cylinder);
-          }}
-          className="h-16"
-          variant={"outline"}
-        >
-          <CylinderIcon className="scale-[2]" />
-        </Button>
+        {others_shapes.map((s, i) => (
+          <Button
+            onClick={() => {
+              handleShape({ type: s.type, path: s.path, scale: s.scale });
+            }}
+            className="w-full h-16"
+            variant={"outline"}
+            key={i}
+          >
+            <Image
+              src={s.I}
+              alt={s.type}
+              width={100}
+              height={100}
+              quality={30}
+              className="w-12"
+            />
+          </Button>
+        ))}
       </div>
     </div>
   );

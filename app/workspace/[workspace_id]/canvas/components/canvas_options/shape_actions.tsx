@@ -22,10 +22,6 @@ import {
 import { useCanvasStore } from "../../store";
 import { Button } from "@/components/ui/button";
 import { FabricObject } from "fabric";
-import UpDown from "@/components/updown";
-import { Slider } from "@/components/ui/slider";
-import { debouncer } from "@/lib/utils";
-import OpacityOption from "../opacity_option";
 import {
   Popover,
   PopoverContent,
@@ -54,8 +50,8 @@ function ShapeActions({ canvasC }: props) {
 
   return (
     <TooltipProvider>
-      <div className="w-full flex flex-col p-2 gap-3 justify-center">
-        <div className="flex gap-3">
+      <div className="w-full flex flex-col gap-1 justify-center">
+        <div className="flex gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -197,102 +193,6 @@ function ShapeActions({ canvasC }: props) {
             <TooltipContent>Lock Movement</TooltipContent>
           </Tooltip>
         </div>
-
-        <div className="w-full flex flex-col items-center justify-center">
-          <div className="w-full flex items-center gap-2 justify-center">
-            <span>w</span>
-            <UpDown
-              rate={activeObject?.type === "path" ? 0.1 : 10}
-              defaultV={
-                activeObject?.type === "path"
-                  ? activeObject?.get("scaleX") || 0
-                  : activeObject?.get("width") || 0
-              }
-              onChange={(v) => {
-                if (!check()) return;
-                const update =
-                  activeObject?.type == "path" ? { scaleX: v } : { width: v };
-                canvasC.current?.changeCanvasProperties(
-                  activeObject as FabricObject,
-                  update,
-                );
-                activeObject?.setCoords();
-              }}
-            />
-          </div>
-
-          <div className="w-full flex items-center gap-2 justify-center">
-            <span>h</span>
-            <UpDown
-              rate={activeObject?.type === "path" ? 0.1 : 10}
-              defaultV={
-                activeObject?.type === "path"
-                  ? activeObject?.get("scaleY") || 0
-                  : activeObject?.get("height") || 0
-              }
-              onChange={(v) => {
-                if (!check()) return;
-                const update =
-                  activeObject?.type == "path" ? { scaleY: v } : { height: v };
-                canvasC.current?.changeCanvasProperties(
-                  activeObject as FabricObject,
-                  update,
-                );
-                activeObject?.setCoords();
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="w-full">
-          <div className="flex gap-2 items-center">
-            <span>ScaleX</span>
-            <Slider
-              max={10}
-              step={0.1}
-              min={0}
-              defaultValue={[activeObject?.get("scaleX") || 0]}
-              onValueChange={debouncer((e: number[]) => {
-                if (!check()) return;
-                canvasC.current?.changeCanvasProperties(
-                  activeObject as FabricObject,
-                  {
-                    scaleX: e[0],
-                  },
-                );
-                activeObject?.setCoords();
-              }, 100)}
-            />
-          </div>
-          <div className="flex gap-2 items-center">
-            <span>ScaleY</span>
-            <Slider
-              max={10}
-              step={0.1}
-              min={0}
-              defaultValue={[activeObject?.get("scaleY") || 0]}
-              onValueChange={debouncer((e: number[]) => {
-                if (!check()) return;
-                canvasC.current?.changeCanvasProperties(
-                  activeObject as FabricObject,
-                  {
-                    scaleY: e[0],
-                  },
-                );
-                activeObject?.setCoords();
-              }, 100)}
-            />
-          </div>
-        </div>
-        <OpacityOption
-          fn={(v) => {
-            if (!canvasC.current || !activeObject) return;
-            canvasC.current.changeCanvasProperties(activeObject, {
-              opacity: v,
-            });
-          }}
-          opacity={activeObject?.get("opacity")}
-        />
       </div>
     </TooltipProvider>
   );

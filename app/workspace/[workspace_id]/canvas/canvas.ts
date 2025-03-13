@@ -12,6 +12,7 @@ import {
   TPointerEventInfo,
   FabricObjectProps,
   Rect,
+  Polyline,
 } from "fabric";
 import { brushTypes, canvasShapes, textTypes } from "./types";
 import {
@@ -30,6 +31,7 @@ interface canvasInterface {
   canvas: Canvas;
   canvasElement: HTMLCanvasElement;
 
+  snapping: boolean;
   callbackDrawMode: (v: boolean) => void;
   callbackSeleted: (o: FabricObject | undefined) => void;
   changePointerEventsForCanvas: (v: boolean) => void;
@@ -60,13 +62,14 @@ class CanvasC {
     callbackDrawMode,
     canvasElement,
     changePointerEventsForCanvas,
+    snapping,
   }: canvasInterface) {
     this.canvas = canvas;
     this.draw_brush = null;
     this.callbackDrawMode = callbackDrawMode;
     this.canvasElement = canvasElement;
     this.changePointerEventsForCanvas = changePointerEventsForCanvas;
-    this.snapping = false;
+    this.snapping = snapping;
 
     this.canvas.on("selection:created", () => {
       const selected = this.canvas.getActiveObject();
@@ -120,6 +123,17 @@ class CanvasC {
         this.guideLines.forEach((l) => this.canvas.remove(l));
       }
       callbackSeleted(e.target);
+
+      // store to history
+      const objs = [];
+      this.canvas.getObjects().forEach((o) => {
+        const r = o.getBoundingRect();
+
+        objs.push({ ...o.toObject(), left: r.left, top: r.top });
+      });
+      if (objs.length) {
+        this.history.push(objs);
+      }
     });
 
     this.canvas.on("object:removed", (e) => {
@@ -142,8 +156,19 @@ class CanvasC {
     });
 
     document.addEventListener("keydown", (e) => {
-      if (e.ctrlKey) {
-        if (e.key == "z") {
+      if (e.key === "Delete") {
+        this.deleteObject();
+      } else if (e.ctrlKey) {
+        if (e.key === "a") {
+          e.preventDefault();
+          const as = new ActiveSelection(canvas.getObjects(), {
+            canvas: this.canvas,
+          });
+          this.canvas.add(as);
+          this.canvas.discardActiveObject();
+          this.canvas.setActiveObject(as);
+          this.canvas.requestRenderAll();
+        } else if (e.key == "z") {
           this.undo();
         } else if (e.key == "y") {
           this.redo();
@@ -161,7 +186,7 @@ class CanvasC {
     this.mousedownpoint = { x: p.x, y: p.y };
     this.isDragging = true;
   }
-  canvasMouseMove(e: TPointerEventInfo<TPointerEvent>) {
+  canvasMouseMove() {
     if (!this.isDragging) return;
     // this.changePointerEventsForCanvas(false);
     // const { x, y } = e.scenePoint;
@@ -230,9 +255,13 @@ class CanvasC {
   createNewShape({
     shapetype,
     path,
+    points,
+    scale,
   }: {
+    scale?: number;
     shapetype: canvasShapes;
     path?: string;
+    points?: { x: number; y: number }[];
   }) {
     const w = this.canvas.width;
     const h = this.canvas.height;
@@ -267,7 +296,20 @@ class CanvasC {
           top: h / 2 - 50,
           left: w / 2 - 50,
           strokeWidth: 3,
+          scaleX: scale,
+          scaleY: scale,
         });
+        break;
+      case "polygon":
+        if (points?.length) {
+          shape = new Polyline(points, {
+            top: h / 2 - 50,
+            left: w / 2 - 50,
+            strokeWidth: 3,
+            scaleY: 4,
+            scaleX: 4,
+          });
+        }
     }
 
     if (shape) {
@@ -317,6 +359,10 @@ class CanvasC {
       this.canvas.backgroundImage = img;
       this.canvas.requestRenderAll();
     }
+  }
+  async removeCanvasBackground() {
+    this.canvas.backgroundImage = undefined;
+    this.canvas.renderAll();
   }
 
   deleteObject() {
@@ -443,7 +489,13 @@ class CanvasC {
           setPropertyRecursively(o, i);
         });
       } else {
-        if (props.height) {
+        if (props.scaleX) {
+          const currScaleX = object.get("scaleX");
+          object.set({ scaleX: currScaleX + 1 });
+        } else if (props.scaleY) {
+          const currScaleY = object.get("scaleY");
+          object.set({ scaleY: currScaleY + 1 });
+        } else if (props.height) {
           const currh = object.get("height");
           object.set({ height: currh + (currh - props.height || 0) });
           obj.setCoords();
@@ -648,9 +700,13 @@ class CanvasC {
           });
           break;
       }
-      if (s) {
-        this.canvas.add(s);
-      }
+    });
+    this.canvas.requestRenderAll();
+  }
+
+  makeObjectsUnselectabale() {
+    this.canvas.getObjects().forEach((o) => {
+      o.set("selectable", false);
     });
     this.canvas.requestRenderAll();
   }

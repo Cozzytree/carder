@@ -29,8 +29,11 @@ import {
   MousePointer2,
   PencilIcon,
   PencilLine,
+  RedoIcon,
+  SettingsIcon,
   TypeIcon,
   TypeOutline,
+  UndoIcon,
 } from "lucide-react";
 import { RefObject } from "react";
 import { useCanvasStore } from "./store";
@@ -48,6 +51,8 @@ import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
 import { handleGradient } from "./utilsfunc";
 import BtnWithColor from "./components/btn-with-color";
+import OpacityOption from "./components/opacity_option";
+import InputWithValue from "./components/input-with-value";
 
 function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
   const { activeObject, setFabricObject } = useCanvasStore();
@@ -379,24 +384,172 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
           <DrawerClose className="absolute right-3 top-3">close</DrawerClose>
           <DrawerTitle>Shapes</DrawerTitle>
           <Shapes
-            handleShape={(type, path) => {
+            handleShape={({ type, path, points, scale }) => {
               if (!canvasC.current) return;
-              canvasC.current.createNewShape({ shapetype: type, path });
+              canvasC.current.createNewShape({
+                shapetype: type,
+                path,
+                points,
+                scale,
+              });
             }}
           />
         </DrawerContent>
       </Drawer>
 
       {activeObject && (
-        <Popover>
-          <PopoverTrigger className="pl-2 text-sm border-l-2 border-foreground/30">
-            Actions
-          </PopoverTrigger>
-          <PopoverContent sideOffset={20} className="flex gap-2 w-fit">
+        <>
+          <Popover>
+            <PopoverTrigger className="pl-2 text-sm border-l-2 border-foreground/30">
+              <SettingsIcon className="w-6 h-6" />
+            </PopoverTrigger>
+            <PopoverContent
+              sideOffset={20}
+              className="flex gap-2 flex-col bg-background/80"
+            >
+              <InputWithValue
+                val={activeObject ? activeObject?.get("left") : 0}
+                change={(e) => {
+                  if (!canvasC.current || !activeObject) return;
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    left: e,
+                  });
+                  activeObject?.setCoords();
+                  setFabricObject(activeObject);
+                }}
+              >
+                <span>x-axis</span>
+              </InputWithValue>
+              <InputWithValue
+                val={activeObject?.get("top") || 0}
+                change={(e) => {
+                  if (!canvasC.current || !activeObject) return;
+
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    top: e,
+                  });
+                  activeObject.setCoords();
+                  setFabricObject(activeObject);
+                }}
+              >
+                <span>y-axis</span>
+              </InputWithValue>
+
+              <InputWithValue
+                change={(e) => {
+                  if (!canvasC.current || !activeObject) return;
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    scaleX: e,
+                  });
+                  activeObject.setCoords();
+                  setFabricObject(activeObject);
+                }}
+                val={
+                  activeObject instanceof ActiveSelection
+                    ? activeObject.getObjects()[0].get("scaleX")
+                    : activeObject?.get("scaleX") || 0
+                }
+              >
+                <span> scale X</span>
+              </InputWithValue>
+              <InputWithValue
+                change={(e) => {
+                  if (!canvasC.current || !activeObject) return;
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    scaleY: e,
+                  });
+                  activeObject.setCoords();
+                  setFabricObject(activeObject);
+                }}
+                val={
+                  activeObject instanceof ActiveSelection
+                    ? activeObject.getObjects()[0].get("scaleY")
+                    : activeObject?.get("scaleY") || 0
+                }
+              >
+                <span>scale Y</span>
+              </InputWithValue>
+
+              <InputWithValue
+                val={activeObject?.get("angle") || 0}
+                change={(e) => {
+                  if (!canvasC.current || !activeObject) return;
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    angle: e,
+                  });
+                  activeObject.setCoords();
+                  setFabricObject(activeObject);
+                }}
+              >
+                <span>angle</span>
+              </InputWithValue>
+              <InputWithValue
+                val={
+                  activeObject instanceof ActiveSelection
+                    ? activeObject.getObjects()[0].get("width") || 0
+                    : activeObject?.get("width") || 0
+                }
+                change={(e) => {
+                  if (!canvasC.current || !activeObject) return;
+
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    width: e,
+                  });
+                  activeObject.setCoords();
+                  setFabricObject(activeObject);
+                }}
+              >
+                <span>width</span>
+              </InputWithValue>
+              <InputWithValue
+                val={
+                  activeObject instanceof ActiveSelection
+                    ? activeObject.getObjects()[0].get("height") || 0
+                    : activeObject?.get("height") || 0
+                }
+                change={(e) => {
+                  if (!canvasC.current || !activeObject) return;
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    height: e,
+                  });
+                  activeObject.setCoords();
+                  setFabricObject(activeObject);
+                }}
+              >
+                <span>height</span>
+              </InputWithValue>
+
+              <OpacityOption
+                fn={(v) => {
+                  if (!canvasC.current || !activeObject) return;
+                  canvasC.current.changeCanvasProperties(activeObject, {
+                    opacity: v,
+                  });
+                }}
+                opacity={activeObject?.get("opacity")}
+              />
+            </PopoverContent>
             <ShapeActions canvasC={canvasC} />
-          </PopoverContent>
-        </Popover>
+          </Popover>
+        </>
       )}
+
+      <button
+        onClick={() => {
+          if (!canvasC.current) return;
+          canvasC.current.undo();
+        }}
+      >
+        <UndoIcon />
+      </button>
+      <button
+        onClick={() => {
+          if (!canvasC.current) return;
+          canvasC.current.redo();
+        }}
+      >
+        <RedoIcon />
+      </button>
     </div>
   );
 }

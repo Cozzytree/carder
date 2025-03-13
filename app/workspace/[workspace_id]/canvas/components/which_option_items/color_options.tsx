@@ -46,13 +46,13 @@ function ColorOptions({
   const recentGradients = useColorStore((state) => state.recentGradients);
 
   return (
-    <div className="w-full flex flex-col gap-2 items-center justify-center">
-      <div className="w-full border-b-2 border-foreground flex items-center gap-2">
+    <div className="w-full flex flex-col items-center justify-center">
+      <div className="w-full border-b border-foreground/50 flex items-center gap-2 py-[3.5px]">
         <button
           onClick={() => {
             setTab("colors");
           }}
-          className={`${tab === "colors" && "font-bold text-md"} text-xs md:text-lg p-1`}
+          className={`${tab === "colors" && "font-bold text-md"}`}
         >
           Standard
         </button>
@@ -61,36 +61,40 @@ function ColorOptions({
             onClick={() => {
               setTab("gradient");
             }}
-            className={`${tab === "gradient" && "font-bold text-md"} text-sm md:text-lg p-1`}
+            className={`${tab === "gradient" && "font-bold text-md"}`}
           >
             Gradient
           </button>
         )}
       </div>
 
-      <div className="w-full flex flex-col">
+      <div className="w-full flex flex-col px-2">
         {tab === "colors" ? (
           <>
-            <div className="mb-4">
-              <h4 className="font-semibold">Recent</h4>
-              <div className="w-full grid grid-cols-5 gap-1">
-                {recentColors.map((c, i) => (
-                  <BtnWithColor
-                    onClick={() => {
-                      handleColor(c);
-                    }}
-                    w={28}
-                    h={28}
-                    color={c}
-                    key={i}
-                  />
-                ))}
+            {recentColors.length > 0 ? (
+              <div className="mb-4">
+                <h4 className="font-semibold">Recent</h4>
+                <div className="w-fit md:w-full grid grid-cols-5 md:grid-cols-6 gap-1">
+                  {recentColors.map((c, i) => (
+                    <BtnWithColor
+                      onClick={() => {
+                        handleColor(c);
+                      }}
+                      w={28}
+                      h={28}
+                      color={c}
+                      key={i}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <></>
+            )}
 
             {/* {///} */}
 
-            <div className="grid grid-cols-5 w-fit gap-1">
+            <div className="grid grid-cols-5 md:grid-cols-6 w-fit md:w-full gap-1">
               <button
                 onClick={() => {
                   handleColor("");
@@ -130,10 +134,10 @@ function ColorOptions({
             {showGradient && color && (
               <div className="flex w-full flex-col gap-1">
                 <div className="flex flex-col gap-1 mb-2">
-                  {recentGradients.length && (
-                    <>
-                      <h4>Recent</h4>
-                      <div className="grid grid-cols-5 gap-2">
+                  {recentGradients.length > 0 ? (
+                    <div>
+                      <h4 className="">Recent</h4>
+                      <div className="grid grid-cols-5 md:grid-cols-6 gap-2">
                         {recentGradients.map((g, i) => (
                           <BtnWithColor
                             w={28}
@@ -151,11 +155,13 @@ function ColorOptions({
                           />
                         ))}
                       </div>
-                    </>
+                    </div>
+                  ) : (
+                    <> </>
                   )}
                 </div>
 
-                <div className="w-full grid grid-cols-5 gap-1">
+                <div className="w-fit md:w-full grid grid-cols-5 md:grid-cols-6 gap-1">
                   {gradients.map((g, i) => (
                     <BtnWithColor
                       w={28}
