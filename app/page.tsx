@@ -7,9 +7,7 @@ export default async function Home() {
   return (
     <div className="h-full w-full sm:container mx-auto py-5">
       <div className="w-full flex justify-between">
-        {session?.user ? (
-          <div>{session.user.name}</div>
-        ) : (
+        {!session?.user && (
           <div className="flex gap-2">
             <form
               action={async () => {

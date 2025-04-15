@@ -12,9 +12,9 @@ import ResizeCanvas from "./which_option_items/resize_canvas";
 import Shapes from "./which_option_items/shapes";
 import TextOptions from "./which_option_items/texts_o";
 import ImageOption from "./image_option";
-import DrawOptions from "./draw_options";
 import ImageFiltersOption from "./image_filter_options";
 import { handleColorfill, handleGradient } from "../utilsfunc";
+import DrawOptions from "./draw_options";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -33,7 +33,7 @@ function WhichOContainer({ canvasC }: props) {
     type: canvasShapes;
     path?: string;
     points?: { x: number; y: number }[];
-    scale: number;
+    scale?: number;
   }) => {
     if (!canvasC.current) return;
     canvasC.current.createNewShape({ shapetype: type, path, points, scale });
@@ -104,7 +104,7 @@ function WhichOContainer({ canvasC }: props) {
   }, [activeObject, which]);
 
   return (
-    <div className="w-[250px] h-full bg-secondary border-r-2 relative">
+    <div className="h-full w-[250px] border-r relative">
       <h3 className="capitalize px-2 py-1 font-semibold">{which}</h3>
 
       {which === WhichOptionEmum.IMAGE && <ImageOption canvasC={canvasC} />}
@@ -172,7 +172,7 @@ function WhichOContainer({ canvasC }: props) {
 
       {which === WhichOptionEmum.FONTS && <FontOptions canvasC={canvasC} />}
 
-      <button className="border-2 rounded-full border-foreground/30 bg-secondary z-50 absolute -right-4 top-1/2 -translate-y-1/2">
+      <button className="border-2 rounded-full border-foreground/30 bg-secondary z-[51] absolute -right-4 top-1/2 -translate-y-1/2 text-background">
         <ChevronLeft
           onClick={() => {
             setWhichOption(null);

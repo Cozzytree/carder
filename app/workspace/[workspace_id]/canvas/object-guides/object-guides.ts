@@ -10,9 +10,8 @@ import { DefaultLine } from "../default_styles";
 const snapSize = 8;
 const lineProp: Partial<FabricObjectProps> = {
   selectable: false,
-  strokeDashArray: [3, 3],
   stroke: "red",
-  strokeWidth: 1,
+  strokeWidth: 1.5,
 };
 
 function ObjectMoving(

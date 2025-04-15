@@ -7,8 +7,8 @@ import {
   FabricObject,
   Gradient,
   GradientType,
-  Group,
   Shadow,
+  Group,
 } from "fabric";
 import { RefObject } from "react";
 import CanvasC from "../../canvas";
@@ -32,30 +32,33 @@ function OutlineAndShadow({ canvasC }: props) {
   const { activeObject, setFabricObject } = useCanvasStore();
   let hasShadow: Shadow | null = activeObject?.get("shadow");
   let strokeWidth: number = 0;
-  let stroke: string = "";
-  const activeObjectStroke =
-    activeObject instanceof ActiveSelection || activeObject instanceof Group
-      ? activeObject.getObjects()[0]?.stroke
-      : activeObject?.stroke;
-  const activeObjectWidth =
-    activeObject instanceof ActiveSelection || activeObject instanceof Group
-      ? activeObject.getObjects()[0].width
-      : activeObject?.width;
-  const activeObjectHeight =
-    activeObject instanceof ActiveSelection || activeObject instanceof Group
-      ? activeObject.getObjects()[0].height
-      : activeObject?.height;
 
-  if (
-    activeObject instanceof ActiveSelection ||
-    activeObject instanceof Group
-  ) {
+  const isActiveSelection =
+    activeObject &&
+    (activeObject instanceof ActiveSelection || activeObject instanceof Group);
+
+  const activeObjectStroke = isActiveSelection
+    ? (activeObject?.getObjects().length &&
+        activeObject?.getObjects()[0].get("stroke")) ||
+      null
+    : activeObject?.get("stroke") || null;
+
+  const activeObjectWidth = isActiveSelection
+    ? activeObject.getObjects().length
+      ? activeObject.getObjects()[0].get("width")
+      : 0
+    : activeObject?.get("width");
+  const activeObjectHeight = isActiveSelection
+    ? activeObject.getObjects().length
+      ? activeObject.getObjects()[0].get("height")
+      : 0
+    : activeObject?.get("height");
+
+  if (isActiveSelection && activeObject.getObjects().length) {
     const o = activeObject.getObjects()[0];
     strokeWidth = o.get("strokeWidth") as number;
     hasShadow = o.get("shadow");
-    stroke = o.get("stroke");
   } else {
-    stroke = activeObject?.get("stroke");
     strokeWidth = activeObject?.get("strokeWidth");
     hasShadow = activeObject?.get("shadow");
   }
@@ -127,14 +130,11 @@ function OutlineAndShadow({ canvasC }: props) {
           />
           <Popover>
             <PopoverTrigger>
-              <BtnWithColor color={stroke} w={25} h={25} />
+              <BtnWithColor color={activeObjectStroke} w={25} h={25} />
             </PopoverTrigger>
-            <PopoverContent
-              side={isMobile ? "top" : "left"}
-              className="bg-secondary border-foreground/20"
-            >
+            <PopoverContent side={isMobile ? "top" : "left"} className="">
               <ColorOptions
-                color={stroke}
+                color={activeObjectStroke}
                 handleColor={(v) => {
                   if (!canvasC.current || !activeObject) return;
                   canvasC.current.changeCanvasProperties(activeObject, {

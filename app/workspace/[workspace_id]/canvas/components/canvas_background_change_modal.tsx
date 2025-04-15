@@ -19,8 +19,10 @@ function CanvasBackgroundChange({ handleChange }: props) {
   return (
     <div>
       <Dialog>
-        <DialogTrigger>
-          <ImageIcon />
+        <DialogTrigger asChild>
+          <Button size={"xs"} variant={"simple"}>
+            <ImageIcon />
+          </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogTitle>Canvas Background</DialogTitle>

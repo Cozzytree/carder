@@ -166,13 +166,6 @@ function ImageFiltersOption({ canvasC }: props) {
     setFabricObject(activeObject);
   };
 
-  const handleGetFilterVal = (index: number) => {
-    if (activeObject instanceof FabricImage) {
-      if (activeObject.filters[index]) {
-      }
-    }
-  };
-
   const hasFilter = (index: number) => {
     if (activeObject instanceof FabricImage) {
       if (activeObject.filters[index]) {
@@ -182,7 +175,7 @@ function ImageFiltersOption({ canvasC }: props) {
     return false;
   };
   return (
-    <div className="flex flex-col w-full divide-y-2">
+    <div className="flex flex-col w-full divide-y-2 px-4">
       {filtersOptions.map((f, i) => (
         <Collapsible open={f.label == currFilter} key={i}>
           <CollapsibleTrigger asChild>
@@ -208,7 +201,7 @@ function ImageFiltersOption({ canvasC }: props) {
               />
             </div>
           </CollapsibleTrigger>
-          <CollapsibleContent className="w-full px-2 py-2 bg-secondary">
+          <CollapsibleContent className="w-full px-2 py-2">
             {renderFilter({
               condition: !activeObject || !canvasC.current || !hasFilter(i),
               activeObject: activeObject,

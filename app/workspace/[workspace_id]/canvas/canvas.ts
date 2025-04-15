@@ -24,14 +24,18 @@ import {
   DefaultTriangle,
 } from "./default_styles";
 import { makeText } from "./utilfunc";
-import { filtersOptions } from "./constants";
+import { canvasConfig, filtersOptions } from "./constants";
 import { ObjectMoving } from "./object-guides/object-guides";
 
 interface canvasInterface {
   canvas: Canvas;
   canvasElement: HTMLCanvasElement;
+  theme: string | undefined;
+  idPrefix?: string;
 
   snapping: boolean;
+  onUpdate: (v: FabricObject) => void;
+  onCreation: (v: FabricObject) => void;
   callbackDrawMode: (v: boolean) => void;
   callbackSeleted: (o: FabricObject | undefined) => void;
   changePointerEventsForCanvas: (v: boolean) => void;
@@ -45,7 +49,9 @@ class CanvasC {
   declare canvasElement: HTMLCanvasElement;
   declare changePointerEventsForCanvas: (v: boolean) => void;
   declare snapping: boolean;
+  idPrefix?: string;
 
+  theme: string | undefined;
   history: any[][] = [];
   historyRedo: any[][] = [];
   isDragging: boolean = false;
@@ -63,6 +69,10 @@ class CanvasC {
     canvasElement,
     changePointerEventsForCanvas,
     snapping,
+    theme,
+    onCreation,
+    idPrefix,
+    onUpdate,
   }: canvasInterface) {
     this.canvas = canvas;
     this.draw_brush = null;
@@ -70,6 +80,8 @@ class CanvasC {
     this.canvasElement = canvasElement;
     this.changePointerEventsForCanvas = changePointerEventsForCanvas;
     this.snapping = snapping;
+    this.theme = theme;
+    this.idPrefix = idPrefix;
 
     this.canvas.on("selection:created", () => {
       const selected = this.canvas.getActiveObject();
@@ -77,16 +89,14 @@ class CanvasC {
         selected.set({
           borderDashArray: [3],
           cornerSize: 10,
-          cornerStyle: "circle",
-          cornerStrokeColor: "#0000ff",
+          cornerStrokeColor: canvasConfig.selectionStroke,
           strokeUniform: true,
           cornerColor: "#2020ff",
-          transparentCorners: false,
-          padding: 2,
         });
       }
       callbackSeleted(selected);
     });
+
     this.canvas.on("mouse:down", () => {
       const active = canvas.getActiveObject();
       callbackSeleted(active);
@@ -102,6 +112,7 @@ class CanvasC {
         this.history.push(objs);
       }
     });
+
     this.canvas.on("object:moving", (e) => {
       if (this.snapping) {
         if (this.guideLines.length) {
@@ -114,8 +125,11 @@ class CanvasC {
         });
       }
     });
+
     this.canvas.on("object:added", (e) => {
+      if (e.target.get("name") === "guide") return;
       callbackSeleted(e.target);
+      onCreation(e.target);
     });
 
     this.canvas.on("object:modified", (e) => {
@@ -123,6 +137,7 @@ class CanvasC {
         this.guideLines.forEach((l) => this.canvas.remove(l));
       }
       callbackSeleted(e.target);
+      onUpdate(e.target);
 
       // store to history
       const objs = [];
@@ -143,6 +158,12 @@ class CanvasC {
     });
 
     this.canvas.on("path:created", (e) => {
+      if (
+        this.draw_brush instanceof CircleBrush ||
+        this.draw_brush instanceof SprayBrush
+      ) {
+        e.path.set("bubble", true);
+      }
       e.path.set({
         objectCaching: true,
         cornerSize: 10,
@@ -164,7 +185,6 @@ class CanvasC {
           const as = new ActiveSelection(canvas.getObjects(), {
             canvas: this.canvas,
           });
-          this.canvas.add(as);
           this.canvas.discardActiveObject();
           this.canvas.setActiveObject(as);
           this.canvas.requestRenderAll();
@@ -202,7 +222,7 @@ class CanvasC {
   }
 
   createText(type: textTypes) {
-    const t = makeText(type);
+    const t = makeText(type, this.idPrefix);
     if (!t) return;
     t.set({
       fontStyle: "normal",
@@ -266,25 +286,35 @@ class CanvasC {
     const w = this.canvas.width;
     const h = this.canvas.height;
     let shape: FabricObject | null = null;
+    const stroke = this.theme == "dark" ? "white" : "black";
     switch (shapetype) {
       case "rect":
-        shape = new DefaultRect({
-          width: 100,
-          height: 100,
-          top: this.canvas.height / 2 - 50,
-          left: this.canvas.width / 2 - 50,
-          strokeWidth: 3,
-        });
+        shape = new DefaultRect(
+          {
+            width: 100,
+            height: 100,
+            stroke,
+            top: this.canvas.height / 2 - 50,
+            left: this.canvas.width / 2 - 50,
+            strokeWidth: 3,
+          },
+          this.idPrefix,
+        );
         break;
       case "circle":
-        shape = new DefaultCircle({
-          top: h / 2 - 10,
-          left: w / 2 - 10,
-          radius: 20,
-        });
+        shape = new DefaultCircle(
+          {
+            top: h / 2 - 10,
+            stroke,
+            left: w / 2 - 10,
+            radius: 20,
+          },
+          this.idPrefix,
+        );
         break;
       case "triangle":
         shape = new DefaultTriangle({
+          stroke,
           width: 100,
           height: 100,
           top: h / 2 - 50,
@@ -292,17 +322,23 @@ class CanvasC {
         });
         break;
       case "path":
-        shape = new DefaultCustomPath(path || "", {
-          top: h / 2 - 50,
-          left: w / 2 - 50,
-          strokeWidth: 3,
-          scaleX: scale,
-          scaleY: scale,
-        });
+        shape = new DefaultCustomPath(
+          path || "",
+          {
+            stroke,
+            top: h / 2 - 50,
+            left: w / 2 - 50,
+            strokeWidth: 3,
+            scaleX: scale,
+            scaleY: scale,
+          },
+          this.idPrefix,
+        );
         break;
       case "polygon":
         if (points?.length) {
           shape = new Polyline(points, {
+            stroke,
             top: h / 2 - 50,
             left: w / 2 - 50,
             strokeWidth: 3,
@@ -438,11 +474,8 @@ class CanvasC {
     this.canvas.requestRenderAll();
   }
 
-  canvasToggleDrawMode() {
-    if (this.canvas.isDrawingMode) {
-      this.canvas.isDrawingMode = false;
-      this.callbackDrawMode(false);
-    } else {
+  canvasToggleDrawMode(enable: boolean) {
+    if (enable) {
       this.callbackDrawMode(true);
       this.canvas.isDrawingMode = true;
       if (!this.draw_brush) {
@@ -450,8 +483,10 @@ class CanvasC {
         this.draw_brush.width = this.brush_props.stroke;
         this.draw_brush.color = this.brush_props.stroke_color;
       }
-
       this.canvas.freeDrawingBrush = this.draw_brush;
+    } else {
+      this.canvas.isDrawingMode = false;
+      this.callbackDrawMode(false);
     }
   }
 
@@ -708,6 +743,35 @@ class CanvasC {
     this.canvas.getObjects().forEach((o) => {
       o.set("selectable", false);
     });
+    this.canvas.requestRenderAll();
+  }
+
+  // groups
+  createNewGroup(activeObject: FabricObject) {
+    if (!activeObject) {
+      return;
+    }
+    if (
+      (activeObject.type !== "activeSelection" &&
+        activeObject.type !== "activeselection") ||
+      !(activeObject instanceof ActiveSelection)
+    ) {
+      return;
+    }
+    activeObject.forEachObject((o) => this.canvas.remove(o));
+    const group = new Group(activeObject.getObjects());
+    this.canvas.add(group);
+    this.canvas.setActiveObject(group);
+    this.canvas.requestRenderAll();
+  }
+  removeGroup(group: FabricObject) {
+    if (!(group instanceof Group)) return;
+    this.canvas.remove(group);
+    this.canvas.add(...group.removeAll());
+    // const selected = new ActiveSelection(group.removeAll(), {
+    //   canvas: this.canvas,
+    // });
+    // this.canvas.setActiveObject(selected);
     this.canvas.requestRenderAll();
   }
 

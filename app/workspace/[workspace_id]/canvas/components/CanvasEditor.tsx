@@ -53,12 +53,14 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
   return (
     <div className="w-full h-full flex">
       {/* {left sidebar} */}
-      <div className="h-full border-r border-r-foreground/50 hidden md:flex relative">
-        <div className="h-full flex flex-col items-center w-[75px] bg-secondary border-r-2">
+      <div
+        className={`h-full border-r border-r-foreground/50 ${isMobile ? "hidden" : "flex"}`}
+      >
+        <div className="h-full flex flex-col items-center border">
           <CanvasElements canvasC={canvasC_ref} />
         </div>
         {which !== null && !isMobile && (
-          <div className="h-full z-50">
+          <div className="h-full z-50 border-l border-l-foreground/50">
             <WhichOContainer canvasC={canvasC_ref} />
           </div>
         )}
@@ -75,7 +77,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
         </div>
 
         {/* {canvas container} */}
-        <div className="w-full bg-secondary h-full flex justify-center overflow-auto">
+        <div className="w-full h-full flex justify-center overflow-auto">
           <div
             ref={containerRef}
             style={{
@@ -118,7 +120,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
           </div>
         </div>
 
-        <div className="w-full border-t border-t-foreground/50 z-50 min-h-14 flex items-center bg-secondary px-5">
+        <div className="w-full border-t border-t-foreground/50 z-50 min-h-14 flex items-center px-5">
           {/* {!isMobile && activeObject && ( */}
           <div className="flex items-center gap-1">
             <ZoomContainer

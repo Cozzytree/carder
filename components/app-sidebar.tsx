@@ -1,7 +1,7 @@
-import * as React from "react";
-import { GalleryVerticalEnd } from "lucide-react";
+"use client";
 
-import { NavMain } from "@/components/nav-main";
+import * as React from "react";
+
 import { SidebarOptInForm } from "@/components/sidebar-opt-in-form";
 import {
   Sidebar,
@@ -13,45 +13,46 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { Session } from "next-auth";
-import Image from "next/image";
+import UserLabel from "./user_label";
+import { NavMain } from "./nav-main";
+import { Folders, HomeIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export function AppSidebar({
   props,
-  userSession,
 }: {
   props?: React.ComponentProps<typeof Sidebar>;
-  userSession: Session | null;
 }) {
+  const pathname = usePathname();
   return (
     <Sidebar {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center">
-                  {userSession?.user?.image ? (
-                    <Image
-                      width={100}
-                      height={100}
-                      className="w-8 h-8 rounded-full"
-                      src={userSession.user.image}
-                      alt={userSession?.user?.name || ""}
-                    />
-                  ) : (
-                    <GalleryVerticalEnd className="size-4" />
-                  )}
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  {userSession ? userSession.user?.name : "Cardy"}
-                </div>
-              </a>
+              <UserLabel />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>{/* <NavMain items={data.navMain} /> */}</SidebarContent>
+      <SidebarContent>
+        <NavMain
+          items={[
+            {
+              title: "Home",
+              url: "/",
+              icon: HomeIcon,
+              isActive: pathname === "/",
+            },
+            {
+              title: "Design",
+              url: "/design",
+              icon: Folders,
+              isActive: pathname === "/design",
+            },
+          ]}
+        />
+      </SidebarContent>
       <SidebarFooter>
         <div className="p-1">
           <SidebarOptInForm />

@@ -10,6 +10,7 @@ import CanvasC from "../canvas";
 import { RefObject } from "react";
 import { useWhichOptionsOpen } from "../store";
 import { useIsMobile } from "../hooks/isMobile";
+import { Button } from "@/components/ui/button";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
@@ -35,28 +36,35 @@ function CanvasElementStandard({
   const { setWhichOption, which } = useWhichOptionsOpen();
 
   return (
-    <div className="w-full h-full flex flex-col divide-y divide-foreground/50 border-r">
+    <div className="w-full h-full flex flex-col divide-y divide-foreground/50">
       {whichOptions.map((o, i) => (
-        <button
+        <Button
+          variant={"simple"}
+          size={null}
           onClick={() => {
             if (!canvasC.current) return;
+
+            if (o.label !== "draw" && canvasC.current.canvas.isDrawingMode) {
+              canvasC.current.canvasToggleDrawMode(false);
+            }
+
             if (which == o.label) {
               setWhichOption(null);
             } else {
-              if (o.label === "draw") {
-                canvasC.current.canvasToggleDrawMode();
-              }
               setWhichOption(o.label);
+              if (o.label === "draw") {
+                canvasC.current.canvasToggleDrawMode(true);
+              }
             }
           }}
-          className={`${o.label === which && "bg-foreground/10"} flex py-[0.58rem] flex-col items-center hover:bg-foreground/10 transition-all duration-75`}
+          className={`${o.label === which && "bg-accent font-bold"} w-full rounded-none py-2 px-3`}
           key={i}
         >
-          <o.I />
-          <span className="text-sm text-foreground/80">
+          <o.I className="w-5 h-5" />
+          <span className="text-sm text-start hidden lg:inline">
             {o.label[0].toUpperCase() + o.label.slice(1, o.label.length)}
           </span>
-        </button>
+        </Button>
       ))}
     </div>
   );

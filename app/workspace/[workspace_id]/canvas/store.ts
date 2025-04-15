@@ -74,9 +74,7 @@ const useColorStore = create<colorStoreInterface>((set) => ({
 }));
 
 const useCanvasStore = create<canvasInterface>((set) => ({
-  width: localStorage.getItem("canvas_width")
-    ? (JSON.parse(localStorage.getItem("canvas_width") || "") as number)
-    : 600,
+  width: 600,
   height: 600,
   activeObject: undefined,
   isDrawing: false,
@@ -104,4 +102,47 @@ const useCanvasStore = create<canvasInterface>((set) => ({
     }),
 }));
 
-export { useCanvasStore, useColorStore, useWhichOptionsOpen };
+type queueShape = {
+  shapeId: string;
+  props: string;
+  page_id: string;
+};
+interface queueStoreState {
+  shape: queueShape[][];
+
+  //action
+  addNewShape: (v: queueShape[]) => void;
+  popShape: () => queueShape[] | undefined;
+}
+const queueStore = create<queueStoreState>((set, get) => ({
+  shape: [],
+
+  addNewShape: (v) =>
+    set((state) => {
+      state.shape.push(v);
+      return { shape: [...state.shape] };
+    }),
+  popShape: () => {
+    const state = get();
+
+    if (!state.shape.length) return undefined;
+    if (state.shape.length == 1) {
+      set({ shape: [] });
+      return state.shape[0];
+    }
+
+    const i = 2;
+    const e = state.shape.length - 1;
+
+    const newS = [];
+    for (let j = i; j <= e; j++) {
+      newS.push(state.shape[j]);
+    }
+
+    set({ shape: newS });
+
+    return state.shape[i];
+  },
+}));
+
+export { queueStore, useCanvasStore, useColorStore, useWhichOptionsOpen };

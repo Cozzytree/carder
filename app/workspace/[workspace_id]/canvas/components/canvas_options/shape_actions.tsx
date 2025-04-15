@@ -13,20 +13,23 @@ import {
   CopyIcon,
   FlipHorizontal2,
   FlipVertical2,
+  GroupIcon,
   LockIcon,
   LucideBringToFront,
   LucideIcon,
   SendToBackIcon,
   TrashIcon,
+  UngroupIcon,
 } from "lucide-react";
 import { useCanvasStore } from "../../store";
 import { Button } from "@/components/ui/button";
-import { FabricObject } from "fabric";
+import { ActiveSelection, FabricObject, Group } from "fabric";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useIsMobile } from "../../hooks/isMobile";
 
 const index_options: { label: string; I: LucideIcon }[] = [
   { I: ArrowDown, label: "Send Backward" },
@@ -40,8 +43,14 @@ type props = {
 };
 
 function ShapeActions({ canvasC }: props) {
+  const { isMobile } = useIsMobile();
   const { activeObject, setFabricObject } = useCanvasStore();
   const isLocked = activeObject?.get("lockMovementX") || false;
+  const enableGroup = activeObject instanceof ActiveSelection ? true : false;
+  const discardGroup =
+    !(activeObject instanceof ActiveSelection) &&
+    activeObject instanceof Group &&
+    activeObject?.get("bubble") == undefined;
 
   const check = () => {
     if (!canvasC || !activeObject) return false;
@@ -51,10 +60,14 @@ function ShapeActions({ canvasC }: props) {
   return (
     <TooltipProvider>
       <div className="w-full flex flex-col gap-1 justify-center">
-        <div className="flex gap-2">
+        <div
+          className={`${!isMobile ? "grid grid-cols-4" : "flex items-center gap-1"}`}
+        >
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <Button
+                variant={"simple"}
+                size={"xs"}
                 onClick={() => {
                   if (check()) {
                     canvasC.current?.duplicateCanvasObject();
@@ -63,14 +76,16 @@ function ShapeActions({ canvasC }: props) {
                 className="cursor-pointer"
               >
                 <CopyIcon className="w-5 h-5" />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent>Duplicate</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <Button
+                variant={"simple"}
+                size={"xs"}
                 onClick={() => {
                   if (check()) {
                     canvasC.current?.deleteObject();
@@ -79,7 +94,7 @@ function ShapeActions({ canvasC }: props) {
                 className="cursor-pointer"
               >
                 <TrashIcon className="w-5 h-5" />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent>Deletel</TooltipContent>
           </Tooltip>
@@ -88,7 +103,9 @@ function ShapeActions({ canvasC }: props) {
             <Popover>
               <PopoverTrigger>
                 <TooltipTrigger asChild>
-                  <LucideBringToFront className="2-5 h-5" />
+                  <Button variant={"simple"} size={"xs"}>
+                    <LucideBringToFront className="2-5 h-5" />
+                  </Button>
                 </TooltipTrigger>
               </PopoverTrigger>
               <PopoverContent className="w-fit h-fit">
@@ -105,8 +122,8 @@ function ShapeActions({ canvasC }: props) {
                               );
                             }
                           }}
+                          variant={"simple"}
                           size={"xs"}
-                          variant={"outline"}
                         >
                           <o.I />
                         </Button>
@@ -122,7 +139,9 @@ function ShapeActions({ canvasC }: props) {
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <Button
+                variant={"simple"}
+                size={"xs"}
                 onClick={() => {
                   if (!check()) return;
                   if (activeObject?.get("flipY")) {
@@ -139,14 +158,16 @@ function ShapeActions({ canvasC }: props) {
                 }}
               >
                 <FlipVertical2 className="2-5 h-5" />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent>Flip Vertical</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <Button
+                variant={"simple"}
+                size={"xs"}
                 onClick={() => {
                   if (!check()) return;
                   if (activeObject?.get("flipX")) {
@@ -162,14 +183,16 @@ function ShapeActions({ canvasC }: props) {
                 }}
               >
                 <FlipHorizontal2 className="2-5 h-5" />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent>Flip Vertical</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
+              <Button
+                variant={"simple"}
+                size={"xs"}
                 className={`${isLocked && "bg-foreground/80 text-background p-1 rounded-md"}`}
                 onClick={() => {
                   if (!check()) return;
@@ -188,9 +211,43 @@ function ShapeActions({ canvasC }: props) {
                 }}
               >
                 <LockIcon className="w-5 h-5" />
-              </button>
+              </Button>
             </TooltipTrigger>
             <TooltipContent>Lock Movement</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => {
+                  if (!canvasC.current || !activeObject) return;
+                  canvasC.current.createNewGroup(activeObject);
+                }}
+                disabled={!enableGroup}
+                variant={"simple"}
+                size={"xs"}
+              >
+                <GroupIcon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Group</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => {
+                  if (!canvasC.current || !activeObject) return;
+                  canvasC.current.removeGroup(activeObject);
+                }}
+                disabled={!discardGroup}
+                variant={"simple"}
+                size={"xs"}
+              >
+                <UngroupIcon />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Group</TooltipContent>
           </Tooltip>
         </div>
       </div>

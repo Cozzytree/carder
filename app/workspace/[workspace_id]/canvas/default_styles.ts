@@ -1,9 +1,10 @@
 import * as fabric from "fabric";
 import { canvasConfig } from "./constants";
+import { generateRandomID } from "@/lib/utils";
 
 class DefaultRect extends fabric.Rect {
   declare hoverShape: fabric.Rect | null;
-  constructor(params: Partial<fabric.RectProps>) {
+  constructor(params: Partial<fabric.RectProps>, idPrefix?: string) {
     super({
       rx: 10,
       ry: 10,
@@ -18,7 +19,6 @@ class DefaultRect extends fabric.Rect {
 
       centeredRotation: true,
 
-      // transparentCorners: false,
       shadow: new fabric.Shadow({
         offsetX: 1,
         offsetY: 2,
@@ -28,7 +28,10 @@ class DefaultRect extends fabric.Rect {
       // objectCaching: true,
       ...params,
     });
-    this.set("id", `shape-${Date.now()}`);
+    this.set(
+      "id",
+      `shape-${idPrefix ? `${idPrefix}-${generateRandomID()}` : Date.now()}`,
+    );
   }
 }
 
@@ -38,7 +41,6 @@ class DefaultTriangle extends fabric.Triangle {
       fill: "transparent",
       stroke: "black",
       strokeWidth: 2,
-      transparentCorners: false,
 
       padding: 3,
       cornerSize: 8,
@@ -65,7 +67,6 @@ class DefaultEllipse extends fabric.Ellipse {
       stroke: "white",
       strokeWidth: 4,
       cornerColor: "transparent",
-      transparentCorners: false,
       centeredRotation: true,
       cornerStyle: "circle",
       // objectCaching: true,
@@ -90,7 +91,7 @@ class DefaultEllipse extends fabric.Ellipse {
 }
 
 class DefaultCircle extends fabric.Circle {
-  constructor(params: Partial<fabric.CircleProps>) {
+  constructor(params: Partial<fabric.CircleProps>, idPrefix?: string) {
     super({
       radius: 10,
       originX: "center",
@@ -99,7 +100,6 @@ class DefaultCircle extends fabric.Circle {
       strokeWidth: 3,
       fill: "transparent",
       cornerColor: "transparent",
-      transparentCorners: false,
       centeredRotation: true,
 
       padding: 3,
@@ -117,12 +117,19 @@ class DefaultCircle extends fabric.Circle {
       }),
       ...params,
     });
-    this.set("id", `shape-${Date.now()}`);
+    this.set(
+      "id",
+      `shape-${idPrefix ? `${idPrefix}-${generateRandomID()}` : Date.now()}`,
+    );
   }
 }
 
 class DefaultIText extends fabric.Textbox {
-  constructor(text: string, params: Partial<fabric.ITextProps>) {
+  constructor(
+    text: string,
+    params: Partial<fabric.ITextProps>,
+    idPrefix?: string,
+  ) {
     super(text, {
       stroke: "black",
       fontFamily: "sans serif",
@@ -130,7 +137,6 @@ class DefaultIText extends fabric.Textbox {
       cornerStyle: "circle",
       charSpacing: -1,
       fontStyle: "italic",
-      transparentCorners: false,
       // objectCaching: true,
 
       centeredRotation: true,
@@ -142,7 +148,10 @@ class DefaultIText extends fabric.Textbox {
       borderScaleFactor: 2,
       ...params,
     });
-    this.set("id", `shape-${Date.now()}`);
+    this.set(
+      "id",
+      `${idPrefix ? `shape-${idPrefix}-${generateRandomID()}` : Date.now()}`,
+    );
   }
 }
 
@@ -242,23 +251,28 @@ class DefaultLine extends fabric.Line {
 }
 
 class DefaultCustomPath extends fabric.Path {
-  constructor(path: string, props: Partial<fabric.PathProps>) {
+  constructor(
+    path: string,
+    props: Partial<fabric.PathProps>,
+    idPrefix?: string,
+  ) {
     super(path, {
-      ...props,
       fill: "transparent",
       stroke: "black",
-      transparentCorners: false,
 
       padding: 3,
       cornerSize: 8,
       strokeUniform: true,
       cornerStrokeColor: canvasConfig.selectionStroke,
       borderScaleFactor: 2,
-      cornerStyle: "circle",
 
       centeredRotation: true,
+      ...props,
     });
-    this.set("id", `shape-${Date.now()}`);
+    this.set(
+      "id",
+      `shape-${idPrefix ? `${idPrefix}-${generateRandomID()}` : Date.now()}`,
+    );
   }
 }
 

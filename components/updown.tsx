@@ -1,6 +1,5 @@
 import { Minus, PlusIcon } from "lucide-react";
-import { ChangeEvent, ReactNode, useState } from "react";
-import { Button } from "./ui/button";
+import { ReactNode, useState } from "react";
 import { Input } from "./ui/input";
 
 type props = {

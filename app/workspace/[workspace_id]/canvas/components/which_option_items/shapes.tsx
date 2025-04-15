@@ -19,10 +19,11 @@ type props = {
 
 function Shapes({ handleShape }: props) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col p-3">
       <div className="grid grid-cols-2 rounded-md">
         {shapes.map((s, i) => (
-          <button
+          <Button
+            variant={"outline"}
             onClick={() => {
               handleShape({
                 type: s.type as canvasShapes,
@@ -31,7 +32,7 @@ function Shapes({ handleShape }: props) {
                 scale: s.scale,
               });
             }}
-            className="flex border py-3 justify-center items-center"
+            className="flex border py-3 h-16 justify-center items-center"
             key={i}
           >
             <Image
@@ -40,9 +41,9 @@ function Shapes({ handleShape }: props) {
               width={100}
               height={100}
               quality={30}
-              className="w-12"
+              className="w-12 text-foreground"
             />
-          </button>
+          </Button>
         ))}
       </div>
       <h3 className="font-semibold pt-2">Lines</h3>

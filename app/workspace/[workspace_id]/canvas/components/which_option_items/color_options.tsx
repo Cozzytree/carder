@@ -46,7 +46,7 @@ function ColorOptions({
   const recentGradients = useColorStore((state) => state.recentGradients);
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
+    <div className="w-full flex flex-col gap-2 items-center justify-center">
       <div className="w-full border-b border-foreground/50 flex items-center gap-2 py-[3.5px]">
         <button
           onClick={() => {
@@ -338,9 +338,9 @@ function GradientToggle({
             className={cn(
               gradient
                 ? gradient.type === "linear"
-                  ? "bg-foreground text-background"
-                  : "bg-secondary"
-                : "bg-secondary",
+                  ? "bg-secondary text-background"
+                  : ""
+                : "",
               "text-sm px-2 rounded-sm py-[2px] md:py-1",
             )}
           >
@@ -350,9 +350,9 @@ function GradientToggle({
             className={cn(
               gradient
                 ? gradient.type === "radial"
-                  ? "bg-foreground text-background"
-                  : "bg-secondary"
-                : "bg-secondary",
+                  ? "bg-secondary text-background"
+                  : ""
+                : "",
               "text-sm px-2 rounded-sm py-[2px] md:py-1",
             )}
             onClick={() => {

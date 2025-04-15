@@ -9,7 +9,6 @@ import {
 import ColorOptions from "./which_option_items/color_options";
 import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
-import ShapeActions from "./canvas_options/shape_actions";
 
 type props = {
   canvasC: RefObject<CanvasC | null>;
