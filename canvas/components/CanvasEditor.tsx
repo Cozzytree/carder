@@ -1,19 +1,15 @@
-import { RefObject, useEffect, useRef, useState } from "react";
 import CanvasC from "@/canvas/canvas";
-import { useIsMobile } from "../hooks/isMobile";
-import { useCanvasStore, useWhichOptionsOpen } from "@/canvas/store";
-import { CanvasElements } from "./elements";
 import WhichOContainer from "./which_option_container";
 import CanvasOptions from "../options";
-import {
-   ContextMenu,
-   ContextMenuContent,
-   ContextMenuItem,
-   ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import ZoomContainer from "./zoom_container";
 import OptionsMobile from "../options_mobile";
 import RightContainer from "./right-container";
+
+import { RefObject, useEffect, useRef, useState } from "react";
+import { useIsMobile } from "../hooks/isMobile";
+import { useCanvasStore, useWhichOptionsOpen } from "@/canvas/store";
+import { CanvasElements } from "./elements";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
 
 type props = {
    canvasC_ref: RefObject<CanvasC | null>;
@@ -50,9 +46,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
    return (
       <div className="w-full h-full flex">
          {/* {left sidebar} */}
-         <div
-            className={`h-full border-r border-r-foreground/50 ${isMobile ? "hidden" : "flex"}`}
-         >
+         <div className={`h-full border-r border-r-foreground/50 ${isMobile ? "hidden" : "flex"}`}>
             <div className="h-full flex flex-col items-center border">
                <CanvasElements canvasC={canvasC_ref} />
             </div>
@@ -65,12 +59,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
 
          <div className="w-full h-full flex flex-col">
             <div>
-               <CanvasOptions
-                  containerZoom={containerZoom}
-                  setContainerZoom={setContainerZoom}
-                  canvasC={canvasC_ref}
-                  containerRef={containerRef}
-               />
+               <CanvasOptions containerZoom={containerZoom} setContainerZoom={setContainerZoom} canvasC={canvasC_ref} containerRef={containerRef} />
             </div>
 
             {/* {canvas container} */}
@@ -92,19 +81,13 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                   >
                      <ContextMenu>
                         <ContextMenuTrigger>
-                           <canvas
-                              ref={canvasRef}
-                              className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`}
-                           />
+                           <canvas ref={canvasRef} className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`} />
                         </ContextMenuTrigger>
                         <ContextMenuContent>
                            <ContextMenuItem
                               onClick={() => {
                                  if (!canvasC_ref.current) return;
-                                 canvasC_ref.current.snapping = canvasC_ref
-                                    .current.snapping
-                                    ? false
-                                    : true;
+                                 canvasC_ref.current.snapping = canvasC_ref.current.snapping ? false : true;
                                  setSnap(canvasC_ref.current.snapping);
                               }}
                            >

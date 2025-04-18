@@ -1,11 +1,11 @@
 import * as fabric from "fabric";
 import { canvasConfig } from "./constants";
-import { generateRandomID } from "@/lib/utils";
+// import { generateRandomID } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 
 class DefaultRect extends fabric.Rect {
    declare hoverShape: fabric.Rect | null;
-   constructor(params: Partial<fabric.RectProps>) {
+   constructor(params: Partial<fabric.RectProps>, id?: string) {
       super({
          rx: 10,
          ry: 10,
@@ -29,12 +29,12 @@ class DefaultRect extends fabric.Rect {
          // objectCaching: true,
          ...params,
       });
-      this.set("id", uuid());
+      this.set("id", id || uuid());
    }
 }
 
 class DefaultTriangle extends fabric.Triangle {
-   constructor(params: Partial<fabric.Triangle>) {
+   constructor(params: Partial<fabric.Triangle>, id?: string) {
       super({
          fill: "transparent",
          stroke: "black",
@@ -52,12 +52,12 @@ class DefaultTriangle extends fabric.Triangle {
          // objectCaching: true,
          ...params,
       });
-      this.set("id", uuid());
+      this.set("id", id || uuid());
    }
 }
 
 class DefaultEllipse extends fabric.Ellipse {
-   constructor(params: Partial<fabric.EllipseProps>) {
+   constructor(params: Partial<fabric.EllipseProps>, id?: string) {
       super({
          ...params,
          originX: "center",
@@ -82,14 +82,14 @@ class DefaultEllipse extends fabric.Ellipse {
             color: "black",
          }),
       });
-      this.set("id", uuid());
+      this.set("id", id || uuid());
       this.width = params.width || 50;
       this.height = params.height || 50;
    }
 }
 
 class DefaultCircle extends fabric.Circle {
-   constructor(params: Partial<fabric.CircleProps>) {
+   constructor(params: Partial<fabric.CircleProps>, id?: string) {
       super({
          radius: 10,
          originX: "center",
@@ -115,12 +115,12 @@ class DefaultCircle extends fabric.Circle {
          }),
          ...params,
       });
-      this.set("id", uuid());
+      this.set("id", id || uuid());
    }
 }
 
 class DefaultIText extends fabric.Textbox {
-   constructor(text: string, params: Partial<fabric.ITextProps>) {
+   constructor(text: string, params: Partial<fabric.ITextProps>, id?: string) {
       super(text, {
          stroke: "black",
          fontFamily: "sans serif",
@@ -139,7 +139,7 @@ class DefaultIText extends fabric.Textbox {
          borderScaleFactor: 2,
          ...params,
       });
-      this.set("id", uuid());
+      this.set("id", id || uuid());
    }
 }
 
@@ -173,10 +173,7 @@ class DefaultPath extends fabric.Path {
 }
 
 class DefaultLine extends fabric.Line {
-   constructor(
-      points: [number, number, number, number],
-      props: Partial<fabric.FabricObjectProps>,
-   ) {
+   constructor(points: [number, number, number, number], props: Partial<fabric.FabricObjectProps>) {
       super(points, { ...props });
       this.initilizeControls();
       this.set("id", uuid());
@@ -239,7 +236,7 @@ class DefaultLine extends fabric.Line {
 }
 
 class DefaultCustomPath extends fabric.Path {
-   constructor(path: string, props: Partial<fabric.PathProps>) {
+   constructor(path: string, props: Partial<fabric.PathProps>, id?: string) {
       super(path, {
          fill: "transparent",
          stroke: "black",
@@ -253,7 +250,7 @@ class DefaultCustomPath extends fabric.Path {
          centeredRotation: true,
          ...props,
       });
-      this.set("id", uuid());
+      this.set("id", id || uuid());
    }
 }
 
@@ -261,9 +258,11 @@ class DefaultImage extends fabric.FabricImage {
    constructor({
       props,
       img,
+      id,
    }: {
       img: string;
       props: Partial<fabric.FabricObjectProps>;
+      id?: string;
    }) {
       super(img, {
          cornerSize: 10,
@@ -281,7 +280,7 @@ class DefaultImage extends fabric.FabricImage {
          ...props,
       });
       this.applyFilters();
-      this.set("id", uuid);
+      this.set("id", id || uuid());
    }
 }
 

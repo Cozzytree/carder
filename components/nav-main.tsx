@@ -98,7 +98,7 @@ export function NavMain({
                 className="p-2"
               />
               <textarea
-                className="outline-none focus:ring-2 ring-primary p-2 bg-transparent rounded-3xl max-h-16"
+                className="outline-hidden focus:ring-2 ring-primary p-2 bg-transparent rounded-3xl max-h-16"
                 placeholder="Description"
                 onChange={(e) => {
                   setDescription(e.target.value);

@@ -1,9 +1,4 @@
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuLabel,
-   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ReactNode } from "react";
 import { alphas, colors } from "../constants";
 import { Button } from "@/components/ui/button";
@@ -24,12 +19,7 @@ function ColorOptions({ color, fn, children }: props) {
    return (
       <DropdownMenu>
          <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-         <DropdownMenuContent
-            align="start"
-            sideOffset={10}
-            side="right"
-            className="w-fiit bg-secondary p-2 shadow-lg rounded-lg border"
-         >
+         <DropdownMenuContent align="start" sideOffset={10} side="right" className="w-fiit bg-secondary p-2 shadow-lg rounded-lg border">
             <div className="grid grid-cols-5 gap-2">
                {colors.map((c, i) => (
                   <Button
@@ -47,10 +37,7 @@ function ColorOptions({ color, fn, children }: props) {
                   />
                ))}
 
-               <label
-                  htmlFor="color"
-                  className="w-6 h-6 bg-gradient-to-r from-red-500 to-lime-600 rounded-md"
-               />
+               <label htmlFor="color" className="w-6 h-6 bg-gradient-to-r from-red-500 to-lime-600 rounded-md" />
                <input
                   onChange={(e) => {
                      let time = null;

@@ -1,6 +1,7 @@
 import { handler } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "../types";
+
 import conf from "../conf";
 
 const useCurrentUser = () => {

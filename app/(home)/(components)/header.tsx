@@ -3,13 +3,10 @@
 import UserInfo from "@/components/user_info";
 
 // import { useCurrentUser } from "@/api_/queries/user-query";
-import type { User } from "@/api_/types";
+import { useUserContext } from "@/hooks/use_user";
 
-type props = {
-   user: User;
-};
-
-const Header = ({ user }: props) => {
+const Header = () => {
+   const { user } = useUserContext();
    return (
       <div className="w-full flex items-center justify-between">
          <div></div>

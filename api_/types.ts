@@ -8,6 +8,14 @@ export interface User {
    avatar: string;
 }
 
+export interface Shapes {
+   id: string;
+   design_id: string;
+   props: string;
+   created_at: Date;
+   updated_at: Date;
+}
+
 export interface Design {
    id: string;
    user_id: string;
@@ -18,4 +26,15 @@ export interface Design {
    name: string;
    created_at: Date;
    updated_at: Date;
+}
+
+export interface UserImage {
+   id: string;
+   user_id: string;
+   design_id: number;
+   image_url: string;
+   size: number;
+   created_at: Date;
+   updated_at: Date;
+   image_id: string;
 }

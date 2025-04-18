@@ -1,16 +1,12 @@
-import {
-   CaseUpperIcon,
-   Image,
-   LucideIcon,
-   PencilIcon,
-   TriangleIcon,
-} from "lucide-react";
-import { whichOption } from "../types";
 import CanvasC from "../canvas";
+
+import { CaseUpperIcon, Image, LucideIcon, PencilIcon, TriangleIcon, UploadIcon } from "lucide-react";
+import { whichOption, WhichOptionEmum } from "../types";
 import { RefObject } from "react";
 import { useWhichOptionsOpen } from "../store";
 import { useIsMobile } from "../hooks/isMobile";
 import { Button } from "@/components/ui/button";
+import { useEditorContext } from "./editor-wrapper";
 
 type props = {
    canvasC: RefObject<CanvasC | null>;
@@ -28,11 +24,8 @@ const whichOptions: { label: whichOption; I: LucideIcon }[] = [
    { label: "shapes", I: TriangleIcon },
    { label: "draw", I: PencilIcon },
 ];
-function CanvasElementStandard({
-   canvasC,
-}: {
-   canvasC: RefObject<CanvasC | null>;
-}) {
+function CanvasElementStandard({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
+   const { showUploads } = useEditorContext();
    const { setWhichOption, which } = useWhichOptionsOpen();
 
    return (
@@ -44,10 +37,7 @@ function CanvasElementStandard({
                onClick={() => {
                   if (!canvasC.current) return;
 
-                  if (
-                     o.label !== "draw" &&
-                     canvasC.current.canvas.isDrawingMode
-                  ) {
+                  if (o.label !== "draw" && canvasC.current.canvas.isDrawingMode) {
                      canvasC.current.canvasToggleDrawMode(false);
                   }
 
@@ -60,18 +50,33 @@ function CanvasElementStandard({
                      }
                   }
                }}
-               className={`${o.label === which && "bg-accent font-bold"} w-full rounded-none py-2 px-3`}
+               className={`${o.label === which && "bg-accent font-bold"} flex flex-col items-center w-full rounded-none py-2 px-3`}
                key={i}
             >
                <o.I className="w-5 h-5" />
-               <span className="text-sm text-start hidden lg:block">
-                  {o.label[0].toUpperCase() + o.label.slice(1, o.label.length)}
-               </span>
+               <span className="text-sm text-start hidden lg:block">{o.label[0].toUpperCase() + o.label.slice(1, o.label.length)}</span>
                {/* <span className="text-sm text-start">
                   {o.label[0].toUpperCase() + o.label.slice(1, o.label.length)}
                </span> */}
             </Button>
          ))}
+         {showUploads && (
+            <Button
+               onClick={() => {
+                  if (!canvasC.current) return;
+
+                  setWhichOption(WhichOptionEmum.UPLOAD);
+                  console.log(which);
+               }}
+               className={`${which === "upload" && "bg-accent font-bold"} flex flex-col items-center w-full rounded-none py-2 px-3`}
+               variant={"simple"}
+               size={null}
+            >
+               <UploadIcon className="w-5 h-5" />
+
+               <span className="text-sm text-start hidden lg:block">Uploads</span>
+            </Button>
+         )}
       </div>
    );
 }

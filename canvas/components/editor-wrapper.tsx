@@ -4,16 +4,13 @@ import * as fabric from "fabric";
 import CanvasC from "../canvas";
 import CanvasEditor from "./CanvasEditor";
 
-import type { DBshape } from "@/lib/types";
-import React, { useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 
-import {
-   Popover,
-   PopoverContent,
-   PopoverTrigger,
-} from "@/components/ui/popover";
+import type { Shapes } from "@/api_/types";
+
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MenuIcon } from "lucide-react";
-import { canvasConfig, saveOptions } from "../constants";
+import { canvasConfig, filtersOptions, saveOptions } from "../constants";
 import { useCanvasStore } from "../store";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
@@ -24,19 +21,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
 import { action } from "@/lib/queueShapes";
+import { DefaultCircle, DefaultCustomPath, DefaultIText, DefaultRect } from "../default_styles";
 
 type props = {
+   showUploads?: boolean;
    children?: React.ReactNode;
-   initialData?: { shapes: DBshape[]; width: number; height: number };
-   onChange: (
-      params:
-         | fabric.FabricObject
-         | { width: number; height: number; background: string },
-      action: action,
-   ) => void;
+   initialData?: { shapes?: Shapes[]; width: number; height: number };
+   onChange: (params: fabric.FabricObject, action: action) => void;
 };
 
-function EditorWrapper({ initialData, onChange, children }: props) {
+type editorProps = {
+   showUploads?: boolean;
+};
+
+const EditorContext = createContext<editorProps | undefined>(undefined);
+
+export const useEditorContext = () => {
+   const ctx = useContext(EditorContext);
+   if (!ctx) throw new Error("useEditoContext must be used within a EditorWrapper");
+   return ctx;
+};
+
+function EditorWrapper({ initialData, onChange, children, showUploads = false }: props) {
    const { theme } = useTheme();
    const width = useCanvasStore((state) => state.width);
    const setWidth = useCanvasStore((state) => state.setWidth);
@@ -79,10 +85,207 @@ function EditorWrapper({ initialData, onChange, children }: props) {
          allowTouchScrolling: true,
       });
 
+      // if (initialData?.shapes) {
+      //    initialData?.shapes?.forEach((shape) => {
+      //       let newShape: fabric.FabricObject | null = null;
+
+      //       const s = JSON.parse(shape.props) as fabric.FabricObject;
+      //       if (s.type === "Path") {
+      //          const fp = s as fabric.Path;
+      //          let path = "";
+      //          fp?.path.forEach((p) => {
+      //             path += p.join(" ");
+      //          });
+      //          newShape = new DefaultCustomPath(path, {}, shape.id);
+      //       } else if (s.type === "Circle") {
+      //          const cir = s as fabric.Circle;
+      //          newShape = new DefaultCircle({ radius: cir.radius }, shape.id);
+      //       } else if (s.type === "Rect") {
+      //          newShape = new DefaultRect({}, shape.id);
+      //       } else if (s.type === "Textbox") {
+      //          const t = s as fabric.Text;
+      //          newShape = new DefaultIText(
+      //             t?.text,
+      //             {
+      //                fontSize: t.fontSize,
+      //                fontFamily: t.fontFamily,
+      //                fontStyle: t.fontStyle,
+      //                fontWeight: t.fontWeight,
+      //                textAlign: t.textAlign,
+      //                underline: t.underline,
+      //             },
+      //             shape.id,
+      //          );
+      //       } else if (s.type === "Image") {
+      //          const img = s as fabric.FabricImage;
+
+      //          const i = new Image();
+      //          i.crossOrigin = "Anonymous";
+      //          i.src = img?.src ?? "";
+      //          i.onload = () => {
+      //             const fabricImg = new fabric.FabricImage(i);
+
+      //             const all_filters = Array.from({
+      //                length: filtersOptions.length,
+      //             });
+
+      //             if (img.filters && img.filters.length > 0) {
+      //                all_filters.forEach((f, i) => {
+      //                   all_filters[i] = f;
+      //                });
+      //                fabricImg.filters = all_filters;
+      //                fabricImg.applyFilters(); // Important to apply filters
+      //             }
+      //             newShape = fabricImg;
+      //             console.log(newShape);
+      //          };
+      //       }
+
+      //       if (newShape) {
+      //          newShape.set({
+      //             fill: s.fill,
+      //             top: s.top,
+      //             left: s.left,
+      //             width: s.width,
+      //             height: s.height,
+      //             scaleX: s.scaleX,
+      //             scaleY: s.scaleY,
+      //             stroke: s.stroke,
+      //             strokeWidth: s.strokeWidth,
+      //             lockScalingX: s.lockScalingX,
+      //             lockScalingY: s.lockScalingY,
+      //             shadow: s.shadow,
+      //             flipX: s.flipX,
+      //             flipY: s.flipY,
+      //             lockMovementX: s.lockMovementX,
+      //             lockMovementY: s.lockMovementY,
+      //             opacity: s.opacity,
+      //          });
+      //          f.add(newShape);
+      //       }
+      //    });
+      //    f.renderAll();
+      // }
+
+      // f.renderAll();
+
       if (initialData?.shapes) {
+         const asyncOperations: Promise<void>[] = [];
+
+         initialData.shapes.forEach((shape) => {
+            let newShape: fabric.FabricObject | null = null;
+            const s = JSON.parse(shape.props) as fabric.FabricObject;
+
+            if (s.type === "Path") {
+               const fp = s as fabric.Path;
+               let path = "";
+               fp?.path.forEach((p) => {
+                  path += p.join(" ") + " ";
+               });
+               newShape = new DefaultCustomPath(path.trim(), {}, shape.id);
+            } else if (s.type === "Circle") {
+               const cir = s as fabric.Circle;
+               newShape = new DefaultCircle({ radius: cir.radius }, shape.id);
+            } else if (s.type === "Rect") {
+               newShape = new DefaultRect({}, shape.id);
+            } else if (s.type === "Textbox") {
+               const t = s as fabric.Text;
+               newShape = new DefaultIText(
+                  t?.text,
+                  {
+                     fontSize: t.fontSize,
+                     fontFamily: t.fontFamily,
+                     fontStyle: t.fontStyle,
+                     fontWeight: t.fontWeight,
+                     textAlign: t.textAlign,
+                     underline: t.underline,
+                  },
+                  shape.id,
+               );
+            } else if (s.type === "Image") {
+               // Wrap asynchronous image loading in a Promise
+               const imagePromise = new Promise<void>((resolve) => {
+                  const img = s as fabric.FabricImage;
+                  const i = new Image();
+                  i.crossOrigin = "Anonymous";
+                  i.src = img?.src ?? "";
+                  i.onload = () => {
+                     // Use fabric.Image constructor (or fabric.FabricImage, depending on your version)
+                     const fabricImg = new fabric.Image(i);
+
+                     // If using filters from the original image, assign and apply them
+                     if (img.filters && img.filters.length > 0) {
+                        fabricImg.filters = img.filters;
+                        fabricImg.applyFilters();
+                     }
+                     newShape = fabricImg;
+                     // Set general properties for the shape
+                     newShape.set({
+                        id: shape.id,
+                        fill: s.fill,
+                        top: s.top,
+                        left: s.left,
+                        width: s.width,
+                        height: s.height,
+                        scaleX: s.scaleX,
+                        scaleY: s.scaleY,
+                        stroke: s.stroke,
+                        strokeWidth: s.strokeWidth,
+                        lockScalingX: s.lockScalingX,
+                        lockScalingY: s.lockScalingY,
+                        shadow: s.shadow,
+                        flipX: s.flipX,
+                        flipY: s.flipY,
+                        lockMovementX: s.lockMovementX,
+                        lockMovementY: s.lockMovementY,
+                        opacity: s.opacity,
+                     });
+                     f.add(newShape);
+                     // Resolve the promise once the image shape is added
+                     resolve();
+                  };
+
+                  // Optionally handle error if image fails to load
+                  i.onerror = () => {
+                     console.error("Error loading image:", i.src);
+                     resolve(); // resolve to avoid hanging the promise chain
+                  };
+               });
+               asyncOperations.push(imagePromise);
+            }
+
+            // For non-image shapes, set properties and add them immediately
+            if (newShape && s.type !== "Image") {
+               newShape.set({
+                  id: shape.id,
+                  fill: s.fill,
+                  top: s.top,
+                  left: s.left,
+                  width: s.width,
+                  height: s.height,
+                  scaleX: s.scaleX,
+                  scaleY: s.scaleY,
+                  stroke: s.stroke,
+                  strokeWidth: s.strokeWidth,
+                  lockScalingX: s.lockScalingX,
+                  lockScalingY: s.lockScalingY,
+                  shadow: s.shadow,
+                  flipX: s.flipX,
+                  flipY: s.flipY,
+                  lockMovementX: s.lockMovementX,
+                  lockMovementY: s.lockMovementY,
+                  opacity: s.opacity,
+               });
+               f.add(newShape);
+            }
+         });
+
+         // Once all asynchronous operations complete, re-render the canvas.
+         Promise.all(asyncOperations).then(() => {
+            f.renderAll();
+         });
       }
 
-      f.renderAll();
       canvasC_ref.current = new CanvasC({
          theme,
          snapping: snap,
@@ -92,6 +295,9 @@ function EditorWrapper({ initialData, onChange, children }: props) {
          },
          onUpdate: (e) => {
             onChange(e, "update");
+         },
+         onDelete: (e) => {
+            onChange(e, "delete");
          },
          callbackSeleted: (e) => {
             setFabricObject(e);
@@ -107,6 +313,7 @@ function EditorWrapper({ initialData, onChange, children }: props) {
 
       return () => {
          canvasC_ref.current?.clear();
+         canvasC_ref.current = null;
       };
    }, [theme]);
 
@@ -114,20 +321,13 @@ function EditorWrapper({ initialData, onChange, children }: props) {
       if (!canvasC_ref.current) return;
       canvasC_ref.current.changeCanvasSize("width", width);
       canvasC_ref.current.changeCanvasSize("height", height);
-      onChange(
-         {
-            width: width,
-            height: height,
-            background: canvasC_ref.current.canvas.backgroundColor.toString(),
-         },
-         "resize",
-      );
    }, [width, height]);
 
    return (
-      <div className="h-screen w-full flex flex-1">
-         <div className="w-full h-full">
-            {/* <div>
+      <EditorContext.Provider value={{ showUploads }}>
+         <div className="h-screen w-full flex flex-1">
+            <div className="w-full h-full">
+               {/* <div>
                <Popover>
                   <PopoverTrigger>
                      <MenuIcon />
@@ -189,9 +389,11 @@ function EditorWrapper({ initialData, onChange, children }: props) {
                   </PopoverContent>
                </Popover>
             </div> */}
-            <CanvasEditor canvasC_ref={canvasC_ref} canvasRef={canvasRef} />
+               <CanvasEditor canvasC_ref={canvasC_ref} canvasRef={canvasRef} />
+            </div>
          </div>
-      </div>
+      </EditorContext.Provider>
    );
 }
+
 export default EditorWrapper;

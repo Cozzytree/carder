@@ -2,7 +2,7 @@ import conf from "@/api_/conf";
 import Editor from "../(components)/editor";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { Design } from "@/api_/types";
+import type { Design, Shapes } from "@/api_/types";
 
 type props = {
    params: { editor_Id: string };
@@ -32,11 +32,26 @@ const EditorPage = async ({ params }: props) => {
 
    const data = (await res.json()) as { data: Design; status: number };
 
-   console.log(data);
+   if (!data?.data) {
+      redirect("/");
+   }
+
+   const shapeRes = await fetch(`${conf?.api_url}/shape/${data?.data?.id}`, {
+      method: "GET",
+      headers: {
+         Authorization: `Bearer ${session?.value}`,
+      },
+   });
+
+   if (shapeRes?.status >= 400) {
+      redirect(`/error?m=${shapeRes?.statusText || "unknown error"}&origin=editor`);
+   }
+
+   const shapeData = (await shapeRes.json()) as { data: Shapes[] };
 
    return (
       <div className="h-screen  w-full">
-         <Editor design={data?.data} />
+         <Editor design={data?.data} shapes={shapeData?.data} />
       </div>
    );
 };
