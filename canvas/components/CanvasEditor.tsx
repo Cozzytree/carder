@@ -1,3 +1,4 @@
+"use client";
 import CanvasC from "@/canvas/canvas";
 import WhichOContainer from "./which_option_container";
 import CanvasOptions from "../options";
@@ -9,7 +10,13 @@ import { RefObject, useEffect, useRef, useState } from "react";
 import { useIsMobile } from "../hooks/isMobile";
 import { useCanvasStore, useWhichOptionsOpen } from "@/canvas/store";
 import { CanvasElements } from "./elements";
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components/ui/context-menu";
+import {
+   ContextMenu,
+   ContextMenuContent,
+   ContextMenuItem,
+   ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { useEditorContext } from "./editor-wrapper";
 
 type props = {
    canvasC_ref: RefObject<CanvasC | null>;
@@ -17,6 +24,7 @@ type props = {
 };
 
 function CanvasEditor({ canvasC_ref, canvasRef }: props) {
+   const { isEdit } = useEditorContext();
    const width = useCanvasStore((state) => state.width);
    const snap = useCanvasStore((state) => state.snapping);
    const setSnap = useCanvasStore((state) => state.setSnap);
@@ -31,7 +39,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
 
    useEffect(() => {
       const handler = () => {
-         if (!canvasRef.current) return;
+         if (!canvasRef.current || !isEdit) return;
          if (innerContainerRef.current) {
             innerContainerRef.current.scrollIntoView({
                behavior: "smooth",
@@ -46,77 +54,106 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
    return (
       <div className="w-full h-full flex">
          {/* {left sidebar} */}
-         <div className={`h-full border-r border-r-foreground/50 ${isMobile ? "hidden" : "flex"}`}>
-            <div className="h-full flex flex-col items-center border">
-               <CanvasElements canvasC={canvasC_ref} />
+         {isEdit && (
+            <div
+               className={`h-full border-r border-r-foreground/50 ${isMobile ? "hidden" : "flex"}`}
+            >
+               <div className="h-full flex flex-col items-center border">
+                  <CanvasElements canvasC={canvasC_ref} />
+               </div>
+               {which !== null && !isMobile && (
+                  <div className="h-full z-50 border-l border-l-foreground/50">
+                     <WhichOContainer canvasC={canvasC_ref} />
+                  </div>
+               )}
             </div>
-            {which !== null && !isMobile && (
-               <div className="h-full z-50 border-l border-l-foreground/50">
-                  <WhichOContainer canvasC={canvasC_ref} />
+         )}
+         <div className="w-full h-full flex flex-col">
+            {/* {isEdit && (
+               <div>
+                  <CanvasOptions
+                     containerZoom={containerZoom}
+                     setContainerZoom={setContainerZoom}
+                     canvasC={canvasC_ref}
+                     containerRef={containerRef}
+                  />
+               </div>
+            )} */}
+
+            {/* {canvas container} */}
+            {isEdit ? (
+               <div className="w-full h-full flex justify-center overflow-auto">
+                  <div
+                     ref={containerRef}
+                     style={{
+                        scale: containerScale,
+                     }}
+                     className="shrink-0 w-full flex justify-center items-center py-5 h-full relative"
+                  >
+                     <div
+                        ref={innerContainerRef}
+                        className="absolute w-full h-full top-0 left-0 flex justify-center items-center"
+                        style={
+                           {
+                              // width:
+                              //    containerZoom < 1.5 && containerZoom > 0.6
+                              //       ? "100%"
+                              //       : `${width + containerZoom * 500 + "px"}`,
+                              // height: `${height + containerZoom * 250 + "px"}`,
+                           }
+                        }
+                     >
+                        <ContextMenu>
+                           <ContextMenuTrigger asChild>
+                              <canvas
+                                 ref={canvasRef}
+                                 className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`}
+                              />
+                           </ContextMenuTrigger>
+                           <ContextMenuContent>
+                              <ContextMenuItem
+                                 onClick={() => {
+                                    if (!canvasC_ref.current) return;
+                                    canvasC_ref.current.snapping = canvasC_ref.current.snapping
+                                       ? false
+                                       : true;
+                                    setSnap(canvasC_ref.current.snapping);
+                                 }}
+                              >
+                                 {snap ? "Disable " : "Enable "}
+                                 snapping
+                              </ContextMenuItem>
+                           </ContextMenuContent>
+                        </ContextMenu>
+                     </div>
+                  </div>
+               </div>
+            ) : (
+               <canvas
+                  ref={canvasRef}
+                  className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`}
+               ></canvas>
+            )}
+
+            {isEdit && (
+               <div className="w-full border-t border-t-foreground/50 z-50 min-h-14 flex items-center px-5">
+                  {/* {!isMobile && activeObject && ( */}
+                  <div className="flex w-full items-center gap-1">
+                     <ZoomContainer
+                        containerRef={containerRef}
+                        handleZoom={(v) => {
+                           setContainerZoom(v);
+                        }}
+                        zoomLevel={containerZoom}
+                     />
+                  </div>
+                  {isMobile && <OptionsMobile canvasC={canvasC_ref} />}
                </div>
             )}
          </div>
 
-         <div className="w-full h-full flex flex-col">
-            <div>
-               <CanvasOptions containerZoom={containerZoom} setContainerZoom={setContainerZoom} canvasC={canvasC_ref} containerRef={containerRef} />
-            </div>
-
-            {/* {canvas container} */}
-            <div className="w-full h-full flex justify-center overflow-auto">
-               <div
-                  ref={containerRef}
-                  style={{
-                     scale: containerScale,
-                  }}
-                  className="shrink-0 w-full flex justify-center items-center py-5 h-full relative"
-               >
-                  <div
-                     ref={innerContainerRef}
-                     className="absolute top-0 left-0 flex justify-center items-center"
-                     style={{
-                        width: `${width + containerZoom * 500 + "px"}`,
-                        height: `${height + containerZoom * 250 + "px"}`,
-                     }}
-                  >
-                     <ContextMenu>
-                        <ContextMenuTrigger>
-                           <canvas ref={canvasRef} className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`} />
-                        </ContextMenuTrigger>
-                        <ContextMenuContent>
-                           <ContextMenuItem
-                              onClick={() => {
-                                 if (!canvasC_ref.current) return;
-                                 canvasC_ref.current.snapping = canvasC_ref.current.snapping ? false : true;
-                                 setSnap(canvasC_ref.current.snapping);
-                              }}
-                           >
-                              {snap ? "Disable " : "Enable "}
-                              snapping
-                           </ContextMenuItem>
-                        </ContextMenuContent>
-                     </ContextMenu>
-                  </div>
-               </div>
-            </div>
-
-            <div className="w-full border-t border-t-foreground/50 z-50 min-h-14 flex items-center px-5">
-               {/* {!isMobile && activeObject && ( */}
-               <div className="flex w-full items-center gap-1">
-                  <ZoomContainer
-                     containerRef={containerRef}
-                     handleZoom={(v) => {
-                        setContainerZoom(v);
-                     }}
-                     zoomLevel={containerZoom}
-                  />
-               </div>
-               {isMobile && <OptionsMobile canvasC={canvasC_ref} />}
-            </div>
-         </div>
-
          {/* {right container} */}
-         {!isMobile && <RightContainer canvasC={canvasC_ref} />}
+         {isEdit && <>{!isMobile && <RightContainer canvasC={canvasC_ref} />}</>}
       </div>
    );
 }

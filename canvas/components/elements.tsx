@@ -1,6 +1,13 @@
 import CanvasC from "../canvas";
 
-import { CaseUpperIcon, Image, LucideIcon, PencilIcon, TriangleIcon, UploadIcon } from "lucide-react";
+import {
+   CaseUpperIcon,
+   Image,
+   LucideIcon,
+   PencilIcon,
+   TriangleIcon,
+   UploadIcon,
+} from "lucide-react";
 import { whichOption, WhichOptionEmum } from "../types";
 import { RefObject } from "react";
 import { useWhichOptionsOpen } from "../store";
@@ -54,7 +61,9 @@ function CanvasElementStandard({ canvasC }: { canvasC: RefObject<CanvasC | null>
                key={i}
             >
                <o.I className="w-5 h-5" />
-               <span className="text-sm text-start hidden lg:block">{o.label[0].toUpperCase() + o.label.slice(1, o.label.length)}</span>
+               <span className="text-sm text-start hidden lg:block">
+                  {o.label[0].toUpperCase() + o.label.slice(1, o.label.length)}
+               </span>
                {/* <span className="text-sm text-start">
                   {o.label[0].toUpperCase() + o.label.slice(1, o.label.length)}
                </span> */}
@@ -66,7 +75,6 @@ function CanvasElementStandard({ canvasC }: { canvasC: RefObject<CanvasC | null>
                   if (!canvasC.current) return;
 
                   setWhichOption(WhichOptionEmum.UPLOAD);
-                  console.log(which);
                }}
                className={`${which === "upload" && "bg-accent font-bold"} flex flex-col items-center w-full rounded-none py-2 px-3`}
                variant={"simple"}

@@ -17,6 +17,8 @@ export default async function RootLayout({
 
    const session = cookie.get(process.env.NEXT_PUBLIC_SESSION_NAME || "");
 
+   console.log(session);
+
    if (!session || !session?.value) {
       redirect("/landing");
    }

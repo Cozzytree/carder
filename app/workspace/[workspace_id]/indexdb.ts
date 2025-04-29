@@ -26,7 +26,6 @@ class IndexDB {
          page_id: pageId,
       });
       req.onerror = (e) => {
-         console.log(e);
          // throw new Error()
       };
    }

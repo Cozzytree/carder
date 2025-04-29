@@ -387,7 +387,6 @@ class CanvasC {
    }
    async changeCanvasBackground(v: HTMLImageElement | string) {
       let img: DefaultImage | null = null;
-      console.log(v);
       if (typeof v == "string") {
          img = await FabricImage.fromURL(v);
       } else if (v instanceof HTMLImageElement) {
@@ -627,7 +626,6 @@ class CanvasC {
       } else {
          this.canvas.selection = true;
       }
-      console.log(this.canvas.selection);
       this.canvas.requestRenderAll();
    }
 

@@ -28,7 +28,17 @@ type props = {
    handleGradient?: (g: string[], type?: "radial" | "linear") => void;
 };
 
-function ColorOptions({ handleColor, handleGradient, canvasC, color, width, height, forCanvas, showGradient = true, showGradientOptions = false }: props) {
+function ColorOptions({
+   handleColor,
+   handleGradient,
+   canvasC,
+   color,
+   width,
+   height,
+   forCanvas,
+   showGradient = true,
+   showGradientOptions = false,
+}: props) {
    const [tab, setTab] = useState<"colors" | "gradient">("colors");
    const setRecentColor = useColorStore((state) => state.setRecentColors);
    const setRecentGradient = useColorStore((state) => state.setRecentGradient);
@@ -89,22 +99,24 @@ function ColorOptions({ handleColor, handleGradient, canvasC, color, width, heig
                         onClick={() => {
                            handleColor("");
                         }}
-                        className="rounded-full"
                      >
-                        <CircleXIcon className="w-7 h-7 md:w-8 md:h-8" fill="red" />
+                        <CircleXIcon className="w-[28px] h-[28px]" fill="red" />
                      </button>
                      {colors.map((c, i) => (
-                        <button
+                        <BtnWithColor
                            onClick={() => {
                               handleColor(c);
-                              setRecentColor(c);
                            }}
-                           className="w-7 h-7 md:w-8 md:h-8 rounded-full border-foreground/40 border-2"
+                           w={28}
+                           h={28}
+                           color={c}
                            key={i}
-                           style={{ background: c }}
                         />
                      ))}
-                     <label htmlFor="customcolor" className="gradient w-8 h-8 cursor-pointer rounded-full bg-foreground"></label>
+                     <label
+                        htmlFor="customcolor"
+                        className="gradient w-8 h-8 cursor-pointer rounded-full bg-foreground"
+                     ></label>
                      <input
                         onChange={debouncer((e: ChangeEvent<HTMLInputElement>) => {
                            handleColor(e.target.value);
@@ -130,7 +142,10 @@ function ColorOptions({ handleColor, handleGradient, canvasC, color, width, heig
                                           w={28}
                                           h={28}
                                           onClick={() => {
-                                             handleGradient?.(g, color instanceof Gradient ? color.type : "linear");
+                                             handleGradient?.(
+                                                g,
+                                                color instanceof Gradient ? color.type : "linear",
+                                             );
                                           }}
                                           color={g}
                                           key={i}
@@ -151,7 +166,10 @@ function ColorOptions({ handleColor, handleGradient, canvasC, color, width, heig
                                  gradientType={color instanceof Gradient ? color.type : "linear"}
                                  key={i}
                                  onClick={() => {
-                                    handleGradient?.(g, color instanceof Gradient ? color.type : "linear");
+                                    handleGradient?.(
+                                       g,
+                                       color instanceof Gradient ? color.type : "linear",
+                                    );
                                     setRecentGradient(g);
                                  }}
                                  color={g}
@@ -175,7 +193,11 @@ function ColorOptions({ handleColor, handleGradient, canvasC, color, width, heig
                               }
                            }}
                         />
-                        <CustomGradientColor handleGradient={(c) => handleGradient?.(c, color instanceof Gradient ? color.type : "linear")} />
+                        <CustomGradientColor
+                           handleGradient={(c) =>
+                              handleGradient?.(c, color instanceof Gradient ? color.type : "linear")
+                           }
+                        />
                      </div>
                   )}
                </>
@@ -191,7 +213,11 @@ function CustomGradientColor({ handleGradient }: { handleGradient?: (v: string[]
    return (
       <div className="w-full mt-4 flex flex-col gap-2">
          <div className="flex gpa-2 items-center">
-            <label style={{ background: color || "" }} className="block w-7 h-7 rounded-full border-2 border-foreground/80" htmlFor="c-gra"></label>
+            <label
+               style={{ background: color || "" }}
+               className="block w-7 h-7 rounded-full border-2 border-foreground/80"
+               htmlFor="c-gra"
+            ></label>
             <input
                onChange={(e) => {
                   setColor(e.target.value);
@@ -225,7 +251,11 @@ function CustomGradientColor({ handleGradient }: { handleGradient?: (v: string[]
                   >
                      <XCircle className="text-foreground w-4 h-4" />
                   </button>
-                  <label style={{ background: c || "" }} className="block w-7 h-7 rounded-full border-2 border-foreground/80" htmlFor={`c-gra${i}`}></label>
+                  <label
+                     style={{ background: c || "" }}
+                     className="block w-7 h-7 rounded-full border-2 border-foreground/80"
+                     htmlFor={`c-gra${i}`}
+                  ></label>
                   <input
                      onChange={(e) => {
                         setColors((c) => {
@@ -293,12 +323,26 @@ function GradientToggle({
                   onClick={() => {
                      handleToggle("linear");
                   }}
-                  className={cn(gradient ? (gradient.type === "linear" ? "bg-secondary text-background" : "") : "", "text-sm px-2 rounded-sm py-[2px] md:py-1")}
+                  className={cn(
+                     gradient
+                        ? gradient.type === "linear"
+                           ? "bg-secondary text-background"
+                           : ""
+                        : "",
+                     "text-sm px-2 rounded-sm py-[2px] md:py-1",
+                  )}
                >
                   linear
                </button>
                <button
-                  className={cn(gradient ? (gradient.type === "radial" ? "bg-secondary text-background" : "") : "", "text-sm px-2 rounded-sm py-[2px] md:py-1")}
+                  className={cn(
+                     gradient
+                        ? gradient.type === "radial"
+                           ? "bg-secondary text-background"
+                           : ""
+                        : "",
+                     "text-sm px-2 rounded-sm py-[2px] md:py-1",
+                  )}
                   onClick={() => {
                      handleToggle("radial");
                   }}
@@ -467,7 +511,18 @@ function GradientToggle({
    );
 }
 
-function RadialPropertyChange({ fn, max, defaultVal, min = 0 }: { min?: number; defaultVal: number; max: number; fn: (e: number) => void; color: Gradient<GradientType> }) {
+function RadialPropertyChange({
+   fn,
+   max,
+   defaultVal,
+   min = 0,
+}: {
+   min?: number;
+   defaultVal: number;
+   max: number;
+   fn: (e: number) => void;
+   color: Gradient<GradientType>;
+}) {
    return (
       <Slider
          onValueChange={debouncer((e) => {

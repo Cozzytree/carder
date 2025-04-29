@@ -1,15 +1,15 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Roboto_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import QueryProvider from "@/components/query-client_provider";
 
-const roboto = Roboto_Mono({
+const poppins = Poppins({
    weight: ["400", "700"],
    style: ["italic", "normal"],
    display: "auto",
-   subsets: ["cyrillic", "latin"],
+   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default async function RootLayout({
    return (
       <html lang="en" suppressHydrationWarning>
          <head />
-         <body className={`${roboto.className} antialiased min-h-screen`}>
+         <body className={`${poppins.className} antialiased min-h-screen`}>
             <QueryProvider>
                <ThemeProvider
                   attribute="class"

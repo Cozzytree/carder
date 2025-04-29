@@ -6,7 +6,7 @@ const conf = (() => {
    }
 
    const c = {
-      api_url,
+      api_url: `${api_url}/api/v1`,
       session,
    };
 

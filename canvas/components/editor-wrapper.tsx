@@ -22,16 +22,24 @@ import {
 import { useTheme } from "next-themes";
 import { action } from "@/lib/queueShapes";
 import { DefaultCircle, DefaultCustomPath, DefaultIText, DefaultRect } from "../default_styles";
+import { initialize } from "next/dist/server/lib/router-server";
 
 type props = {
+   editable?: boolean;
    showUploads?: boolean;
    children?: React.ReactNode;
-   initialData?: { shapes?: Shapes[]; width: number; height: number };
-   onChange: (params: fabric.FabricObject, action: action) => void;
+   initialData?: {
+      shapes?: Shapes[];
+      width: number;
+      height: number;
+      scale?: number;
+   };
+   onChange?: (params: fabric.FabricObject, action: action) => void;
 };
 
 type editorProps = {
    showUploads?: boolean;
+   isEdit?: boolean;
 };
 
 const EditorContext = createContext<editorProps | undefined>(undefined);
@@ -42,7 +50,13 @@ export const useEditorContext = () => {
    return ctx;
 };
 
-function EditorWrapper({ initialData, onChange, children, showUploads = false }: props) {
+function EditorWrapper({
+   initialData,
+   onChange,
+   children,
+   showUploads = false,
+   editable = true,
+}: props) {
    const { theme } = useTheme();
    const width = useCanvasStore((state) => state.width);
    const setWidth = useCanvasStore((state) => state.setWidth);
@@ -60,8 +74,10 @@ function EditorWrapper({ initialData, onChange, children, showUploads = false }:
       if (!canvasRef.current) return;
 
       if (initialData) {
-         setWidth(initialData.width);
-         setHeight(initialData.height);
+         // setWidth(initialData.width);
+         // setHeight(initialData.height);
+         setWidth(window.innerWidth);
+         setHeight(window.innerHeight);
       }
 
       try {
@@ -84,90 +100,10 @@ function EditorWrapper({ initialData, onChange, children, showUploads = false }:
          selectionLineWidth: canvasConfig.selectionWidth,
          allowTouchScrolling: true,
       });
-
-      // if (initialData?.shapes) {
-      //    initialData?.shapes?.forEach((shape) => {
-      //       let newShape: fabric.FabricObject | null = null;
-
-      //       const s = JSON.parse(shape.props) as fabric.FabricObject;
-      //       if (s.type === "Path") {
-      //          const fp = s as fabric.Path;
-      //          let path = "";
-      //          fp?.path.forEach((p) => {
-      //             path += p.join(" ");
-      //          });
-      //          newShape = new DefaultCustomPath(path, {}, shape.id);
-      //       } else if (s.type === "Circle") {
-      //          const cir = s as fabric.Circle;
-      //          newShape = new DefaultCircle({ radius: cir.radius }, shape.id);
-      //       } else if (s.type === "Rect") {
-      //          newShape = new DefaultRect({}, shape.id);
-      //       } else if (s.type === "Textbox") {
-      //          const t = s as fabric.Text;
-      //          newShape = new DefaultIText(
-      //             t?.text,
-      //             {
-      //                fontSize: t.fontSize,
-      //                fontFamily: t.fontFamily,
-      //                fontStyle: t.fontStyle,
-      //                fontWeight: t.fontWeight,
-      //                textAlign: t.textAlign,
-      //                underline: t.underline,
-      //             },
-      //             shape.id,
-      //          );
-      //       } else if (s.type === "Image") {
-      //          const img = s as fabric.FabricImage;
-
-      //          const i = new Image();
-      //          i.crossOrigin = "Anonymous";
-      //          i.src = img?.src ?? "";
-      //          i.onload = () => {
-      //             const fabricImg = new fabric.FabricImage(i);
-
-      //             const all_filters = Array.from({
-      //                length: filtersOptions.length,
-      //             });
-
-      //             if (img.filters && img.filters.length > 0) {
-      //                all_filters.forEach((f, i) => {
-      //                   all_filters[i] = f;
-      //                });
-      //                fabricImg.filters = all_filters;
-      //                fabricImg.applyFilters(); // Important to apply filters
-      //             }
-      //             newShape = fabricImg;
-      //             console.log(newShape);
-      //          };
-      //       }
-
-      //       if (newShape) {
-      //          newShape.set({
-      //             fill: s.fill,
-      //             top: s.top,
-      //             left: s.left,
-      //             width: s.width,
-      //             height: s.height,
-      //             scaleX: s.scaleX,
-      //             scaleY: s.scaleY,
-      //             stroke: s.stroke,
-      //             strokeWidth: s.strokeWidth,
-      //             lockScalingX: s.lockScalingX,
-      //             lockScalingY: s.lockScalingY,
-      //             shadow: s.shadow,
-      //             flipX: s.flipX,
-      //             flipY: s.flipY,
-      //             lockMovementX: s.lockMovementX,
-      //             lockMovementY: s.lockMovementY,
-      //             opacity: s.opacity,
-      //          });
-      //          f.add(newShape);
-      //       }
-      //    });
-      //    f.renderAll();
-      // }
-
-      // f.renderAll();
+      f.set({
+         scaleX: initialData?.scale ? initialData?.scale : 1,
+         sacleY: initialData?.scale ? initialData?.scale : 1,
+      });
 
       if (initialData?.shapes) {
          const asyncOperations: Promise<void>[] = [];
@@ -211,7 +147,7 @@ function EditorWrapper({ initialData, onChange, children, showUploads = false }:
                   i.src = img?.src ?? "";
                   i.onload = () => {
                      // Use fabric.Image constructor (or fabric.FabricImage, depending on your version)
-                     const fabricImg = new fabric.Image(i);
+                     const fabricImg = new fabric.FabricImage(i);
 
                      // If using filters from the original image, assign and apply them
                      if (img.filters && img.filters.length > 0) {
@@ -294,10 +230,10 @@ function EditorWrapper({ initialData, onChange, children, showUploads = false }:
             onChange?.(e, "create");
          },
          onUpdate: (e) => {
-            onChange(e, "update");
+            onChange?.(e, "update");
          },
          onDelete: (e) => {
-            onChange(e, "delete");
+            onChange?.(e, "delete");
          },
          callbackSeleted: (e) => {
             setFabricObject(e);
@@ -324,7 +260,7 @@ function EditorWrapper({ initialData, onChange, children, showUploads = false }:
    }, [width, height]);
 
    return (
-      <EditorContext.Provider value={{ showUploads }}>
+      <EditorContext.Provider value={{ showUploads, isEdit: editable }}>
          <div className="h-screen w-full flex flex-1">
             <div className="w-full h-full">
                {/* <div>

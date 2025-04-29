@@ -37,7 +37,6 @@ const Editor = ({ design, shapes }: props) => {
          <EditorWrapper
             showUploads={true}
             onChange={(e, action) => {
-               console.log(e.type, e.get("id"));
                if (e.type === "activeselection" || e.type === "group") return;
                const id = e.get("id");
                if (!id) return;

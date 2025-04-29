@@ -52,12 +52,11 @@ const useCreateDesign = () => {
 
 const useDeleteDesign = () => {
    const { mutate: deleteDesign, isLoading: deletingDesign } = useMutation({
-      mutationFn: handler(async (d: { token?: string; id: string }) => {
+      mutationFn: handler(async (d: { id: string }) => {
          const res = await fetch(`${conf.api_url}/design/delete/${d.id}`, {
             credentials: "include",
             headers: {
                "Content-Type": "application/json",
-               Authorization: `Bearer ${d?.token || ""}`,
             },
             method: "DELETE",
          });
