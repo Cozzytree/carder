@@ -1,18 +1,19 @@
 import CanvasC from "./canvas";
+import BtnWithColor from "./components/btn-with-color";
+import ColorOptions from "./components/which_option_items/color_options";
+import CanvasBackgroundChange from "./components/canvas_background_change_modal";
 
-import { BrushIcon, FilterIcon, MousePointer2 } from "lucide-react";
+import { brushes } from "./constants";
+import { Gradient } from "fabric";
+import { debouncer } from "@/lib/utils";
+import { useIsMobile } from "./hooks/isMobile";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { useCanvasStore, useWhichOptionsOpen } from "./store";
-import { useIsMobile } from "./hooks/isMobile";
+import { handleColorfill, handleGradient } from "./utilsfunc";
+import { BrushIcon, FilterIcon, MousePointer2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { brushes } from "./constants";
-import ColorOptions from "./components/which_option_items/color_options";
-import { Slider } from "@/components/ui/slider";
-import { debouncer } from "@/lib/utils";
-import BtnWithColor from "./components/btn-with-color";
-import { Gradient } from "fabric";
-import { Button } from "@/components/ui/button";
-import CanvasBackgroundChange from "./components/canvas_background_change_modal";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type props = {
@@ -38,22 +39,62 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
    return (
       <TooltipProvider>
-         <div className="w-full relative px-2 min-h-16 gap-2 flex items-center border-b border-b-foreground/50">
+         <div className="w-full relative px-2 min-h-16 gap-2 flex items-center">
             <div className="flex items-center gap-2 text-sm">
                <Tooltip>
                   <TooltipTrigger asChild>
-                     <BtnWithColor
-                        w={25}
-                        h={25}
-                        onClick={() => {
-                           setWhichOption("color");
-                        }}
-                        color={
-                           canvasC.current?.canvas.backgroundColor as
-                              | string
-                              | Gradient<"linear" | "radical">
-                        }
-                     />
+                     <Popover>
+                        <PopoverTrigger>
+                           <BtnWithColor
+                              w={25}
+                              h={25}
+                              onClick={() => {
+                                 // setWhichOption("color");
+                              }}
+                              color={
+                                 canvasC.current?.canvas.backgroundColor as
+                                    | string
+                                    | Gradient<"linear" | "radical">
+                              }
+                           />
+                        </PopoverTrigger>
+                        <PopoverContent>
+                           <ColorOptions
+                              forCanvas={true}
+                              canvasC={canvasC}
+                              showGradient={true}
+                              showGradientOptions={true}
+                              width={canvasC?.current?.canvas.width ?? 0}
+                              height={canvasC?.current?.canvas.height ?? 0}
+                              color={
+                                 (canvasC?.current?.canvas.backgroundColor as
+                                    | string
+                                    | Gradient<"linear" | "radial">) || "#ffffff"
+                              }
+                              handleGradient={(g, t) => {
+                                 handleGradient({
+                                    type: t ? t : "linear",
+                                    activeObject: null,
+                                    canvasC: canvasC,
+                                    color: g,
+                                    fn: () => {
+                                       setFabricObject(activeObject);
+                                    },
+                                 });
+                              }}
+                              handleColor={(v) => {
+                                 handleColorfill({
+                                    activeObject: null,
+                                    canvasC: canvasC,
+                                    color: v,
+                                    fn: () => {
+                                       setFabricObject(activeObject);
+                                    },
+                                 });
+                              }}
+                           />
+                        </PopoverContent>
+                     </Popover>
                   </TooltipTrigger>
                   <TooltipContent>canvas background color</TooltipContent>
                </Tooltip>

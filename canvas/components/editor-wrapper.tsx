@@ -4,25 +4,23 @@ import * as fabric from "fabric";
 import CanvasC from "../canvas";
 import CanvasEditor from "./CanvasEditor";
 
-import React, { createContext, useContext, useEffect, useRef } from "react";
-
-import type { Shapes } from "@/api_/types";
-
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MenuIcon } from "lucide-react";
-import { canvasConfig, filtersOptions, saveOptions } from "../constants";
+import { useTheme } from "next-themes";
 import { useCanvasStore } from "../store";
-import { ModeToggle } from "@/components/mode-toggle";
+import type { Shapes } from "@/api_/types";
+import { action } from "@/lib/queueShapes";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
+import { initialize } from "next/dist/server/lib/router-server";
+import { canvasConfig, filtersOptions, saveOptions } from "../constants";
+import React, { createContext, useContext, useEffect, useRef } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
    DropdownMenu,
    DropdownMenuContent,
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useTheme } from "next-themes";
-import { action } from "@/lib/queueShapes";
 import { DefaultCircle, DefaultCustomPath, DefaultIText, DefaultRect } from "../default_styles";
-import { initialize } from "next/dist/server/lib/router-server";
 
 type props = {
    editable?: boolean;

@@ -1,8 +1,39 @@
-export type canvasShapes = "i-text" | "rect" | "ellipse" | "circle" | "path" | "triangle" | "polygon";
+export type canvasShapes =
+   | "i-text"
+   | "rect"
+   | "ellipse"
+   | "circle"
+   | "path"
+   | "triangle"
+   | "polygon";
 
-export type Align = "left" | "center" | "right" | "justify" | "justify-left" | "justify-center" | "justify-right";
+export type Align =
+   | "left"
+   | "center"
+   | "right"
+   | "justify"
+   | "justify-left"
+   | "justify-center"
+   | "justify-right";
 
-export type whichOption = "shapes" | "draw" | "text" | "images" | "canvasObj" | "canvas" | "color" | "fonts" | "resize_canvas" | "outline" | "image-filters" | "upload";
+export type whichOption =
+   | "shapes"
+   | "draw"
+   | "text"
+   | "images"
+   | "canvasObj"
+   | "canvas"
+   | "color"
+   | "fonts"
+   | "resize_canvas"
+   | "outline"
+   | "image-filters"
+   | "upload";
+
+export const canvasShapeTypes = {
+   rect: "rect",
+   circle: "circle",
+};
 
 export enum WhichOptionEmum {
    SHAPE = "shapes",

@@ -7,19 +7,27 @@ import ColorOptions from "./which_option_items/color_options";
 import OutlineAndShadow from "./which_option_items/outlineandShaodow";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { RefObject, useState } from "react";
+import { Dispatch, RefObject, SetStateAction, useState } from "react";
 import { ActiveSelection, Gradient, Group } from "fabric";
 import { useCanvasStore } from "../store";
 import { handleColorfill, handleGradient } from "../utilsfunc";
 import { Separator } from "@/components/ui/separator";
 import CanvasOptions from "../options";
+import ZoomContainer from "./zoom_container";
+import { canvasShapeTypes } from "../types";
+import ImageFiltersOption from "./image_filter_options";
 
 type props = {
+   containerRef: RefObject<HTMLDivElement | null>;
    canvasC: RefObject<CanvasC | null>;
+   setContainerZoom: Dispatch<SetStateAction<number>>;
+   containerZoom: number;
 };
 
-function RightContainer({ canvasC }: props) {
-   const { activeObject, setFabricObject } = useCanvasStore();
+function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom }: props) {
+   const setFabricObject = useCanvasStore((state) => state.setFabricObject);
+   const activeObject = useCanvasStore((state) => state.activeObject);
+
    const [sideWidth, setSideWidth] = useState(350);
 
    const isActiveSelection =
@@ -31,7 +39,7 @@ function RightContainer({ canvasC }: props) {
    const activeObjectWidth = activeObject ? activeObject?.get("width") : 0;
    const activeObjectHeight = activeObject ? activeObject.get("height") : 0;
 
-   const spanStyle = "text-xs select-none px-3";
+   const spanStyle = "text-xs select-none px-3 text-nowrap";
 
    const Sept = () => <Separator className="border-[1px] mt-1 mb-2 border-foreground/20" />;
 
@@ -120,7 +128,6 @@ function RightContainer({ canvasC }: props) {
                   </div>
                </div>
 
-               <div className=""></div>
                <InputWithValue
                   val={
                      isActiveSelection
@@ -145,7 +152,7 @@ function RightContainer({ canvasC }: props) {
                <div className="space-y-2">
                   <span className={spanStyle}>Layout</span>
                   <Sept />
-                  <div className="flex items-center justify-evenly gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                      <InputWithValue
                         val={
                            activeObject instanceof ActiveSelection
@@ -185,6 +192,51 @@ function RightContainer({ canvasC }: props) {
                      >
                         <span className="text-xs">H</span>
                      </InputWithValue>
+
+                     {activeObject?.type === canvasShapeTypes.circle && (
+                        <InputWithValue
+                           val={activeObject?.get("radius") ?? 0}
+                           change={(e) => {
+                              if (!canvasC.current || !activeObject) return;
+                              canvasC.current.changeCanvasProperties(activeObject, {
+                                 radius: e,
+                              });
+                              activeObject.setCoords();
+                           }}
+                        >
+                           <span>R</span>
+                        </InputWithValue>
+                     )}
+
+                     {/* {/rect radius } */}
+                     {activeObject?.type === canvasShapeTypes.rect && (
+                        <>
+                           <InputWithValue
+                              val={activeObject?.get("radius") ?? 0}
+                              change={(e) => {
+                                 if (!canvasC.current || !activeObject || e > 60) return;
+                                 canvasC.current.changeCanvasProperties(activeObject, {
+                                    rx: e,
+                                 });
+                                 activeObject.setCoords();
+                              }}
+                           >
+                              <span className={spanStyle}>R-X</span>
+                           </InputWithValue>
+                           <InputWithValue
+                              val={activeObject?.get("radius") ?? 0}
+                              change={(e) => {
+                                 if (!canvasC.current || !activeObject || e > 60) return;
+                                 canvasC.current.changeCanvasProperties(activeObject, {
+                                    ry: e,
+                                 });
+                                 activeObject.setCoords();
+                              }}
+                           >
+                              <span className={spanStyle}>R-Y</span>
+                           </InputWithValue>
+                        </>
+                     )}
                   </div>
                </div>
 
@@ -243,6 +295,18 @@ function RightContainer({ canvasC }: props) {
                   )}
                </div>
 
+               {activeObject.type === "image" && (
+                  <>
+                     <Sept />
+                     <div className="flex flex-col gap-2">
+                        <span className={spanStyle}>Filters</span>
+                        <div className="max-h-[200px] overflow-y-auto">
+                           <ImageFiltersOption canvasC={canvasC} />
+                        </div>
+                     </div>
+                  </>
+               )}
+
                <Sept />
 
                <OutlineAndShadow canvasC={canvasC} />
@@ -255,7 +319,19 @@ function RightContainer({ canvasC }: props) {
                </div>
             </div>
          ) : (
-            <CanvasOptions canvasC={canvasC} />
+            <div className="flex flex-col">
+               <CanvasOptions canvasC={canvasC} />
+
+               <Sept />
+
+               <ZoomContainer
+                  containerRef={containerRef}
+                  handleZoom={(v) => {
+                     setContainerZoom(v);
+                  }}
+                  zoomLevel={containerZoom}
+               />
+            </div>
          )}
       </div>
    );

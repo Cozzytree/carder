@@ -1,15 +1,15 @@
 "use client";
 import CanvasC from "@/canvas/canvas";
-import WhichOContainer from "./which_option_container";
 import CanvasOptions from "../options";
 import ZoomContainer from "./zoom_container";
 import OptionsMobile from "../options_mobile";
 import RightContainer from "./right-container";
+import WhichOContainer from "./which_option_container";
 
-import { RefObject, useEffect, useRef, useState } from "react";
-import { useIsMobile } from "../hooks/isMobile";
-import { useCanvasStore, useWhichOptionsOpen } from "@/canvas/store";
 import { CanvasElements } from "./elements";
+import { useIsMobile } from "../hooks/isMobile";
+import { RefObject, useEffect, useRef, useState } from "react";
+import { useCanvasStore, useWhichOptionsOpen } from "@/canvas/store";
 import {
    ContextMenu,
    ContextMenuContent,
@@ -17,6 +17,7 @@ import {
    ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useEditorContext } from "./editor-wrapper";
+import LeftContainer from "./left-container";
 
 type props = {
    canvasC_ref: RefObject<CanvasC | null>;
@@ -54,7 +55,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
    return (
       <div className="w-full h-full flex">
          {/* {left sidebar} */}
-         {isEdit && (
+         {/* {isEdit && (
             <div
                className={`h-full border-r border-r-foreground/50 ${isMobile ? "hidden" : "flex"}`}
             >
@@ -67,8 +68,10 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                   </div>
                )}
             </div>
-         )}
-         <div className="w-full h-full flex flex-col">
+         )} */}
+         {isEdit && !isMobile && <LeftContainer canvasC={canvasC_ref} />}
+
+         <div className="relative w-full h-full flex flex-col items-center">
             {/* {isEdit && (
                <div>
                   <CanvasOptions
@@ -136,9 +139,10 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
             )}
 
             {isEdit && (
-               <div className="w-full border-t border-t-foreground/50 z-50 min-h-14 flex items-center px-5">
+               // <div className="w-full border-t border-t-foreground/50 z-50 min-h-14 flex items-center px-5">
+               <div className="absolute bottom-8 left-0 w-full flex justify-center">
                   {/* {!isMobile && activeObject && ( */}
-                  <div className="flex w-full items-center gap-1">
+                  {/* <div className="flex w-full items-center gap-1">
                      <ZoomContainer
                         containerRef={containerRef}
                         handleZoom={(v) => {
@@ -146,14 +150,26 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                         }}
                         zoomLevel={containerZoom}
                      />
+                  </div> */}
+                  {/* {isMobile && <OptionsMobile canvasC={canvasC_ref} />} */}
+                  <div className="border-1 shadow-lg rounded-xl bg-foreground/20 p-2">
+                     <OptionsMobile canvasC={canvasC_ref} />
                   </div>
-                  {isMobile && <OptionsMobile canvasC={canvasC_ref} />}
                </div>
             )}
          </div>
 
          {/* {right container} */}
-         {isEdit && <>{!isMobile && <RightContainer canvasC={canvasC_ref} />}</>}
+         {isEdit && !isMobile && (
+            <>
+               <RightContainer
+                  containerZoom={containerZoom}
+                  containerRef={containerRef}
+                  setContainerZoom={setContainerZoom}
+                  canvasC={canvasC_ref}
+               />
+            </>
+         )}
       </div>
    );
 }

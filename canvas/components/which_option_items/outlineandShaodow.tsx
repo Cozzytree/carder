@@ -1,16 +1,18 @@
-import { Checkbox } from "@/components/ui/checkbox";
-import { Slider } from "@/components/ui/slider";
 import UpDown from "@/components/updown";
-import { debouncer } from "@/lib/utils";
-import { ActiveSelection, FabricObject, Gradient, GradientType, Shadow, Group } from "fabric";
-import { RefObject } from "react";
 import CanvasC from "../../canvas";
-import { useCanvasStore } from "../../store";
 import ColorOptions from "./color_options";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import BtnWithColor from "../btn-with-color";
+import InputWithValue from "../input-with-value";
+
+import { RefObject } from "react";
+import { debouncer } from "@/lib/utils";
+import { useCanvasStore } from "../../store";
+import { Slider } from "@/components/ui/slider";
 import { handleGradient } from "../../utilsfunc";
 import { useIsMobile } from "../../hooks/isMobile";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ActiveSelection, FabricObject, Gradient, GradientType, Shadow, Group } from "fabric";
 
 type props = {
    canvasC: RefObject<CanvasC | null>;
@@ -99,22 +101,17 @@ function OutlineAndShadow({ canvasC }: props) {
    return (
       <div className="flex gap-3 flex-col py-2 px-2">
          <div className="flex flex-col">
-            <span className="select-none text-sm">Stroke</span>
             <div className="flex items-center gap-1">
-               {strokeWidth}
-               <Slider
-                  className="h-3"
-                  disabled={!!!activeObject}
-                  defaultValue={[strokeWidth || 0]}
-                  max={50}
-                  step={2}
-                  min={0}
-                  onValueChange={debouncer((e: number[]) => {
-                     const v = e[0];
-                     if (isNaN(v)) return;
+               <InputWithValue
+                  change={(v) => {
+                     if (v < 0) return;
                      handleStroke(v);
-                  }, 100)}
-               />
+                  }}
+                  val={strokeWidth}
+               >
+                  <span className="text-sm select-none font-medium">Stroke</span>
+               </InputWithValue>
+
                <Popover>
                   <PopoverTrigger>
                      <BtnWithColor color={activeObjectStroke} w={20} h={20} />
@@ -192,7 +189,14 @@ function OutlineAndShadow({ canvasC }: props) {
                      }}
                      disabled={!hasShadow}
                      defaultV={hasShadow?.offsetX}
-                  />
+                  >
+                     <InputWithValue
+                        change={(e) => {
+                           handleShadowOffset("X", e);
+                        }}
+                        val={hasShadow?.offsetX ?? 0}
+                     />
+                  </UpDown>
                </div>
 
                <div className="flex flex-col">
@@ -203,7 +207,14 @@ function OutlineAndShadow({ canvasC }: props) {
                      }}
                      disabled={!hasShadow}
                      defaultV={hasShadow?.offsetY}
-                  />
+                  >
+                     <InputWithValue
+                        change={(e) => {
+                           handleShadowOffset("Y", e);
+                        }}
+                        val={hasShadow?.offsetY ?? 0}
+                     />
+                  </UpDown>
                </div>
 
                <div className="w-full flex items-center justify-between">
