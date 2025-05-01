@@ -125,58 +125,6 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
    return (
       <div className="w-full px-2 flex items-center gap-3">
-         {/* {resize canvas} */}
-         {/* <Popover>
-            <PopoverTrigger>
-               <NextImage
-                  className="w-5 h-5"
-                  src={"/board.svg"}
-                  width={100}
-                  height={100}
-                  alt="canvas"
-               />
-            </PopoverTrigger>
-            <PopoverContent className="flex flex-col gap-2 w-fit">
-               <ResizeCanvas canvasC={canvasC} />
-               <Button
-                  onClick={() => {
-                     if (!canvasC.current) return;
-                     canvasC.current.canvas.discardActiveObject();
-                     canvasC.current.canvas.requestRenderAll();
-                     setFabricObject(null);
-                  }}
-                  size={"xs"}
-                  variant={"outline"}
-               >
-                  clear selection
-               </Button>
-               <label
-                  htmlFor="c-img"
-                  className={buttonVariants({ variant: "outline", size: "xs" })}
-               >
-                  change background
-               </label>
-               <input
-                  onChange={(e) => {
-                     if (!e.target.files?.length) return;
-                     const file = e.target.files[0];
-                     const reader = new FileReader();
-                     const i = new Image();
-                     reader.onload = async (e) => {
-                        i.src = e.target?.result as string;
-
-                        await canvasC.current?.changeCanvasBackground(i.src);
-                     };
-                     reader.readAsDataURL(file);
-                  }}
-                  className="hidden"
-                  id="c-img"
-                  type="file"
-                  accept=".png, .jpeg, .webp"
-               />
-            </PopoverContent>
-         </Popover> */}
-
          {activeObject ? (
             <>
                {(activeObject.type === "text" ||
@@ -199,14 +147,16 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                )}
 
                {/* {stroke} */}
-               <Popover>
-                  <PopoverTrigger>
-                     <PencilLine className="w-4 h-4" />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                     <OutlineAndShadow canvasC={canvasC} />
-                  </PopoverContent>
-               </Popover>
+               {isMobile && (
+                  <Popover>
+                     <PopoverTrigger>
+                        <PencilLine className="w-4 h-4" />
+                     </PopoverTrigger>
+                     <PopoverContent>
+                        <OutlineAndShadow canvasC={canvasC} />
+                     </PopoverContent>
+                  </Popover>
+               )}
 
                {activeObject.type === "image" && isMobile && (
                   <Popover>
@@ -222,7 +172,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                   </Popover>
                )}
 
-               {activeObject.type == "rect" && (
+               {/* {activeObject.type == "rect" && (
                   <RadiusOption
                      radiuses={activeObject instanceof Rect ? activeObject?.rx : 0}
                      fn={(v) => {
@@ -235,7 +185,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                         });
                      }}
                   />
-               )}
+               )} */}
             </>
          ) : (
             <>
@@ -258,92 +208,23 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                >
                   <PencilIcon className="w-4 h-4" />
                </button>
-
-               {/* {text} */}
-               <Popover>
-                  <PopoverTrigger>
-                     <TypeIcon className="w-4 h-4" />
-                  </PopoverTrigger>
-                  <PopoverContent className="px-5 pb-10">
-                     <TextOptions
-                        handleNewText={(v) => {
-                           if (!canvasC.current) return;
-                           canvasC.current.createText(v);
-                        }}
-                     />
-                  </PopoverContent>
-               </Popover>
             </>
          )}
 
-         {/* {colors} */}
-         {/* <Popover>
+         {/* {text} */}
+         <Popover>
             <PopoverTrigger>
-               <BtnWithColor
-                  w={23}
-                  h={23}
-                  color={
-                     activeObject instanceof ActiveSelection
-                        ? activeObject.getObjects()[0].get("fill")
-                        : activeObject?.get("fill")
-                  }
-               />
+               <TypeIcon className="w-4 h-4" />
             </PopoverTrigger>
-            <PopoverContent align="center" side="top" className="w-fit px-2 bg-background/90">
-               <ColorOptions
-                  showGradient={true}
-                  showGradientOptions={true}
-                  forCanvas={activeObject ? false : true}
-                  height={activeObject ? activeObject?.height : canvasC.current?.canvas.width || 0}
-                  width={activeObject ? activeObject?.width : canvasC.current?.canvas.height || 0}
-                  canvasC={canvasC}
-                  color={
-                     activeObject instanceof ActiveSelection
-                        ? activeObject.getObjects()[0].get("fill")
-                        : activeObject?.get("fill") ||
-                          (canvasC.current?.canvas.backgroundColor as
-                             | string
-                             | Gradient<"linear" | "radial">)
-                  }
-                  handleGradient={(v, gra) => {
-                     if (activeObject) {
-                        handleGradient({
-                           params: "fill",
-                           activeObject: activeObject,
-                           canvasC: canvasC,
-                           color: v,
-                           fn: () => {
-                              setFabricObject(activeObject);
-                           },
-                           type: gra,
-                        });
-                     } else {
-                        handleGradient({
-                           params: "fill",
-                           activeObject: null,
-                           canvasC: canvasC,
-                           color: v,
-                           fn: () => {
-                              setFabricObject(activeObject);
-                           },
-                           type: gra,
-                        });
-                     }
-                  }}
-                  handleColor={(v) => {
+            <PopoverContent className="px-5 pb-10">
+               <TextOptions
+                  handleNewText={(v) => {
                      if (!canvasC.current) return;
-                     if (!activeObject) {
-                        canvasC.current.changeCanvasColor(v);
-                     } else {
-                        canvasC.current.changeCanvasProperties(activeObject, {
-                           fill: v,
-                        });
-                     }
-                     setFabricObject(activeObject);
+                     canvasC.current.createText(v);
                   }}
                />
             </PopoverContent>
-         </Popover> */}
+         </Popover>
 
          <Popover>
             <PopoverTrigger>

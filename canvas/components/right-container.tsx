@@ -1,21 +1,23 @@
 import CanvasC from "../canvas";
+import CanvasOptions from "../canvas_options";
 import FontOptions from "./font_options";
 import BtnWithColor from "./btn-with-color";
+import ZoomContainer from "./zoom_container";
 import InputWithValue from "./input-with-value";
+import ImageFiltersOption from "./image_filter_options";
 import ShapeActions from "./canvas_options/shape_actions";
 import ColorOptions from "./which_option_items/color_options";
 import OutlineAndShadow from "./which_option_items/outlineandShaodow";
 
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Dispatch, RefObject, SetStateAction, useState } from "react";
-import { ActiveSelection, Gradient, Group } from "fabric";
+import { cn } from "@/lib/utils";
 import { useCanvasStore } from "../store";
-import { handleColorfill, handleGradient } from "../utilsfunc";
-import { Separator } from "@/components/ui/separator";
-import CanvasOptions from "../options";
-import ZoomContainer from "./zoom_container";
 import { canvasShapeTypes } from "../types";
-import ImageFiltersOption from "./image_filter_options";
+import { useEditorContext } from "./editor-wrapper";
+import { Separator } from "@/components/ui/separator";
+import { ActiveSelection, Gradient, Group } from "fabric";
+import { handleColorfill, handleGradient } from "../utilsfunc";
+import { Dispatch, RefObject, SetStateAction, useEffect, useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type props = {
    containerRef: RefObject<HTMLDivElement | null>;
@@ -25,8 +27,9 @@ type props = {
 };
 
 function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom }: props) {
-   const setFabricObject = useCanvasStore((state) => state.setFabricObject);
-   const activeObject = useCanvasStore((state) => state.activeObject);
+   const { sidesOpen } = useEditorContext();
+
+   const { activeObject, setFabricObject } = useCanvasStore();
 
    const [sideWidth, setSideWidth] = useState(350);
 
@@ -43,13 +46,23 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
 
    const Sept = () => <Separator className="border-[1px] mt-1 mb-2 border-foreground/20" />;
 
+   const height = sidesOpen ? "100%" : activeObject ? "96%" : "fit-content";
+
    return (
       <div
          style={{
             width: sideWidth + "px",
+            left: sidesOpen ? `0px` : `calc(100% - ${sideWidth + 30}px)`,
+            top: sidesOpen ? `0px` : `${2}%`,
+            position: sidesOpen ? "relative" : "fixed",
+            height: height,
          }}
-         className={`overflow-y-auto pb-10 py-2 border-l border-l-foreground/50`}
+         className={cn(
+            sidesOpen ? "border-l-2" : "border-2",
+            `overflow-y-auto pb-10 border-muted-foreground/20 py-2 rounded-2xl bg-muted shadow-md`,
+         )}
       >
+         {/* <div className="border-l border-l-foreground/50 h-full absolute left-0 top-0" /> */}
          {activeObject ? (
             <div aria-disabled={activeObject == null} className="flex flex-col gap-1">
                <div className="space-y-2">
@@ -319,7 +332,7 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                </div>
             </div>
          ) : (
-            <div className="flex flex-col">
+            <div className={"flex flex-col"}>
                <CanvasOptions canvasC={canvasC} />
 
                <Sept />

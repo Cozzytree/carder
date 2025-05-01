@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/mode-toggle";
 import { initialize } from "next/dist/server/lib/router-server";
 import { canvasConfig, filtersOptions, saveOptions } from "../constants";
-import React, { createContext, useContext, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
    DropdownMenu,
@@ -38,6 +38,8 @@ type props = {
 type editorProps = {
    showUploads?: boolean;
    isEdit?: boolean;
+   sidesOpen: boolean;
+   handleSideToggle: (v?: boolean) => void;
 };
 
 const EditorContext = createContext<editorProps | undefined>(undefined);
@@ -55,6 +57,8 @@ function EditorWrapper({
    showUploads = false,
    editable = true,
 }: props) {
+   const [isSideOpen, setSideOpen] = useState(true);
+
    const { theme } = useTheme();
    const width = useCanvasStore((state) => state.width);
    const setWidth = useCanvasStore((state) => state.setWidth);
@@ -258,7 +262,20 @@ function EditorWrapper({
    }, [width, height]);
 
    return (
-      <EditorContext.Provider value={{ showUploads, isEdit: editable }}>
+      <EditorContext.Provider
+         value={{
+            showUploads,
+            isEdit: editable,
+            sidesOpen: isSideOpen,
+            handleSideToggle: (v) => {
+               if (v !== undefined) {
+                  setSideOpen(v);
+               } else {
+                  setSideOpen((e) => !e);
+               }
+            },
+         }}
+      >
          <div className="h-screen w-full flex flex-1">
             <div className="w-full h-full">
                {/* <div>

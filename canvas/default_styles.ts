@@ -1,10 +1,12 @@
 import * as fabric from "fabric";
-import { canvasConfig } from "./constants";
+import { canvasConfig, PROPGUIDE } from "./constants";
 // import { generateRandomID } from "@/lib/utils";
 import { v4 as uuid } from "uuid";
 
 class DefaultRect extends fabric.Rect {
    declare hoverShape: fabric.Rect | null;
+   text: fabric.FabricText | null;
+
    constructor(params: Partial<fabric.RectProps>, id?: string) {
       super({
          rx: 10,
@@ -29,7 +31,67 @@ class DefaultRect extends fabric.Rect {
          // objectCaching: true,
          ...params,
       });
+      this.text = null;
       this.set("id", id || uuid());
+      this.on("mouseup", () => {
+         if (this.text) {
+            this.canvas?.remove(this.text);
+            this.text = null;
+         }
+      });
+      this.customResize();
+   }
+
+   customResize() {
+      this.on("scaling", () => {
+         const width = Math.round(this.width! * this.scaleX!);
+         const height = Math.round(this.height! * this.scaleY!);
+
+         if (this.text) {
+            this.text.set("text", `${width} x ${height}`);
+            this.text.set("left", this.left + (this.width * this.scaleX) / 2 - this.text.width / 2);
+            this.text.set("top", this.top + this.height * this.scaleY + 20);
+            this.canvas?.bringObjectToFront(this.text);
+         } else {
+            this.text = new fabric.FabricText(`${width} x ${height}`, {
+               strokeWidth: 0.5,
+               fill: "white",
+               charSpacing: 2,
+               left: this.left,
+               top: this.top! - 20,
+               fontSize: 18,
+               fontFamily: "sans serif",
+               backgroundColor: "rgb(50, 105, 255)",
+            });
+            this.canvas?.add(this.text);
+            this.canvas?.bringObjectToFront(this.text);
+         }
+      });
+
+      // this.on("moving", () => {
+      //    const x = this.left.toFixed(0);
+      //    const y = this.top.toFixed(0);
+      //    if (this.text) {
+      //       this.text.set("text", `x ${x} y ${y}`);
+      //       this.text.set("left", this.left + this.width * this.scaleX - this.text.width);
+      //       this.text.set("top", this.top + this.height * this.scaleY + 20);
+      //       this.canvas?.bringObjectToFront(this.text);
+      //    } else {
+      //       this.text = new fabric.FabricText(`x ${x} y ${y}`, {
+      //          strokeWidth: 0.5,
+      //          fill: "white",
+      //          charSpacing: 2,
+      //          left: this.left,
+      //          top: this.top! - 20,
+      //          fontSize: 18,
+      //          fontFamily: "sans serif",
+      //          backgroundColor: "rgb(50, 105, 255)",
+      //       });
+      //       this.text.set("id", PROPGUIDE);
+      //       this.canvas?.add(this.text);
+      //       this.canvas?.bringObjectToFront(this.text);
+      //    }
+      // });
    }
 }
 
@@ -52,6 +114,7 @@ class DefaultTriangle extends fabric.Triangle {
          // objectCaching: true,
          ...params,
       });
+
       this.set("id", id || uuid());
    }
 }
@@ -89,6 +152,8 @@ class DefaultEllipse extends fabric.Ellipse {
 }
 
 class DefaultCircle extends fabric.Circle {
+   text: fabric.FabricText | null;
+
    constructor(params: Partial<fabric.CircleProps>, id?: string) {
       super({
          radius: 10,
@@ -115,7 +180,67 @@ class DefaultCircle extends fabric.Circle {
          }),
          ...params,
       });
+      this.text = null;
       this.set("id", id || uuid());
+   }
+
+   customResize() {
+      this.on("scaling", () => {
+         const width = Math.round(this.width! * this.scaleX!);
+         const height = Math.round(this.height! * this.scaleY!);
+
+         if (this.text) {
+            this.text.set("text", `w ${width} h ${height}`);
+            this.text.set("left", this.left + this.width * this.scaleX - this.text.width);
+            this.text.set("top", this.top + this.height * this.scaleY + 20);
+            this.canvas?.bringObjectToFront(this.text);
+         } else {
+            this.text = new fabric.FabricText(`w ${width} h ${height}`, {
+               strokeWidth: 0.5,
+               fill: "white",
+               charSpacing: 2,
+               left: this.left,
+               top: this.top! - 20,
+               fontSize: 18,
+               fontFamily: "sans serif",
+               backgroundColor: "rgb(50, 105, 255)",
+            });
+            this.canvas?.add(this.text);
+            this.canvas?.bringObjectToFront(this.text);
+         }
+      });
+
+      this.on("moving", () => {
+         const x = this.left.toFixed(0);
+         const y = this.top.toFixed(0);
+         if (this.text) {
+            this.text.set("text", `x ${x} y ${y}`);
+            this.text.set("left", this.left + this.width * this.scaleX - this.text.width);
+            this.text.set("top", this.top + this.height * this.scaleY + 20);
+            this.canvas?.bringObjectToFront(this.text);
+         } else {
+            this.text = new fabric.FabricText(`x ${x} y ${y}`, {
+               strokeWidth: 0.5,
+               fill: "white",
+               charSpacing: 2,
+               left: this.left,
+               top: this.top! - 20,
+               fontSize: 18,
+               fontFamily: "sans serif",
+               backgroundColor: "rgb(50, 105, 255)",
+            });
+            this.text.set("id", PROPGUIDE);
+            this.canvas?.add(this.text);
+            this.canvas?.bringObjectToFront(this.text);
+         }
+      });
+
+      this.on("modified", () => {
+         if (this.text) {
+            this.canvas?.remove(this.text);
+            this.text = null;
+         }
+      });
    }
 }
 
@@ -236,6 +361,8 @@ class DefaultLine extends fabric.Line {
 }
 
 class DefaultCustomPath extends fabric.Path {
+   text: fabric.FabricText | null;
+
    constructor(path: string, props: Partial<fabric.PathProps>, id?: string) {
       super(path, {
          fill: "transparent",
@@ -250,7 +377,42 @@ class DefaultCustomPath extends fabric.Path {
          centeredRotation: true,
          ...props,
       });
+      this.text = null;
       this.set("id", id || uuid());
+      this.customResize();
+      this.on("mouseup", () => {
+         if (this.text) {
+            this?.canvas?.remove(this.text);
+            this.text = null;
+         }
+      });
+   }
+
+   customResize() {
+      this.on("scaling", () => {
+         const width = Math.round(this.width! * this.scaleX!);
+         const height = Math.round(this.height! * this.scaleY!);
+
+         if (this.text) {
+            this.text.set("text", `${width} x ${height}`);
+            this.text.set("left", this.left + (this.width * this.scaleX) / 2 - this.text.width / 2);
+            this.text.set("top", this.top + this.height * this.scaleY + 20);
+            this.canvas?.bringObjectToFront(this.text);
+         } else {
+            this.text = new fabric.FabricText(`${width} x ${height}`, {
+               strokeWidth: 0.5,
+               fill: "white",
+               charSpacing: 2,
+               left: this.left,
+               top: this.top! - 20,
+               fontSize: 18,
+               fontFamily: "sans serif",
+               backgroundColor: "rgb(50, 105, 255)",
+            });
+            this.canvas?.add(this.text);
+            this.canvas?.bringObjectToFront(this.text);
+         }
+      });
    }
 }
 

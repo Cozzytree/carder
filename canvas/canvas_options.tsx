@@ -1,5 +1,6 @@
 import CanvasC from "./canvas";
 import BtnWithColor from "./components/btn-with-color";
+import InputWithValue from "./components/input-with-value";
 import ColorOptions from "./components/which_option_items/color_options";
 import CanvasBackgroundChange from "./components/canvas_background_change_modal";
 
@@ -31,10 +32,9 @@ function CanvasOptions({ canvasC }: props) {
 }
 
 function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
+   const { width, setWidth, height, setHeight } = useCanvasStore();
    const setFabricObject = useCanvasStore((state) => state.setFabricObject);
    const activeObject = useCanvasStore((state) => state.activeObject);
-   const width = useCanvasStore((state) => state.width);
-   const height = useCanvasStore((state) => state.height);
    const { setWhichOption } = useWhichOptionsOpen();
 
    return (
@@ -98,26 +98,26 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                   </TooltipTrigger>
                   <TooltipContent>canvas background color</TooltipContent>
                </Tooltip>
-
-               {/* <ActiveColor
-          fn={() => {
-            setWhichOption("color");
-          }}
-          color={canvasC.current?.canvas.backgroundColor}
-          label="change color"
-        /> */}
                <Tooltip>
                   <TooltipTrigger asChild>
-                     <Button
-                        size={"xs"}
-                        variant={"outline"}
-                        className="flex flex-col items-center text-sm text-nowrap"
-                        onClick={() => {
-                           setWhichOption("resize_canvas");
-                        }}
-                     >
-                        {width} x {height}
-                     </Button>
+                     <div className="flex flex-col items-center">
+                        <InputWithValue
+                           change={(e) => {
+                              setWidth(e);
+                           }}
+                           val={width}
+                        >
+                           w
+                        </InputWithValue>
+                        <InputWithValue
+                           change={(e) => {
+                              setHeight(e);
+                           }}
+                           val={height}
+                        >
+                           h
+                        </InputWithValue>
+                     </div>
                   </TooltipTrigger>
                   <TooltipContent>canvas parameters</TooltipContent>
                </Tooltip>

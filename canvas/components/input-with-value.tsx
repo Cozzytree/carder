@@ -7,7 +7,7 @@ type props = {
 };
 
 function InputWithValue({ change, children, val }: props) {
-   const [numb, setNumb] = useState(Number(val));
+   const [numb, setNumb] = useState(Number(val.toFixed(2)));
    const inputRef = useRef<HTMLInputElement | null>(null);
 
    useEffect(() => {
@@ -22,14 +22,14 @@ function InputWithValue({ change, children, val }: props) {
       if (isNaN(num) || !inputRef.current) {
          // If invalid, reset to last valid value
          if (inputRef.current) {
-            inputRef.current.value = String(val);
+            inputRef.current.value = String(val.toFixed(2));
          }
          return;
       }
 
       change(num);
       setNumb(num);
-      inputRef.current.value = String(num); // Keep formatting consistent
+      inputRef.current.value = String(num.toFixed(2));
    };
 
    useEffect(() => {
