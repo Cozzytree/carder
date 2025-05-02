@@ -69,7 +69,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                )}
             </div>
          )} */}
-         {isEdit && !isMobile && <LeftContainer canvasC={canvasC_ref} />}
+         {isEdit && !isMobile && <LeftContainer />}
 
          <div className="relative w-full h-full flex flex-col items-center">
             {/* {isEdit && (

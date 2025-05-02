@@ -51,7 +51,7 @@ function ShapeActions({ canvasC }: props) {
    return (
       <TooltipProvider>
          <div className="w-full flex flex-col gap-1 justify-center">
-            <div className={`${!isMobile ? "grid grid-cols-4" : "flex items-center gap-1"} gap-2`}>
+            <div className={`${!isMobile ? "grid grid-cols-5" : "flex items-center"} gap-1`}>
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
@@ -62,7 +62,7 @@ function ShapeActions({ canvasC }: props) {
                               canvasC.current?.duplicateCanvasObject();
                            }
                         }}
-                        className="cursor-pointer w-full py-3"
+                        className="cursor-pointer w-full "
                      >
                         <CopyIcon className="w-5 h-5" />
                      </Button>
@@ -80,7 +80,7 @@ function ShapeActions({ canvasC }: props) {
                               canvasC.current?.deleteObject();
                            }
                         }}
-                        className="cursor-pointer w-full py-3"
+                        className="cursor-pointer w-full "
                      >
                         <TrashIcon className="w-5 h-5" />
                      </Button>
@@ -95,7 +95,7 @@ function ShapeActions({ canvasC }: props) {
                            <Button
                               variant={"simple"}
                               size={"xs"}
-                              className="cursor-pointer w-full py-3"
+                              className="cursor-pointer w-full "
                            >
                               <LucideBringToFront className="2-5 h-5" />
                            </Button>
@@ -133,7 +133,7 @@ function ShapeActions({ canvasC }: props) {
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
-                        className="cursor-pointer w-full py-3"
+                        className="cursor-pointer w-full "
                         variant={"simple"}
                         size={"xs"}
                         onClick={() => {
@@ -160,11 +160,12 @@ function ShapeActions({ canvasC }: props) {
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
-                        className="cursor-pointer w-full py-3"
+                        className="cursor-pointer w-full "
                         variant={"simple"}
                         size={"xs"}
                         onClick={() => {
                            if (!check()) return;
+
                            if (activeObject?.get("flipX")) {
                               canvasC.current?.changeCanvasProperties(activeObject, {
                                  flipX: false,
@@ -175,6 +176,7 @@ function ShapeActions({ canvasC }: props) {
                                  { flipX: true },
                               );
                            }
+                           setFabricObject(activeObject);
                         }}
                      >
                         <FlipHorizontal2 className="2-5 h-5" />
@@ -188,7 +190,7 @@ function ShapeActions({ canvasC }: props) {
                      <Button
                         variant={"simple"}
                         size={"xs"}
-                        className={`${isLocked && "bg-foreground/80 text-background p-1 rounded-md"} cursor-pointer w-full py-3`}
+                        className={`${isLocked && "bg-foreground/80 text-background p-1 rounded-md"} cursor-pointer w-full `}
                         onClick={() => {
                            if (!check()) return;
                            const v = isLocked ? false : true;
@@ -211,7 +213,7 @@ function ShapeActions({ canvasC }: props) {
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
-                        className="cursor-pointer w-full py-3"
+                        className="cursor-pointer w-full "
                         onClick={() => {
                            if (!canvasC.current || !activeObject) return;
                            canvasC.current.createNewGroup(activeObject);
@@ -229,7 +231,7 @@ function ShapeActions({ canvasC }: props) {
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
-                        className="cursor-pointer w-full py-3"
+                        className="cursor-pointer w-full "
                         onClick={() => {
                            if (!canvasC.current || !activeObject) return;
                            canvasC.current.removeGroup(activeObject);

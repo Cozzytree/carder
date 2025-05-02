@@ -10,6 +10,7 @@ import { RefObject, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useUploadImage } from "@/api_/mutations/image-mutation";
 import { useParams } from "next/navigation";
+import { useEditorContext } from "./editor-wrapper";
 
 type props = {
    canvasC: RefObject<CanvasC | null>;
@@ -20,6 +21,7 @@ const tabs = ["programming", "emoji", "others"];
 function ImageOption({ canvasC }: props) {
    const params = useParams();
    const { uploadImage, uploadingImage } = useUploadImage();
+   const { showUploads } = useEditorContext();
    const [currTab, setCurrTab] = useState("programming");
 
    const handleImage = (f: File) => {
@@ -42,7 +44,7 @@ function ImageOption({ canvasC }: props) {
       );
    };
 
-   const handleImageElement = async (f: string) => {
+   const handleImageElement = async (f: string | HTMLImageElement) => {
       if (!f || !canvasC.current) return;
       await canvasC.current?.createNewImage(f);
    };
@@ -50,14 +52,31 @@ function ImageOption({ canvasC }: props) {
    return (
       <div className="h-full w-full flex flex-col gap-2">
          {uploadingImage && <p>uploading</p>}
-         <label htmlFor="image-local" className="text-sm cursor-pointer flex items-center gap-2 px-3">
+         <label
+            htmlFor="image-local"
+            className="text-sm cursor-pointer flex items-center gap-2 px-3"
+         >
             Local
             <PlusCircle className="w-5 h-5 border" />
          </label>
          <input
             onChange={(e) => {
                if (e.target.files) {
-                  handleImage(e.target.files[0]);
+                  if (showUploads) {
+                     handleImage(e.target.files[0]);
+                  } else {
+                     const reader = new FileReader();
+                     reader.onload = (event) => {
+                        if (event.target?.result) {
+                           const img = new Image();
+                           img.onload = () => {
+                              handleImageElement(img);
+                           };
+                           img.src = event.target.result as string;
+                        }
+                     };
+                     reader.readAsDataURL(e.target.files[0]);
+                  }
                }
             }}
             type="file"
@@ -93,7 +112,14 @@ function ImageOption({ canvasC }: props) {
                            key={i}
                            className="w-full flex justify-center p-2 items-center hover:bg-foreground/10 cursor-pointer"
                         >
-                           <NextImage className="w-10 h-10" src={p.url} width={100} height={100} alt={p.label} quality={40} />
+                           <NextImage
+                              className="w-10 h-10"
+                              src={p.url}
+                              width={100}
+                              height={100}
+                              alt={p.label}
+                              quality={40}
+                           />
                         </div>
                      ))}
                   </>
@@ -108,7 +134,13 @@ function ImageOption({ canvasC }: props) {
                            key={i}
                            className="w-full h-full flex justify-center p-2 items-center hover:bg-foreground/10 cursor-pointer"
                         >
-                           <NextImage className="w-10 h-10" src={e.url} alt={e.label} width={100} height={100} />
+                           <NextImage
+                              className="w-10 h-10"
+                              src={e.url}
+                              alt={e.label}
+                              width={100}
+                              height={100}
+                           />
                         </div>
                      ))}
                   </>

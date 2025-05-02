@@ -1,37 +1,37 @@
-import CanvasC from "../canvas";
+import CollapceWithBtn from "@/components/collapseWithBtn";
 import CanvasOptions from "../canvas_options";
-import FontOptions from "./font_options";
 import BtnWithColor from "./btn-with-color";
-import ZoomContainer from "./zoom_container";
-import InputWithValue from "./input-with-value";
-import ImageFiltersOption from "./image_filter_options";
 import ShapeActions from "./canvas_options/shape_actions";
+import ExportShape from "./exportShape";
+import FontOptions from "./font_options";
+import ImageFiltersOption from "./image_filter_options";
+import InputWithValue from "./input-with-value";
 import ColorOptions from "./which_option_items/color_options";
 import OutlineAndShadow from "./which_option_items/outlineandShaodow";
+import ZoomContainer from "./zoom_container";
 
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { ActiveSelection, Gradient, Group } from "fabric";
+import { Dispatch, RefObject, SetStateAction, useState } from "react";
 import { useCanvasStore } from "../store";
 import { canvasShapeTypes } from "../types";
-import { useEditorContext } from "./editor-wrapper";
-import { Separator } from "@/components/ui/separator";
-import { ActiveSelection, Gradient, Group } from "fabric";
 import { handleColorfill, handleGradient } from "../utilsfunc";
-import { Dispatch, RefObject, SetStateAction, useEffect, useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useEditorContext } from "./editor-wrapper";
 
 type props = {
    containerRef: RefObject<HTMLDivElement | null>;
-   canvasC: RefObject<CanvasC | null>;
    setContainerZoom: Dispatch<SetStateAction<number>>;
    containerZoom: number;
 };
 
-function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom }: props) {
-   const { sidesOpen } = useEditorContext();
+function RightContainer({ containerZoom, containerRef, setContainerZoom }: props) {
+   const { sidesOpen, canvas } = useEditorContext();
 
    const { activeObject, setFabricObject } = useCanvasStore();
 
-   const [sideWidth, setSideWidth] = useState(350);
+   const [sideWidth] = useState(350);
 
    const isActiveSelection =
       activeObject && (activeObject instanceof ActiveSelection || activeObject instanceof Group);
@@ -58,22 +58,20 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
             height: height,
          }}
          className={cn(
-            sidesOpen ? "border-l-2" : "border-2",
-            `overflow-y-auto pb-10 border-muted-foreground/20 py-2 rounded-2xl bg-muted shadow-md`,
+            sidesOpen ? "border-l-2" : "border-2 rounded-2xl",
+            `overflow-y-auto pb-10 border-muted-foreground/20 py-2 bg-muted shadow-md`,
          )}
       >
          {/* <div className="border-l border-l-foreground/50 h-full absolute left-0 top-0" /> */}
          {activeObject ? (
             <div aria-disabled={activeObject == null} className="flex flex-col gap-1">
-               <div className="space-y-2">
-                  <span className={spanStyle}>Position</span>
-                  <Sept />
+               <CollapceWithBtn classname={spanStyle} label="Position">
                   <div className="flex items-center justify-evenly gap-1 px-1">
                      <InputWithValue
                         val={activeObject ? activeObject?.get("left") : 0}
                         change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, {
+                           if (!canvas.current || !activeObject) return;
+                           canvas.current.changeCanvasProperties(activeObject, {
                               left: e,
                            });
                            activeObject?.setCoords();
@@ -85,9 +83,9 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                      <InputWithValue
                         val={activeObject?.get("top") || 0}
                         change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
+                           if (!canvas.current || !activeObject) return;
 
-                           canvasC.current.changeCanvasProperties(activeObject, {
+                           canvas.current.changeCanvasProperties(activeObject, {
                               top: e,
                            });
                            activeObject.setCoords();
@@ -97,17 +95,15 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                         <span>Y</span>
                      </InputWithValue>
                   </div>
-               </div>
+               </CollapceWithBtn>
 
                {/* {scale} */}
-               <div className="space-y-2">
-                  <span className={spanStyle}>Scale</span>
-                  <Sept />
+               <CollapceWithBtn label="Scale" classname={spanStyle}>
                   <div className="flex items-center justify-evenly gap-2 px-1">
                      <InputWithValue
                         change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, { scaleX: e });
+                           if (!canvas.current || !activeObject) return;
+                           canvas.current.changeCanvasProperties(activeObject, { scaleX: e });
                            activeObject.setCoords();
                            setFabricObject(activeObject);
                         }}
@@ -123,8 +119,8 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                      </InputWithValue>
                      <InputWithValue
                         change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, { scaleY: e });
+                           if (!canvas.current || !activeObject) return;
+                           canvas.current.changeCanvasProperties(activeObject, { scaleY: e });
                            activeObject.setCoords();
                            setFabricObject(activeObject);
                         }}
@@ -139,7 +135,7 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                         <span className="text-xs">Y</span>
                      </InputWithValue>
                   </div>
-               </div>
+               </CollapceWithBtn>
 
                <InputWithValue
                   val={
@@ -151,8 +147,8 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                         : activeObject?.get("angle") || 0
                   }
                   change={(e) => {
-                     if (!canvasC.current || !activeObject) return;
-                     canvasC.current.changeCanvasProperties(activeObject, {
+                     if (!canvas.current || !activeObject) return;
+                     canvas.current.changeCanvasProperties(activeObject, {
                         angle: e,
                      });
                      activeObject.setCoords();
@@ -175,9 +171,9 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                               : activeObject?.get("width") || 0
                         }
                         change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
+                           if (!canvas.current || !activeObject) return;
 
-                           canvasC.current.changeCanvasProperties(activeObject, {
+                           canvas.current.changeCanvasProperties(activeObject, {
                               width: e,
                            });
                            activeObject.setCoords();
@@ -195,8 +191,8 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                               : activeObject?.get("height") || 0
                         }
                         change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, {
+                           if (!canvas.current || !activeObject) return;
+                           canvas.current.changeCanvasProperties(activeObject, {
                               height: e,
                            });
                            activeObject.setCoords();
@@ -210,8 +206,8 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                         <InputWithValue
                            val={activeObject?.get("radius") ?? 0}
                            change={(e) => {
-                              if (!canvasC.current || !activeObject) return;
-                              canvasC.current.changeCanvasProperties(activeObject, {
+                              if (!canvas.current || !activeObject) return;
+                              canvas.current.changeCanvasProperties(activeObject, {
                                  radius: e,
                               });
                               activeObject.setCoords();
@@ -227,8 +223,8 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                            <InputWithValue
                               val={activeObject?.get("radius") ?? 0}
                               change={(e) => {
-                                 if (!canvasC.current || !activeObject || e > 60) return;
-                                 canvasC.current.changeCanvasProperties(activeObject, {
+                                 if (!canvas.current || !activeObject || e > 60) return;
+                                 canvas.current.changeCanvasProperties(activeObject, {
                                     rx: e,
                                  });
                                  activeObject.setCoords();
@@ -239,8 +235,8 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                            <InputWithValue
                               val={activeObject?.get("radius") ?? 0}
                               change={(e) => {
-                                 if (!canvasC.current || !activeObject || e > 60) return;
-                                 canvasC.current.changeCanvasProperties(activeObject, {
+                                 if (!canvas.current || !activeObject || e > 60) return;
+                                 canvas.current.changeCanvasProperties(activeObject, {
                                     ry: e,
                                  });
                                  activeObject.setCoords();
@@ -273,14 +269,14 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                            showGradient
                            showGradientOptions
                            forCanvas={false}
-                           canvasC={canvasC}
+                           canvasC={canvas}
                            height={activeObjectWidth || 0}
                            width={activeObjectHeight || 0}
                            color={activeObjectFill as string | Gradient<"linear" | "gradient">}
                            handleColor={(v) => {
                               handleColorfill({
                                  activeObject: activeObject,
-                                 canvasC: canvasC,
+                                 canvasC: canvas,
                                  color: v,
                                  fn: () => {
                                     setFabricObject(activeObject);
@@ -293,7 +289,7 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                                  params: "fill",
                                  type: t ? t : "linear",
                                  activeObject: activeObject,
-                                 canvasC: canvasC,
+                                 canvasC: canvas,
                                  color: c,
                                  fn: () => {
                                     setFabricObject(activeObject);
@@ -304,36 +300,31 @@ function RightContainer({ canvasC, containerZoom, containerRef, setContainerZoom
                      </PopoverContent>
                   </Popover>
                   {(activeObject?.type == "textbox" || activeObject?.type == "i-text") && (
-                     <FontOptions canvasC={canvasC} />
+                     <FontOptions canvasC={canvas} />
                   )}
                </div>
 
                {activeObject.type === "image" && (
-                  <>
-                     <Sept />
-                     <div className="flex flex-col gap-2">
-                        <span className={spanStyle}>Filters</span>
-                        <div className="max-h-[200px] overflow-y-auto">
-                           <ImageFiltersOption canvasC={canvasC} />
-                        </div>
+                  <CollapceWithBtn label="Filters" classname="px-3">
+                     <div className="max-h-[200px] overflow-y-auto">
+                        <ImageFiltersOption canvasC={canvas} />
                      </div>
-                  </>
+                  </CollapceWithBtn>
                )}
 
-               <Sept />
+               <OutlineAndShadow canvasC={canvas} />
 
-               <OutlineAndShadow canvasC={canvasC} />
+               <CollapceWithBtn label="Actions" classname={spanStyle}>
+                  <ShapeActions canvasC={canvas} />
+               </CollapceWithBtn>
 
-               <div className="w-full border border-foreground/30" />
-
-               <div className="px-2 text-md">
-                  <h4 className="font-semibold">Actions</h4>
-                  <ShapeActions canvasC={canvasC} />
-               </div>
+               <CollapceWithBtn label="Export" classname={spanStyle}>
+                  <ExportShape canvasC={canvas} />
+               </CollapceWithBtn>
             </div>
          ) : (
             <div className={"flex flex-col"}>
-               <CanvasOptions canvasC={canvasC} />
+               <CanvasOptions canvasC={canvas} />
 
                <Sept />
 

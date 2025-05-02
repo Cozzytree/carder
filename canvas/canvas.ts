@@ -26,7 +26,7 @@ import {
    DefaultTriangle,
 } from "./default_styles";
 import { makeText } from "./utilfunc";
-import { canvasConfig, filtersOptions, GUIDE, PROPGUIDE } from "./constants";
+import { canvasConfig, filtersOptions, GUIDE, PATH, PROPGUIDE } from "./constants";
 import { ObjectMoving } from "./object-guides/object-guides";
 
 interface canvasInterface {
@@ -132,6 +132,10 @@ class CanvasC {
 
       this.canvas.on("object:added", (e) => {
          if (e.target.get("name") === GUIDE || e.target.get("id") === PROPGUIDE) return;
+         if (e.target.type === PATH && !e.target.get("id")) {
+            e.target.set("id", uuid());
+         }
+
          callbackSeleted(e.target);
          onCreation(e.target);
       });
@@ -140,6 +144,7 @@ class CanvasC {
          if (this.guideLines.length) {
             this.guideLines.forEach((l) => this.canvas.remove(l));
          }
+         if (e.target.get("name") === GUIDE || e.target.get("id") === PROPGUIDE) return;
          callbackSeleted(e.target);
 
          onUpdate(e.target);

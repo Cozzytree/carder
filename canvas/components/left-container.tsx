@@ -1,50 +1,45 @@
-import { RefObject, useEffect, useState } from "react";
-import CanvasC from "../canvas";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { FabricObject } from "fabric";
-import { useCanvasStore } from "../store";
-import { Separator } from "@/components/ui/separator";
+import CollapceWithBtn from "@/components/collapseWithBtn";
+
 import { cn } from "@/lib/utils";
+import { FabricObject } from "fabric";
 import { EyeClosed, EyeIcon, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useCanvasStore } from "../store";
 import { useEditorContext } from "./editor-wrapper";
 
-type props = {
-   canvasC: RefObject<CanvasC | null>;
-};
-
-export default function LeftContainer({ canvasC }: props) {
-   const { showUploads, handleSideToggle, sidesOpen } = useEditorContext();
+export default function LeftContainer() {
+   const { showUploads, handleSideToggle, sidesOpen, canvas } = useEditorContext();
    const activeObject = useCanvasStore((state) => state.activeObject);
    const [objs, setObjs] = useState<FabricObject[] | []>(() => {
-      return canvasC?.current?.canvas?.getObjects() || [];
+      return canvas?.current?.canvas?.getObjects() || [];
    });
 
    const handleActive = (o: FabricObject) => {
-      if (!canvasC.current) return;
-      canvasC.current.canvas.discardActiveObject();
-      canvasC.current.canvas.setActiveObject(o);
-      canvasC.current.canvas.requestRenderAll();
+      if (!canvas.current) return;
+      canvas.current.canvas.discardActiveObject();
+      canvas.current.canvas.setActiveObject(o);
+      canvas.current.canvas.requestRenderAll();
    };
 
    const handleVisible = (o: FabricObject) => {
-      if (!canvasC.current) return;
+      if (!canvas.current) return;
       const isV = o.get("visible");
-      canvasC.current.changeCanvasProperties(o, {
+      canvas.current.changeCanvasProperties(o, {
          visible: isV ? false : true,
       });
       if (isV) {
-         canvasC.current.canvas.discardActiveObject();
+         canvas.current.canvas.discardActiveObject();
       } else {
-         canvasC.current.canvas.discardActiveObject();
-         canvasC.current.canvas.setActiveObject(o);
+         canvas.current.canvas.discardActiveObject();
+         canvas.current.canvas.setActiveObject(o);
       }
    };
 
    useEffect(() => {
       setObjs(() => {
-         return canvasC?.current?.canvas?.getObjects() || [];
+         return canvas?.current?.canvas?.getObjects() || [];
       });
-   }, [activeObject]);
+   }, [activeObject, canvas]);
 
    return (
       <>
@@ -58,49 +53,39 @@ export default function LeftContainer({ canvasC }: props) {
                   <span>something</span> <PanelRightClose onClick={() => handleSideToggle(false)} />
                </div>
 
-               <Collapsible>
-                  <CollapsibleTrigger className="pl-3 text-sm text-start w-full">
-                     Layers
-                  </CollapsibleTrigger>
-
-                  <Separator className="bg-muted-foreground/50 my-1" />
-
-                  <CollapsibleContent className="pl-3 w-full">
-                     {objs.map((o, i) => (
-                        <div
-                           key={i}
-                           className={cn(
-                              activeObject?.get("id") === o.get("id") && "bg-muted-foreground/5",
-                              "w-full rounded-l-md py-1 text-xs flex items-center justify-between px-4",
-                           )}
+               <CollapceWithBtn label="Layers" classname="px-3 text-sm">
+                  {objs.map((o, i) => (
+                     <div
+                        key={i}
+                        className={cn(
+                           activeObject?.get("id") === o.get("id") && "bg-foreground/20",
+                           "w-full rounded-l-md py-1 text-xs flex items-center justify-between px-4",
+                        )}
+                     >
+                        <button
+                           disabled={!activeObject?.get("visible")}
+                           onClick={() => {
+                              handleActive(o);
+                           }}
+                           className="w-full text-start"
                         >
-                           <button
-                              onClick={() => {
-                                 handleActive(o);
-                              }}
-                              className="w-full text-start"
-                           >
-                              {o?.get("type")}
-                           </button>
-                           <button onClick={() => handleVisible(o)}>
-                              {o.get("visible") ? (
-                                 <EyeIcon width={20} height={20} />
-                              ) : (
-                                 <EyeClosed />
-                              )}
-                           </button>
-                        </div>
-                     ))}
-                  </CollapsibleContent>
-               </Collapsible>
+                           {o?.get("type")}
+                        </button>
+                        <button onClick={() => handleVisible(o)}>
+                           {o.get("visible") ? (
+                              <EyeIcon width={20} height={20} />
+                           ) : (
+                              <EyeClosed width={20} height={20} />
+                           )}
+                        </button>
+                     </div>
+                  ))}
+               </CollapceWithBtn>
 
                {showUploads && (
-                  <Collapsible>
-                     <CollapsibleTrigger className="pl-3 text-sm text-start w-full">
-                        Uploads
-                     </CollapsibleTrigger>
-                     <CollapsibleContent className="pl-3 w-full">Images</CollapsibleContent>
-                  </Collapsible>
+                  <CollapceWithBtn label="Assets" classname="px-3">
+                     <div className="px-3">Images</div>
+                  </CollapceWithBtn>
                )}
             </div>
          )}

@@ -20,6 +20,7 @@ const canvasConfig = {
 
 export const PROPGUIDE = "prop-guide";
 export const GUIDE = "guide";
+export const PATH = "path";
 
 const gradients = [
    ["#FF7E5F", "#FEB47B"],
