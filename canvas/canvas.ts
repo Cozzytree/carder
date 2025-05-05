@@ -11,7 +11,6 @@ import {
    TPointerEvent,
    ActiveSelection,
    TPointerEventInfo,
-   FabricObjectProps,
    Rect,
    Polyline,
    ImageProps,

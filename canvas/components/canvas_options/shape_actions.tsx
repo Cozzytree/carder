@@ -21,6 +21,9 @@ import { Button } from "@/components/ui/button";
 import { ActiveSelection, FabricObject, Group } from "fabric";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useIsMobile } from "../../hooks/isMobile";
+import { useEditorContext } from "../editor-wrapper";
+import CollapceWithBtn from "@/components/collapseWithBtn";
+import InputWithValue from "../input-with-value";
 
 const index_options: { label: string; I: LucideIcon }[] = [
    { I: ArrowDown, label: "Send Backward" },
@@ -34,6 +37,7 @@ type props = {
 };
 
 function ShapeActions({ canvasC }: props) {
+   const { canvas } = useEditorContext();
    const { isMobile } = useIsMobile();
    const { activeObject, setFabricObject } = useCanvasStore();
    const isLocked = activeObject?.get("lockMovementX") || false;
@@ -50,8 +54,8 @@ function ShapeActions({ canvasC }: props) {
 
    return (
       <TooltipProvider>
-         <div className="w-full flex flex-col gap-1 justify-center">
-            <div className={`${!isMobile ? "grid grid-cols-5" : "flex items-center"} gap-1`}>
+         <div className="w-full flex flex-col gap-1 justify-center mt-2">
+            <div className={`grid  ${!isMobile ? "grid-cols-5" : "grid-cols-4"} gap-1`}>
                <Tooltip>
                   <TooltipTrigger asChild>
                      <Button
@@ -190,7 +194,7 @@ function ShapeActions({ canvasC }: props) {
                      <Button
                         variant={"simple"}
                         size={"xs"}
-                        className={`${isLocked && "bg-foreground/80 text-background p-1 rounded-md"} cursor-pointer w-full `}
+                        className={`${isLocked && "bg-foreground/80 text-background rounded-md"} cursor-pointer w-full `}
                         onClick={() => {
                            if (!check()) return;
                            const v = isLocked ? false : true;

@@ -7,7 +7,6 @@ import CanvasBackgroundChange from "./components/canvas_background_change_modal"
 import { brushes } from "./constants";
 import { Gradient } from "fabric";
 import { debouncer } from "@/lib/utils";
-import { useIsMobile } from "./hooks/isMobile";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Dispatch, RefObject, SetStateAction } from "react";
@@ -26,9 +25,11 @@ type props = {
 };
 
 function CanvasOptions({ canvasC }: props) {
-   const { isMobile } = useIsMobile();
-
-   return <>{!isMobile && <Options canvasC={canvasC} />}</>;
+   return (
+      <>
+         <Options canvasC={canvasC} />
+      </>
+   );
 }
 
 function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
@@ -98,6 +99,7 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                   </TooltipTrigger>
                   <TooltipContent>canvas background color</TooltipContent>
                </Tooltip>
+
                <Tooltip>
                   <TooltipTrigger asChild>
                      <div className="flex flex-col items-center">
@@ -242,6 +244,17 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                </Tooltip>
             )}
          </div>
+         <Button
+            variant={"simple"}
+            size={"sm"}
+            onClick={() => {
+               canvasC?.current?.canvas.discardActiveObject();
+               canvasC?.current?.canvas?.requestRenderAll();
+               setFabricObject(null);
+            }}
+         >
+            clear Selection
+         </Button>
       </TooltipProvider>
    );
 }

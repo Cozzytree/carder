@@ -14,11 +14,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { ActiveSelection, Gradient, Group } from "fabric";
-import { Dispatch, RefObject, SetStateAction, useState } from "react";
+import { Dispatch, RefObject, SetStateAction, useEffect, useState } from "react";
 import { useCanvasStore } from "../store";
 import { canvasShapeTypes } from "../types";
 import { handleColorfill, handleGradient } from "../utilsfunc";
 import { useEditorContext } from "./editor-wrapper";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type props = {
    containerRef: RefObject<HTMLDivElement | null>;
@@ -42,7 +43,7 @@ function RightContainer({ containerZoom, containerRef, setContainerZoom }: props
    const activeObjectWidth = activeObject ? activeObject?.get("width") : 0;
    const activeObjectHeight = activeObject ? activeObject.get("height") : 0;
 
-   const spanStyle = "text-xs select-none px-3 text-nowrap";
+   const spanStyle = "text-sm md:text-xl select-none px-3 text-nowrap";
 
    const Sept = () => <Separator className="border-[1px] mt-1 mb-2 border-foreground/20" />;
 
@@ -58,7 +59,7 @@ function RightContainer({ containerZoom, containerRef, setContainerZoom }: props
             height: height,
          }}
          className={cn(
-            sidesOpen ? "border-l-2" : "border-2 rounded-2xl",
+            sidesOpen ? "border-l-2 left-0" : `border-2 rounded-2xl`,
             `overflow-y-auto pb-10 border-muted-foreground/20 py-2 bg-muted shadow-md`,
          )}
       >
@@ -328,13 +329,15 @@ function RightContainer({ containerZoom, containerRef, setContainerZoom }: props
 
                <Sept />
 
-               <ZoomContainer
-                  containerRef={containerRef}
-                  handleZoom={(v) => {
-                     setContainerZoom(v);
-                  }}
-                  zoomLevel={containerZoom}
-               />
+               <div className="px-3">
+                  <ZoomContainer
+                     containerRef={containerRef}
+                     handleZoom={(v) => {
+                        setContainerZoom(v);
+                     }}
+                     zoomLevel={containerZoom}
+                  />
+               </div>
             </div>
          )}
       </div>

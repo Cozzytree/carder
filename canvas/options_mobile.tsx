@@ -1,23 +1,29 @@
+import CollapceWithBtn from "@/components/collapseWithBtn";
 import CanvasC from "./canvas";
-import ImageOption from "./components/image_option";
-import RadiusOption from "./components/radius_option";
-import Shapes from "./components/which_option_items/shapes";
-import ImageFiltersOption from "./components/image_filter_options";
+import CanvasOptions from "./canvas_options";
+import BtnWithColor from "./components/btn-with-color";
 import ShapeActions from "./components/canvas_options/shape_actions";
+import ExportShape from "./components/exportShape";
+import FontOptionUpdated from "./components/font_option(updated)";
+import ImageFiltersOption from "./components/image_filter_options";
+import ImageOption from "./components/image_option";
+import InputWithValue from "./components/input-with-value";
+import OpacityOption from "./components/opacity_option";
 import ColorOptions from "./components/which_option_items/color_options";
-import ResizeCanvas from "./components/which_option_items/resize_canvas";
 import FontOptions from "./components/which_option_items/fonts_option(big)";
 import OutlineAndShadow from "./components/which_option_items/outlineandShaodow";
+import Shapes from "./components/which_option_items/shapes";
+import TextOptions from "./components/which_option_items/texts_o";
 
 import {
-   Drawer,
-   DrawerClose,
-   DrawerContent,
-   DrawerTitle,
-   DrawerTrigger,
-} from "@/components/ui/drawer";
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ActiveSelection, Gradient, Rect } from "fabric";
+import { Slider } from "@/components/ui/slider";
+import { debouncer } from "@/lib/utils";
+import { ActiveSelection, Gradient, Group } from "fabric";
 import {
    BoxIcon,
    BrushIcon,
@@ -33,27 +39,23 @@ import {
    UndoIcon,
 } from "lucide-react";
 import { RefObject } from "react";
-import { useCanvasStore } from "./store";
-import TextOptions from "./components/which_option_items/texts_o";
-import FontOptionUpdated from "./components/font_option(updated)";
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import NextImage from "next/image";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { useEditorContext } from "./components/editor-wrapper";
 import { brushes } from "./constants";
-import { Slider } from "@/components/ui/slider";
-import { debouncer } from "@/lib/utils";
-import { handleGradient } from "./utilsfunc";
-import BtnWithColor from "./components/btn-with-color";
-import OpacityOption from "./components/opacity_option";
-import InputWithValue from "./components/input-with-value";
 import { useIsMobile } from "./hooks/isMobile";
+import { useCanvasStore } from "./store";
+import { handleColorfill, handleGradient } from "./utilsfunc";
 
 function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
+   const { canvas } = useEditorContext();
    const { activeObject, setFabricObject } = useCanvasStore();
+
+   const isActiveSelection =
+      activeObject && (activeObject instanceof ActiveSelection || activeObject instanceof Group);
+   const activeObjectFill = isActiveSelection
+      ? (activeObject.getObjects().length && activeObject?.getObjects()[0].get("fill")) || null
+      : activeObject?.get("fill") || null;
+   const activeObjectWidth = activeObject ? activeObject?.get("width") : 0;
+   const activeObjectHeight = activeObject ? activeObject.get("height") : 0;
    const { isMobile } = useIsMobile();
 
    if (canvasC.current?.canvas.isDrawingMode) {
@@ -125,6 +127,14 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
    return (
       <div className="w-full px-2 flex items-center gap-3">
+         {isMobile && (
+            <Popover>
+               <PopoverTrigger>S</PopoverTrigger>
+               <PopoverContent>
+                  <CanvasOptions canvasC={canvas} />
+               </PopoverContent>
+            </Popover>
+         )}
          {activeObject ? (
             <>
                {(activeObject.type === "text" ||
@@ -252,117 +262,45 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                      <SettingsIcon className="w-6 h-6" />
                   </PopoverTrigger>
                   <PopoverContent sideOffset={20} className="flex gap-2 flex-col bg-background/80">
-                     <InputWithValue
-                        val={activeObject ? activeObject?.get("left") : 0}
-                        change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, {
-                              left: e,
-                           });
-                           activeObject?.setCoords();
-                           setFabricObject(activeObject);
-                        }}
-                     >
-                        <span>x-axis</span>
-                     </InputWithValue>
-                     <InputWithValue
-                        val={activeObject?.get("top") || 0}
-                        change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
+                     <CollapceWithBtn classname={"px-3 text-sm"} label="Position">
+                        <div className="flex items-center justify-evenly gap-1 px-1">
+                           <InputWithValue
+                              val={activeObject ? activeObject?.get("left") : 0}
+                              change={(e) => {
+                                 if (!canvas.current || !activeObject) return;
+                                 canvas.current.changeCanvasProperties(activeObject, {
+                                    left: e,
+                                 });
+                                 activeObject?.setCoords();
+                                 setFabricObject(activeObject);
+                              }}
+                           >
+                              <span className="text-xs">X</span>
+                           </InputWithValue>
+                           <InputWithValue
+                              val={activeObject?.get("top") || 0}
+                              change={(e) => {
+                                 if (!canvas.current || !activeObject) return;
 
-                           canvasC.current.changeCanvasProperties(activeObject, {
-                              top: e,
-                           });
-                           activeObject.setCoords();
-                           setFabricObject(activeObject);
-                        }}
-                     >
-                        <span>y-axis</span>
-                     </InputWithValue>
+                                 canvas.current.changeCanvasProperties(activeObject, {
+                                    top: e,
+                                 });
+                                 activeObject.setCoords();
+                                 setFabricObject(activeObject);
+                              }}
+                           >
+                              <span>Y</span>
+                           </InputWithValue>
+                        </div>
+                     </CollapceWithBtn>
 
-                     <InputWithValue
-                        change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, {
-                              scaleX: e,
-                           });
-                           activeObject.setCoords();
-                           setFabricObject(activeObject);
-                        }}
-                        val={
-                           activeObject instanceof ActiveSelection
-                              ? activeObject.getObjects()[0].get("scaleX")
-                              : activeObject?.get("scaleX") || 0
-                        }
-                     >
-                        <span> scale X</span>
-                     </InputWithValue>
-                     <InputWithValue
-                        change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, {
-                              scaleY: e,
-                           });
-                           activeObject.setCoords();
-                           setFabricObject(activeObject);
-                        }}
-                        val={
-                           activeObject instanceof ActiveSelection
-                              ? activeObject.getObjects()[0].get("scaleY")
-                              : activeObject?.get("scaleY") || 0
-                        }
-                     >
-                        <span>scale Y</span>
-                     </InputWithValue>
+                     <CollapceWithBtn label="Actions" classname={"text-sm px-3"}>
+                        <ShapeActions canvasC={canvas} />
+                     </CollapceWithBtn>
 
-                     <InputWithValue
-                        val={activeObject?.get("angle") || 0}
-                        change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, {
-                              angle: e,
-                           });
-                           activeObject.setCoords();
-                           setFabricObject(activeObject);
-                        }}
-                     >
-                        <span>angle</span>
-                     </InputWithValue>
-                     <InputWithValue
-                        val={
-                           activeObject instanceof ActiveSelection
-                              ? activeObject.getObjects()[0].get("width") || 0
-                              : activeObject?.get("width") || 0
-                        }
-                        change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-
-                           canvasC.current.changeCanvasProperties(activeObject, {
-                              width: e,
-                           });
-                           activeObject.setCoords();
-                           setFabricObject(activeObject);
-                        }}
-                     >
-                        <span>width</span>
-                     </InputWithValue>
-                     <InputWithValue
-                        val={
-                           activeObject instanceof ActiveSelection
-                              ? activeObject.getObjects()[0].get("height") || 0
-                              : activeObject?.get("height") || 0
-                        }
-                        change={(e) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, {
-                              height: e,
-                           });
-                           activeObject.setCoords();
-                           setFabricObject(activeObject);
-                        }}
-                     >
-                        <span>height</span>
-                     </InputWithValue>
+                     <CollapceWithBtn label="Export" classname={"text-sm px-3"}>
+                        <ExportShape canvasC={canvas} />
+                     </CollapceWithBtn>
 
                      <OpacityOption
                         fn={(v) => {
@@ -374,8 +312,61 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                         opacity={activeObject?.get("opacity")}
                      />
                   </PopoverContent>
-                  <ShapeActions canvasC={canvasC} />
+
+                  {/* <ShapeActions canvasC={canvasC} /> */}
                </Popover>
+
+               <div className="flex items-center gap-2">
+                  <Popover>
+                     <PopoverTrigger
+                        disabled={activeObject == null}
+                        className="flex items-center gap-1"
+                     >
+                        <BtnWithColor w={20} h={20} color={activeObjectFill} />
+                     </PopoverTrigger>
+                     <PopoverContent
+                        side="top"
+                        align="center"
+                        className="w-fit bg-muted/40 border-foreground/20"
+                     >
+                        <ColorOptions
+                           showGradient
+                           showGradientOptions
+                           forCanvas={false}
+                           canvasC={canvas}
+                           height={activeObjectWidth || 0}
+                           width={activeObjectHeight || 0}
+                           color={activeObjectFill as string | Gradient<"linear" | "gradient">}
+                           handleColor={(v) => {
+                              handleColorfill({
+                                 activeObject: activeObject,
+                                 canvasC: canvas,
+                                 color: v,
+                                 fn: () => {
+                                    setFabricObject(activeObject);
+                                 },
+                              });
+                           }}
+                           handleGradient={(c, t) => {
+                              if (!activeObject) return;
+                              handleGradient({
+                                 params: "fill",
+                                 type: t ? t : "linear",
+                                 activeObject: activeObject,
+                                 canvasC: canvas,
+                                 color: c,
+                                 fn: () => {
+                                    setFabricObject(activeObject);
+                                 },
+                              });
+                           }}
+                        />
+                     </PopoverContent>
+                  </Popover>
+                  {(activeObject?.type == "textbox" || activeObject?.type == "i-text") && (
+                     <FontOptions canvasC={canvas} />
+                  )}
+               </div>
             </>
          )}
 

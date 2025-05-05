@@ -17,7 +17,7 @@ type props = {
 
 function ZoomContainer({ handleZoom, zoomLevel, containerRef }: props) {
    return (
-      <div className="flex items-center">
+      <div className="w-full flex justify-between items-center">
          <UpDown
             defaultV={zoomLevel * 100}
             onChange={(v) => {
@@ -50,7 +50,7 @@ function ZoomContainer({ handleZoom, zoomLevel, containerRef }: props) {
                </DropdownMenuContent>
             </DropdownMenu>
          </UpDown>
-         <div className="w-32 hidden md:block">
+         {/* <div className="w-32 hidden md:block">
             <Slider
                className="w-full"
                defaultValue={[zoomLevel * 100]}
@@ -65,7 +65,7 @@ function ZoomContainer({ handleZoom, zoomLevel, containerRef }: props) {
                step={5}
                max={300}
             />
-         </div>
+         </div> */}
       </div>
    );
 }

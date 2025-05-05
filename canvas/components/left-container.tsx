@@ -2,10 +2,16 @@ import CollapceWithBtn from "@/components/collapseWithBtn";
 
 import { cn } from "@/lib/utils";
 import { FabricObject } from "fabric";
-import { EyeClosed, EyeIcon, PanelRightClose, PanelRightOpen } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useCanvasStore } from "../store";
+import { useEffect, useState } from "react";
 import { useEditorContext } from "./editor-wrapper";
+import { EyeClosed, EyeIcon, PanelRightClose, PanelRightOpen } from "lucide-react";
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuItem,
+   DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function LeftContainer() {
    const { showUploads, handleSideToggle, sidesOpen, canvas } = useEditorContext();
@@ -48,9 +54,17 @@ export default function LeftContainer() {
                <PanelRightOpen onClick={() => handleSideToggle(true)} />
             </div>
          ) : (
-            <div className="w-[350px] h-full border-r-2 border-r-muted bg-muted py-4">
+            <div className="w-[250px] lg:w-[400px] h-full border-r-2 border-r-muted bg-muted py-4">
                <div className="w-full flex justify-between px-3">
-                  <span>something</span> <PanelRightClose onClick={() => handleSideToggle(false)} />
+                  <DropdownMenu>
+                     <DropdownMenuTrigger>
+                        <span>Canvas</span>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent className="w-36">
+                        <DropdownMenuItem>Export</DropdownMenuItem>
+                     </DropdownMenuContent>
+                  </DropdownMenu>
+                  <PanelRightClose onClick={() => handleSideToggle(false)} />
                </div>
 
                <CollapceWithBtn label="Layers" classname="px-3 text-sm">

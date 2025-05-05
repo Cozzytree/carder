@@ -18,7 +18,7 @@ class DefaultRect extends fabric.Rect {
          strokeUniform: true,
          cornerStrokeColor: canvasConfig.selectionStroke,
          borderScaleFactor: 2,
-         cornerStyle: "circle",
+         // cornerStyle: "circle",
 
          centeredRotation: true,
 

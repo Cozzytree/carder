@@ -1,15 +1,15 @@
 "use client";
 import CanvasC from "@/canvas/canvas";
-import CanvasOptions from "../options";
-import ZoomContainer from "./zoom_container";
+// import CanvasOptions from "../canvas_options";
+// import ZoomContainer from "./zoom_container";
 import OptionsMobile from "../options_mobile";
 import RightContainer from "./right-container";
-import WhichOContainer from "./which_option_container";
+// import WhichOContainer from "./which_option_container";
 
-import { CanvasElements } from "./elements";
+// import { CanvasElements } from "./elements";
 import { useIsMobile } from "../hooks/isMobile";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { useCanvasStore, useWhichOptionsOpen } from "@/canvas/store";
+import { useCanvasStore } from "@/canvas/store";
 import {
    ContextMenu,
    ContextMenuContent,
@@ -27,12 +27,12 @@ type props = {
 function CanvasEditor({ canvasC_ref, canvasRef }: props) {
    const { isEdit } = useEditorContext();
    const width = useCanvasStore((state) => state.width);
+   const height = useCanvasStore((state) => state.height);
    const snap = useCanvasStore((state) => state.snapping);
    const setSnap = useCanvasStore((state) => state.setSnap);
-   const height = useCanvasStore((state) => state.height);
    const containerScale = useCanvasStore((state) => state.containerScale);
 
-   const { which } = useWhichOptionsOpen();
+   // const { which } = useWhichOptionsOpen();
    const { isMobile } = useIsMobile();
    const [containerZoom, setContainerZoom] = useState(1);
    const containerRef = useRef<HTMLDivElement | null>(null);
@@ -50,7 +50,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
          }
       };
       handler();
-   }, [containerZoom]);
+   }, [containerZoom, canvasRef, isEdit]);
 
    return (
       <div className="w-full h-full flex">
@@ -95,16 +95,14 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                   >
                      <div
                         ref={innerContainerRef}
-                        className="absolute w-full h-full top-0 left-0 flex justify-center items-center"
-                        style={
-                           {
-                              // width:
-                              //    containerZoom < 1.5 && containerZoom > 0.6
-                              //       ? "100%"
-                              //       : `${width + containerZoom * 500 + "px"}`,
-                              // height: `${height + containerZoom * 250 + "px"}`,
-                           }
-                        }
+                        className="absolute top-0 left-0 flex justify-center items-center"
+                        style={{
+                           width:
+                              containerZoom < 1.5 && containerZoom > 0.6
+                                 ? "100%"
+                                 : `${width + containerZoom * 500 + "px"}`,
+                           height: `${height + containerZoom * 250 + "px"}`,
+                        }}
                      >
                         <ContextMenu>
                            <ContextMenuTrigger asChild>
@@ -166,7 +164,6 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                   containerZoom={containerZoom}
                   containerRef={containerRef}
                   setContainerZoom={setContainerZoom}
-                  canvasC={canvasC_ref}
                />
             </>
          )}
