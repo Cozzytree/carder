@@ -43,7 +43,7 @@ function RightContainer({ containerZoom, containerRef, setContainerZoom }: props
    const activeObjectWidth = activeObject ? activeObject?.get("width") : 0;
    const activeObjectHeight = activeObject ? activeObject.get("height") : 0;
 
-   const spanStyle = "text-sm md:text-xl select-none px-3 text-nowrap";
+   const spanStyle = "text-sm select-none px-3 text-nowrap";
 
    const Sept = () => <Separator className="border-[1px] mt-1 mb-2 border-foreground/20" />;
 
@@ -156,7 +156,7 @@ function RightContainer({ containerZoom, containerRef, setContainerZoom }: props
                      setFabricObject(activeObject);
                   }}
                >
-                  <span className="text-xs select-none">Rotation</span>
+                  <span className="text-xs select-none font-semibold">Rotation</span>
                </InputWithValue>
 
                <div className="space-y-2">
@@ -227,24 +227,11 @@ function RightContainer({ containerZoom, containerRef, setContainerZoom }: props
                                  if (!canvas.current || !activeObject || e > 60) return;
                                  canvas.current.changeCanvasProperties(activeObject, {
                                     rx: e,
-                                 });
-                                 activeObject.setCoords();
-                              }}
-                           >
-                              <span className={spanStyle}>R-X</span>
-                           </InputWithValue>
-                           <InputWithValue
-                              val={activeObject?.get("radius") ?? 0}
-                              change={(e) => {
-                                 if (!canvas.current || !activeObject || e > 60) return;
-                                 canvas.current.changeCanvasProperties(activeObject, {
                                     ry: e,
                                  });
                                  activeObject.setCoords();
                               }}
-                           >
-                              <span className={spanStyle}>R-Y</span>
-                           </InputWithValue>
+                           ></InputWithValue>
                         </>
                      )}
                   </div>
@@ -252,8 +239,8 @@ function RightContainer({ containerZoom, containerRef, setContainerZoom }: props
 
                <Sept />
 
-               <div className="flex items-center gap-2 px-3">
-                  <span className={spanStyle}>Fill</span>
+               <div className="flex items-center gap-2">
+                  <span className={spanStyle + " font-semibold"}>Fill</span>
                   <Popover>
                      <PopoverTrigger
                         disabled={activeObject == null}

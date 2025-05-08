@@ -101,7 +101,7 @@ function OutlineAndShadow({ canvasC }: props) {
 
    return (
       <div className="flex gap-1 flex-col">
-         <CollapceWithBtn label="Stroke" classname="px-3 text-sm md:text-lg">
+         <CollapceWithBtn label="Stroke" classname="px-3 text-sm">
             <div className="w-full flex flex-col items-center gap-1 px-3">
                <div className="flex">
                   <InputWithValue
@@ -110,9 +110,7 @@ function OutlineAndShadow({ canvasC }: props) {
                         handleStroke(v);
                      }}
                      val={strokeWidth}
-                  >
-                     <span className="text-sm md:text-lg select-none font-medium">Stroke</span>
-                  </InputWithValue>
+                  ></InputWithValue>
                   <Popover>
                      <PopoverTrigger>
                         <BtnWithColor color={activeObjectStroke} w={20} h={20} />
@@ -169,7 +167,7 @@ function OutlineAndShadow({ canvasC }: props) {
             </div>
          </CollapceWithBtn>
 
-         <CollapceWithBtn label="Shadow" classname="px-3 text-sm md:text-lg">
+         <CollapceWithBtn label="Shadow" classname="px-3 text-sm">
             <div className="flex flex-col justify-between px-3">
                <div className="flex items-center justify-between">
                   <label htmlFor="shadow" className="text-sm font-medium select-none">

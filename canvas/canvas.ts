@@ -105,14 +105,14 @@ class CanvasC {
          callbackSeleted(active);
 
          // store to history
-         const objs = [];
+         const objs: FabricObject[] = [];
          this.canvas.getObjects().forEach((o) => {
             const r = o.getBoundingRect();
 
             objs.push({ ...o.toObject(), left: r.left, top: r.top });
          });
          if (objs.length) {
-            this.history.push(objs);
+            this.pushtoHistory(objs);
          }
       });
 
@@ -149,14 +149,14 @@ class CanvasC {
          onUpdate(e.target);
 
          // store to history
-         const objs = [];
+         const objs: FabricObject[] = [];
          this.canvas.getObjects().forEach((o) => {
             const r = o.getBoundingRect();
 
             objs.push({ ...o.toObject(), left: r.left, top: r.top });
          });
          if (objs.length) {
-            this.history.push(objs);
+            this.pushtoHistory(objs);
          }
       });
 
@@ -498,6 +498,7 @@ class CanvasC {
          c.setCoords();
          this.canvas.add(c);
       }
+
       this.canvas.setActiveObject(c);
       this.canvas.requestRenderAll();
    }
@@ -523,11 +524,13 @@ class CanvasC {
       this.draw_brush.color = c;
       this.brush_props.stroke_color = c;
    }
+
    setBrushWidth(new_width: number) {
       if (this.draw_brush == null) return;
       this.draw_brush.width = new_width;
       this.brush_props.stroke = new_width;
    }
+
    setBrushType(brush_type: brushTypes) {
       if (this.draw_brush == null) return;
 
@@ -545,6 +548,7 @@ class CanvasC {
 
       this.canvas.freeDrawingBrush = this.draw_brush;
    }
+
    changeCanvasProperties(obj: FabricObject, props: Record<string, any>) {
       const setPropertyRecursively = (object: FabricObject, i: number) => {
          if (object instanceof Group) {
@@ -608,6 +612,7 @@ class CanvasC {
       document.fonts.add(f);
       return true;
    }
+
    addFilterToImage(filter: any, index: number, activeObject?: FabricObject) {
       if (activeObject instanceof FabricImage) {
          if (!activeObject.filters[index]) {
@@ -624,6 +629,7 @@ class CanvasC {
          }
       }
    }
+
    toggleCanvasSelection() {
       if (this.canvas.selection) {
          this.canvas.selection = false;
@@ -665,10 +671,10 @@ class CanvasC {
 
    undo() {
       if (!this.history.length) return;
-      const lastState = this.history.pop();
+      const lastState = this.popFromHistory();
       if (!lastState) return;
 
-      this.historyRedo.push(lastState);
+      this.pushtoHistoryRedo(lastState);
       this.canvas.discardActiveObject();
       this.canvas.remove(...this.canvas.getObjects());
 
@@ -801,6 +807,19 @@ class CanvasC {
       // });
       // this.canvas.setActiveObject(selected);
       this.canvas.requestRenderAll();
+   }
+
+   pushtoHistory(shapes: FabricObject[]) {
+      this.history.push(shapes);
+   }
+
+   pushtoHistoryRedo(shapes: FabricObject[]) {
+      this.historyRedo.push(shapes);
+   }
+
+   popFromHistory() {
+      const shapes = this.history.pop();
+      return shapes;
    }
 
    clear() {

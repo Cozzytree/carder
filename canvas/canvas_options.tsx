@@ -15,6 +15,7 @@ import { handleColorfill, handleGradient } from "./utilsfunc";
 import { BrushIcon, FilterIcon, MousePointer2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useEditorContext } from "./components/editor-wrapper";
 
 type props = {
    containerRef?: RefObject<HTMLDivElement | null>;
@@ -24,15 +25,8 @@ type props = {
    containerZoom?: number;
 };
 
-function CanvasOptions({ canvasC }: props) {
-   return (
-      <>
-         <Options canvasC={canvasC} />
-      </>
-   );
-}
-
-function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
+function CanvasOptions({}: props) {
+   const { canvas } = useEditorContext();
    const { width, setWidth, height, setHeight } = useCanvasStore();
    const setFabricObject = useCanvasStore((state) => state.setFabricObject);
    const activeObject = useCanvasStore((state) => state.activeObject);
@@ -53,22 +47,22 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                                  // setWhichOption("color");
                               }}
                               color={
-                                 canvasC.current?.canvas.backgroundColor as
+                                 canvas.current?.canvas.backgroundColor as
                                     | string
                                     | Gradient<"linear" | "radical">
                               }
                            />
                         </PopoverTrigger>
-                        <PopoverContent>
+                        <PopoverContent className="w-fit">
                            <ColorOptions
                               forCanvas={true}
-                              canvasC={canvasC}
+                              canvasC={canvas}
                               showGradient={true}
                               showGradientOptions={true}
-                              width={canvasC?.current?.canvas.width ?? 0}
-                              height={canvasC?.current?.canvas.height ?? 0}
+                              width={canvas?.current?.canvas.width ?? 0}
+                              height={canvas?.current?.canvas.height ?? 0}
                               color={
-                                 (canvasC?.current?.canvas.backgroundColor as
+                                 (canvas?.current?.canvas.backgroundColor as
                                     | string
                                     | Gradient<"linear" | "radial">) || "#ffffff"
                               }
@@ -76,7 +70,7 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                                  handleGradient({
                                     type: t ? t : "linear",
                                     activeObject: null,
-                                    canvasC: canvasC,
+                                    canvasC: canvas,
                                     color: g,
                                     fn: () => {
                                        setFabricObject(activeObject);
@@ -86,7 +80,7 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                               handleColor={(v) => {
                                  handleColorfill({
                                     activeObject: null,
-                                    canvasC: canvasC,
+                                    canvasC: canvas,
                                     color: v,
                                     fn: () => {
                                        setFabricObject(activeObject);
@@ -128,7 +122,7 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                   <TooltipTrigger asChild>
                      <CanvasBackgroundChange
                         handleChange={(e) => {
-                           canvasC.current?.changeCanvasBackground(e);
+                           canvas.current?.changeCanvasBackground(e);
                            setFabricObject(undefined);
                         }}
                      />
@@ -136,10 +130,10 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                   <TooltipContent>canvas background image</TooltipContent>
                </Tooltip>
 
-               {canvasC.current && canvasC.current.canvas.backgroundImage && (
+               {canvas.current && canvas.current.canvas.backgroundImage && (
                   <Button
                      onClick={() => {
-                        canvasC.current?.removeCanvasBackground();
+                        canvas.current?.removeCanvasBackground();
                         setFabricObject(undefined);
                      }}
                      size={"xs"}
@@ -150,7 +144,7 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                )}
             </div>
 
-            {canvasC.current?.canvas.isDrawingMode && (
+            {canvas.current?.canvas.isDrawingMode && (
                <div className="w-full px-2 flex items-center gap-3">
                   <Popover>
                      <PopoverTrigger>
@@ -162,8 +156,8 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                               <button
                                  className="hover:scale-[1.2] transition-all duration-150 cursor-pointer"
                                  onClick={() => {
-                                    if (!canvasC.current) return;
-                                    canvasC.current.setBrushType(b.btype);
+                                    if (!canvas.current) return;
+                                    canvas.current.setBrushType(b.btype);
                                  }}
                               >
                                  <b.I className="w-5 h-5" />
@@ -178,23 +172,23 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                         <button
                            className="w-6 h-6 rounded-full border border-foreground/50"
                            style={{
-                              background: canvasC.current.brush_props.stroke_color,
+                              background: canvas.current.brush_props.stroke_color,
                            }}
                         />
                      </PopoverTrigger>
                      <PopoverContent className="w-fit flex flex-col gap-2">
                         <ColorOptions
-                           canvasC={canvasC}
-                           width={canvasC.current.canvas.width || 0}
-                           height={canvasC.current.canvas.height || 0}
+                           canvasC={canvas}
+                           width={canvas.current.canvas.width || 0}
+                           height={canvas.current.canvas.height || 0}
                            color={
-                              canvasC.current.canvas.backgroundColor as
+                              canvas.current.canvas.backgroundColor as
                                  | string
                                  | Gradient<"linear" | "radial">
                            }
                            handleColor={(c) => {
-                              if (!canvasC.current) return;
-                              canvasC.current?.setBrushColor(c);
+                              if (!canvas.current) return;
+                              canvas.current?.setBrushColor(c);
                            }}
                         />
                         <div>
@@ -203,12 +197,12 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                               min={1}
                               max={100}
                               step={1}
-                              defaultValue={[canvasC.current.brush_props.stroke]}
+                              defaultValue={[canvas.current.brush_props.stroke]}
                               onValueChange={debouncer((e: number[]) => {
-                                 if (!canvasC.current) return;
+                                 if (!canvas.current) return;
                                  const n = e[0];
                                  if (n < 0) return;
-                                 canvasC.current?.setBrushWidth(n);
+                                 canvas.current?.setBrushWidth(n);
                               })}
                            />
                         </div>
@@ -217,8 +211,8 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
                   <button
                      onClick={() => {
-                        if (!canvasC.current) return;
-                        canvasC.current.canvasToggleDrawMode(false);
+                        if (!canvas.current) return;
+                        canvas.current.canvasToggleDrawMode(false);
                         setWhichOption(null);
                      }}
                   >
@@ -247,13 +241,14 @@ function Options({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
          <Button
             variant={"simple"}
             size={"sm"}
+            className="font-semibold w-full"
             onClick={() => {
-               canvasC?.current?.canvas.discardActiveObject();
-               canvasC?.current?.canvas?.requestRenderAll();
-               setFabricObject(null);
+               canvas?.current?.canvas.discardActiveObject();
+               canvas?.current?.canvas?.requestRenderAll();
+               setFabricObject(undefined);
             }}
          >
-            clear Selection
+            Clear Selection
          </Button>
       </TooltipProvider>
    );

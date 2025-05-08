@@ -1,13 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import QueryProvider from "@/components/query-client_provider";
 
-const poppins = Poppins({
+const geist = Geist_Mono({
    weight: ["400", "700"],
-   style: ["italic", "normal"],
    display: "auto",
    subsets: ["latin"],
 });
@@ -25,7 +24,7 @@ export default async function RootLayout({
    return (
       <html lang="en" suppressHydrationWarning>
          <head />
-         <body className={`${poppins.className} antialiased min-h-screen`}>
+         <body className={`${geist.className} antialiased min-h-screen`}>
             <QueryProvider>
                <ThemeProvider
                   attribute="class"

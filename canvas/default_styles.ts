@@ -16,7 +16,7 @@ class DefaultRect extends fabric.Rect {
          padding: 3,
          cornerSize: 8,
          strokeUniform: true,
-         cornerStrokeColor: canvasConfig.selectionStroke,
+         // cornerStrokeColor: canvasConfig.selectionStroke,
          borderScaleFactor: 2,
          // cornerStyle: "circle",
 
@@ -101,7 +101,6 @@ class DefaultTriangle extends fabric.Triangle {
          fill: "transparent",
          stroke: "black",
          strokeWidth: 2,
-
          padding: 3,
          cornerSize: 8,
          strokeUniform: true,
@@ -159,16 +158,14 @@ class DefaultCircle extends fabric.Circle {
          radius: 10,
          originX: "center",
          originY: "center",
-         stroke: "black",
          strokeWidth: 3,
-         fill: "transparent",
-         cornerColor: "transparent",
          centeredRotation: true,
 
+         stroke: "black",
+         fill: "transparent",
          padding: 3,
          cornerSize: 8,
          strokeUniform: true,
-         cornerStrokeColor: canvasConfig.selectionStroke,
          borderScaleFactor: 2,
          cornerStyle: "circle",
 
@@ -182,6 +179,13 @@ class DefaultCircle extends fabric.Circle {
       });
       this.text = null;
       this.set("id", id || uuid());
+      this.on("mouseup", () => {
+         if (this.text) {
+            this.canvas?.remove(this.text);
+            this.text = null;
+         }
+      });
+      this.customResize();
    }
 
    customResize() {
@@ -191,54 +195,22 @@ class DefaultCircle extends fabric.Circle {
 
          if (this.text) {
             this.text.set("text", `w ${width} h ${height}`);
-            this.text.set("left", this.left + this.width * this.scaleX - this.text.width);
-            this.text.set("top", this.top + this.height * this.scaleY + 20);
+            this.text.set("left", this.left + this.width / 2 - this.text.width);
+            this.text.set("top", this.getX() + this.height / 2 + 20);
             this.canvas?.bringObjectToFront(this.text);
          } else {
             this.text = new fabric.FabricText(`w ${width} h ${height}`, {
                strokeWidth: 0.5,
                fill: "white",
                charSpacing: 2,
-               left: this.left,
-               top: this.top! - 20,
+               left: this.left - this.radius,
+               top: this.top!,
                fontSize: 18,
                fontFamily: "sans serif",
                backgroundColor: "rgb(50, 105, 255)",
             });
             this.canvas?.add(this.text);
             this.canvas?.bringObjectToFront(this.text);
-         }
-      });
-
-      this.on("moving", () => {
-         const x = this.left.toFixed(0);
-         const y = this.top.toFixed(0);
-         if (this.text) {
-            this.text.set("text", `x ${x} y ${y}`);
-            this.text.set("left", this.left + this.width * this.scaleX - this.text.width);
-            this.text.set("top", this.top + this.height * this.scaleY + 20);
-            this.canvas?.bringObjectToFront(this.text);
-         } else {
-            this.text = new fabric.FabricText(`x ${x} y ${y}`, {
-               strokeWidth: 0.5,
-               fill: "white",
-               charSpacing: 2,
-               left: this.left,
-               top: this.top! - 20,
-               fontSize: 18,
-               fontFamily: "sans serif",
-               backgroundColor: "rgb(50, 105, 255)",
-            });
-            this.text.set("id", PROPGUIDE);
-            this.canvas?.add(this.text);
-            this.canvas?.bringObjectToFront(this.text);
-         }
-      });
-
-      this.on("modified", () => {
-         if (this.text) {
-            this.canvas?.remove(this.text);
-            this.text = null;
          }
       });
    }
@@ -371,7 +343,7 @@ class DefaultCustomPath extends fabric.Path {
          padding: 3,
          cornerSize: 8,
          strokeUniform: true,
-         cornerStrokeColor: canvasConfig.selectionStroke,
+         // cornerStrokeColor: canvasConfig.selectionStroke,
          borderScaleFactor: 2,
 
          centeredRotation: true,

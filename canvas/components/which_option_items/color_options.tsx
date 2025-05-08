@@ -47,7 +47,7 @@ function ColorOptions({
 
    return (
       <div className="w-full flex flex-col gap-2 items-center justify-center">
-         <div className="w-full border-b border-foreground/50 flex items-center gap-2 py-[3.5px]">
+         <div className="w-full border-b border-foreground/50 flex items-center gap-2 px-3 py-2">
             <button
                onClick={() => {
                   setTab("colors");
@@ -68,13 +68,13 @@ function ColorOptions({
             )}
          </div>
 
-         <div className="w-full flex flex-col px-2">
+         <div className="w-full flex flex-col justify-center px-3 py-1">
             {tab === "colors" ? (
                <>
                   {recentColors.length > 0 ? (
-                     <div className="mb-4">
+                     <div className="mb-2">
                         <h4 className="font-semibold">Recent</h4>
-                        <div className="w-fit md:w-full grid grid-cols-5 md:grid-cols-6 gap-1">
+                        <div className="w-fit md:w-full flex gap-2">
                            {recentColors.map((c, i) => (
                               <BtnWithColor
                                  onClick={() => {
@@ -94,7 +94,7 @@ function ColorOptions({
 
                   {/* {///} */}
 
-                  <div className="grid grid-cols-5 md:grid-cols-6 w-fit md:w-full gap-1">
+                  <div className="w-full grid grid-cols-5 md:grid-cols-6 gap-1">
                      <button
                         onClick={() => {
                            handleColor("");
@@ -115,7 +115,7 @@ function ColorOptions({
                      ))}
                      <label
                         htmlFor="customcolor"
-                        className="gradient w-8 h-8 cursor-pointer rounded-full bg-foreground"
+                        className="gradient w-6 h-6 cursor-pointer rounded-full bg-foreground"
                      ></label>
                      <input
                         onChange={debouncer((e: ChangeEvent<HTMLInputElement>) => {

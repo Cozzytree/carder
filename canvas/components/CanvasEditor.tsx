@@ -151,7 +151,11 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                   </div> */}
                   {/* {isMobile && <OptionsMobile canvasC={canvasC_ref} />} */}
                   <div className="border-1 shadow-lg rounded-xl bg-foreground/20 p-2">
-                     <OptionsMobile canvasC={canvasC_ref} />
+                     <OptionsMobile
+                        containerRef={containerRef}
+                        containerZoom={containerZoom}
+                        setContainerZoom={setContainerZoom}
+                     />
                   </div>
                </div>
             )}

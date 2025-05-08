@@ -33,7 +33,7 @@ export function AppSidebar({
               <UserLabel />
             </SidebarMenuButton>
           </SidebarMenuItem>
-        </SidebarMenu>
+        </SidebarMenu>M
       </SidebarHeader>
       <SidebarContent>
         <NavMain

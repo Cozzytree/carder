@@ -38,14 +38,21 @@ import {
    TypeOutline,
    UndoIcon,
 } from "lucide-react";
-import { RefObject } from "react";
+import { Dispatch, RefObject, SetStateAction } from "react";
 import { useEditorContext } from "./components/editor-wrapper";
 import { brushes } from "./constants";
 import { useIsMobile } from "./hooks/isMobile";
 import { useCanvasStore } from "./store";
 import { handleColorfill, handleGradient } from "./utilsfunc";
+import ZoomContainer from "./components/zoom_container";
 
-function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
+type props = {
+   containerRef: RefObject<HTMLDivElement | null>;
+   setContainerZoom: Dispatch<SetStateAction<number>>;
+   containerZoom: number;
+};
+
+function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props) {
    const { canvas } = useEditorContext();
    const { activeObject, setFabricObject } = useCanvasStore();
 
@@ -58,7 +65,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
    const activeObjectHeight = activeObject ? activeObject.get("height") : 0;
    const { isMobile } = useIsMobile();
 
-   if (canvasC.current?.canvas.isDrawingMode) {
+   if (canvas.current?.canvas.isDrawingMode) {
       return (
          <div className="w-full px-2 flex items-center gap-3">
             <Popover>
@@ -132,6 +139,13 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                <PopoverTrigger>S</PopoverTrigger>
                <PopoverContent>
                   <CanvasOptions canvasC={canvas} />
+                  <ZoomContainer
+                     containerRef={containerRef}
+                     handleZoom={(z) => {
+                        setContainerZoom(z);
+                     }}
+                     zoomLevel={containerZoom}
+                  />
                </PopoverContent>
             </Popover>
          )}
@@ -145,11 +159,11 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                         <TypeOutline className="w-4 h-4" />
                      </PopoverTrigger>
                      <PopoverContent className="space-y-2">
-                        <FontOptionUpdated canvasC={canvasC} />
+                        <FontOptionUpdated canvasC={canvas} />
                         <DropdownMenu>
                            <DropdownMenuTrigger className="text-sm">Fonts</DropdownMenuTrigger>
                            <DropdownMenuContent align="end" side="right">
-                              <FontOptions canvasC={canvasC} />
+                              <FontOptions canvasC={canvas} />
                            </DropdownMenuContent>
                         </DropdownMenu>
                      </PopoverContent>
@@ -163,7 +177,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                         <PencilLine className="w-4 h-4" />
                      </PopoverTrigger>
                      <PopoverContent>
-                        <OutlineAndShadow canvasC={canvasC} />
+                        <OutlineAndShadow canvasC={canvas} />
                      </PopoverContent>
                   </Popover>
                )}
@@ -177,7 +191,7 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                         sideOffset={10}
                         className="p-4 w-[200px] max-h-[400px] overflow-y-auto"
                      >
-                        <ImageFiltersOption canvasC={canvasC} />
+                        <ImageFiltersOption canvasC={canvas} />
                      </PopoverContent>
                   </Popover>
                )}
@@ -205,15 +219,15 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
                      <ImagesIcon className="w-4 h-4" />
                   </PopoverTrigger>
                   <PopoverContent className="px-5 pb-10 h-[80vh]">
-                     <ImageOption canvasC={canvasC} />
+                     <ImageOption canvasC={canvas} />
                   </PopoverContent>
                </Popover>
 
                {/* {draw} */}
                <button
                   onClick={() => {
-                     if (!canvasC.current) return;
-                     canvasC.current.canvasToggleDrawMode(true);
+                     if (!canvas.current) return;
+                     canvas.current.canvasToggleDrawMode(true);
                   }}
                >
                   <PencilIcon className="w-4 h-4" />
@@ -229,8 +243,8 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             <PopoverContent className="px-5 pb-10">
                <TextOptions
                   handleNewText={(v) => {
-                     if (!canvasC.current) return;
-                     canvasC.current.createText(v);
+                     if (!canvas.current) return;
+                     canvas.current.createText(v);
                   }}
                />
             </PopoverContent>
@@ -243,8 +257,8 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
             <PopoverContent>
                <Shapes
                   handleShape={({ type, path, points, scale }) => {
-                     if (!canvasC.current) return;
-                     canvasC.current.createNewShape({
+                     if (!canvas.current) return;
+                     canvas.current.createNewShape({
                         shapetype: type,
                         path,
                         points,
@@ -304,8 +318,8 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
                      <OpacityOption
                         fn={(v) => {
-                           if (!canvasC.current || !activeObject) return;
-                           canvasC.current.changeCanvasProperties(activeObject, {
+                           if (!canvas.current || !activeObject) return;
+                           canvas.current.changeCanvasProperties(activeObject, {
                               opacity: v,
                            });
                         }}
@@ -372,16 +386,16 @@ function OptionsMobile({ canvasC }: { canvasC: RefObject<CanvasC | null> }) {
 
          <button
             onClick={() => {
-               if (!canvasC.current) return;
-               canvasC.current.undo();
+               if (!canvas.current) return;
+               canvas.current.undo();
             }}
          >
             <UndoIcon />
          </button>
          <button
             onClick={() => {
-               if (!canvasC.current) return;
-               canvasC.current.redo();
+               if (!canvas.current) return;
+               canvas.current.redo();
             }}
          >
             <RedoIcon />
