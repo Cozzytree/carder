@@ -78,8 +78,8 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
                         <button
                            className="hover:scale-[1.2] transition-all duration-150 cursor-pointer"
                            onClick={() => {
-                              if (!canvasC.current) return;
-                              canvasC.current.setBrushType(b.btype);
+                              if (!canvas.current) return;
+                              canvas.current.setBrushType(b.btype);
                            }}
                         >
                            <b.I className="w-5 h-5" />
@@ -92,15 +92,15 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
                <PopoverTrigger asChild>
                   <button
                      className="w-5 h-5 rounded-full border border-foreground/50"
-                     style={{ background: canvasC.current.brush_props.stroke_color }}
+                     style={{ background: canvas.current.brush_props.stroke_color }}
                   />
                </PopoverTrigger>
                <PopoverContent className="w-fit flex flex-col gap-2">
                   <ColorOptions
                      handleGradient={(e) => {}}
                      handleColor={(c) => {
-                        if (!canvasC.current) return;
-                        canvasC.current?.setBrushColor(c);
+                        if (!canvas.current) return;
+                        canvas.current?.setBrushColor(c);
                      }}
                   />
                   <div>
@@ -109,12 +109,12 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
                         min={1}
                         max={100}
                         step={1}
-                        defaultValue={[canvasC.current.brush_props.stroke]}
+                        defaultValue={[canvas.current.brush_props.stroke]}
                         onValueChange={debouncer((e: number[]) => {
-                           if (!canvasC.current) return;
+                           if (!canvas.current) return;
                            const n = e[0];
                            if (n < 0) return;
-                           canvasC.current?.setBrushWidth(n);
+                           canvas.current?.setBrushWidth(n);
                         })}
                      />
                   </div>
@@ -122,8 +122,8 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
             </Popover>
             <button
                onClick={() => {
-                  if (!canvasC.current) return;
-                  canvasC.current.canvasToggleDrawMode(false);
+                  if (!canvas.current) return;
+                  canvas.current.canvasToggleDrawMode(false);
                }}
             >
                <MousePointer2 cursor={"pointer"} className="w-5 h-5" />
@@ -149,7 +149,7 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
                </PopoverContent>
             </Popover>
          )}
-         {activeObject ? (
+         {activeObject && (
             <>
                {(activeObject.type === "text" ||
                   activeObject.type === "textbox" ||
@@ -211,29 +211,26 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
                   />
                )} */}
             </>
-         ) : (
-            <>
-               {/* {images} */}
-               <Popover>
-                  <PopoverTrigger>
-                     <ImagesIcon className="w-4 h-4" />
-                  </PopoverTrigger>
-                  <PopoverContent className="px-5 pb-10 h-[80vh]">
-                     <ImageOption canvasC={canvas} />
-                  </PopoverContent>
-               </Popover>
-
-               {/* {draw} */}
-               <button
-                  onClick={() => {
-                     if (!canvas.current) return;
-                     canvas.current.canvasToggleDrawMode(true);
-                  }}
-               >
-                  <PencilIcon className="w-4 h-4" />
-               </button>
-            </>
          )}
+         {/* {images} */}
+         <Popover>
+            <PopoverTrigger>
+               <ImagesIcon className="w-4 h-4" />
+            </PopoverTrigger>
+            <PopoverContent className="px-5 pb-10 h-[50vh] overflow-y-auto">
+               <ImageOption canvasC={canvas} />
+            </PopoverContent>
+         </Popover>
+
+         {/* {draw} */}
+         <button
+            onClick={() => {
+               if (!canvas.current) return;
+               canvas.current.canvasToggleDrawMode(true);
+            }}
+         >
+            <PencilIcon className="w-4 h-4" />
+         </button>
 
          {/* {text} */}
          <Popover>

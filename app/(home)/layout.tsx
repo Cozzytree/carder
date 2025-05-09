@@ -7,6 +7,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { MySidebarProvider } from "./(components)/my_sidebar";
 import { UserContextProvider } from "@/hooks/use_user";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export default async function RootLayout({
    children,
@@ -16,8 +18,6 @@ export default async function RootLayout({
    const cookie = await cookies();
 
    const session = cookie.get(process.env.NEXT_PUBLIC_SESSION_NAME || "");
-
-   console.log(session);
 
    if (!session || !session?.value) {
       redirect("/landing");
@@ -36,15 +36,18 @@ export default async function RootLayout({
    const data = (await res.json()) as { data: User };
 
    return (
-      <MySidebarProvider>
-         <UserContextProvider user={data?.data}>
+      // <MySidebarProvider>
+      <UserContextProvider user={data?.data}>
+         <SidebarProvider defaultOpen={true}>
+            <AppSidebar />
             <div className="h-full w-full mx-auto px-2 md:px-5 py-2">
                <div className="w-full flex justify-between">
                   <Header />
                </div>
-               {children}{" "}
+               {children}
             </div>
-         </UserContextProvider>
-      </MySidebarProvider>
+         </SidebarProvider>
+      </UserContextProvider>
+      // </MySidebarProvider>
    );
 }

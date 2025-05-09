@@ -35,100 +35,105 @@ function CanvasOptions({}: props) {
    return (
       <TooltipProvider>
          <div className="w-full relative px-2 min-h-16 gap-2 flex items-center">
-            <div className="flex items-center gap-2 text-sm">
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <Popover>
-                        <PopoverTrigger>
-                           <BtnWithColor
-                              w={25}
-                              h={25}
-                              onClick={() => {
-                                 // setWhichOption("color");
-                              }}
-                              color={
-                                 canvas.current?.canvas.backgroundColor as
-                                    | string
-                                    | Gradient<"linear" | "radical">
-                              }
-                           />
-                        </PopoverTrigger>
-                        <PopoverContent className="w-fit">
-                           <ColorOptions
-                              forCanvas={true}
-                              canvasC={canvas}
-                              showGradient={true}
-                              showGradientOptions={true}
-                              width={canvas?.current?.canvas.width ?? 0}
-                              height={canvas?.current?.canvas.height ?? 0}
-                              color={
-                                 (canvas?.current?.canvas.backgroundColor as
-                                    | string
-                                    | Gradient<"linear" | "radial">) || "#ffffff"
-                              }
-                              handleGradient={(g, t) => {
-                                 handleGradient({
-                                    type: t ? t : "linear",
-                                    activeObject: null,
-                                    canvasC: canvas,
-                                    color: g,
-                                    fn: () => {
-                                       setFabricObject(activeObject);
-                                    },
-                                 });
-                              }}
-                              handleColor={(v) => {
-                                 handleColorfill({
-                                    activeObject: null,
-                                    canvasC: canvas,
-                                    color: v,
-                                    fn: () => {
-                                       setFabricObject(activeObject);
-                                    },
-                                 });
-                              }}
-                           />
-                        </PopoverContent>
-                     </Popover>
-                  </TooltipTrigger>
-                  <TooltipContent>canvas background color</TooltipContent>
-               </Tooltip>
+            <div className="flex flex-col items-center gap-2 text-sm">
+               <div className="space-y-2">
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <Popover>
+                           <PopoverTrigger className="flex gap-1 items-center px-2">
+                              <span className="font-semibold">Fill</span>
+                              <BtnWithColor
+                                 w={25}
+                                 h={25}
+                                 onClick={() => {
+                                    // setWhichOption("color");
+                                 }}
+                                 color={
+                                    canvas.current?.canvas.backgroundColor as
+                                       | string
+                                       | Gradient<"linear" | "radical">
+                                 }
+                              />
+                           </PopoverTrigger>
+                           <PopoverContent className="w-fit">
+                              <ColorOptions
+                                 forCanvas={true}
+                                 canvasC={canvas}
+                                 showGradient={true}
+                                 showGradientOptions={true}
+                                 width={canvas?.current?.canvas.width ?? 0}
+                                 height={canvas?.current?.canvas.height ?? 0}
+                                 color={
+                                    (canvas?.current?.canvas.backgroundColor as
+                                       | string
+                                       | Gradient<"linear" | "radial">) || "#ffffff"
+                                 }
+                                 handleGradient={(g, t) => {
+                                    handleGradient({
+                                       type: t ? t : "linear",
+                                       activeObject: null,
+                                       canvasC: canvas,
+                                       color: g,
+                                       fn: () => {
+                                          setFabricObject(activeObject);
+                                       },
+                                    });
+                                 }}
+                                 handleColor={(v) => {
+                                    handleColorfill({
+                                       activeObject: null,
+                                       canvasC: canvas,
+                                       color: v,
+                                       fn: () => {
+                                          setFabricObject(activeObject);
+                                       },
+                                    });
+                                 }}
+                              />
+                           </PopoverContent>
+                        </Popover>
+                     </TooltipTrigger>
+                     <TooltipContent>canvas background color</TooltipContent>
+                  </Tooltip>
 
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <div className="flex flex-col items-center">
-                        <InputWithValue
-                           change={(e) => {
-                              setWidth(e);
-                           }}
-                           val={width}
-                        >
-                           w
-                        </InputWithValue>
-                        <InputWithValue
-                           change={(e) => {
-                              setHeight(e);
-                           }}
-                           val={height}
-                        >
-                           h
-                        </InputWithValue>
-                     </div>
-                  </TooltipTrigger>
-                  <TooltipContent>canvas parameters</TooltipContent>
-               </Tooltip>
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <div className="flex flex-col items-center">
+                           <InputWithValue
+                              change={(e) => {
+                                 setWidth(e);
+                              }}
+                              val={width}
+                           >
+                              w
+                           </InputWithValue>
+                           <InputWithValue
+                              change={(e) => {
+                                 setHeight(e);
+                              }}
+                              val={height}
+                           >
+                              h
+                           </InputWithValue>
+                        </div>
+                     </TooltipTrigger>
+                     <TooltipContent>canvas parameters</TooltipContent>
+                  </Tooltip>
+               </div>
 
-               <Tooltip>
-                  <TooltipTrigger asChild>
-                     <CanvasBackgroundChange
-                        handleChange={(e) => {
-                           canvas.current?.changeCanvasBackground(e);
-                           setFabricObject(undefined);
-                        }}
-                     />
-                  </TooltipTrigger>
-                  <TooltipContent>canvas background image</TooltipContent>
-               </Tooltip>
+               <div>
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <CanvasBackgroundChange
+                           handleChange={(e) => {
+                              canvas.current?.changeCanvasBackground(e);
+                              setFabricObject(undefined);
+                           }}
+                        />
+                     </TooltipTrigger>
+                     <TooltipContent>canvas background image</TooltipContent>
+                  </Tooltip>
+               </div>
 
                {canvas.current && canvas.current.canvas.backgroundImage && (
                   <Button

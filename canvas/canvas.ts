@@ -161,7 +161,7 @@ class CanvasC {
       });
 
       this.canvas.on("object:removed", (e) => {
-         if (e.target && e.target.get("name") !== "guide") {
+         if (e.target && e.target.get("name") !== GUIDE && e.target.get("id") !== PROPGUIDE) {
             callbackSeleted(undefined);
             onDelete(e.target);
          }
@@ -174,12 +174,8 @@ class CanvasC {
          e.path.set({
             objectCaching: true,
             cornerSize: 10,
-            cornerStyle: "circle",
             padding: 1,
-            cornerStrokeColor: "#2020ff",
             strokeUniform: true,
-            transparentCorners: false,
-            cornerColor: "#2090a0",
          });
       });
 
@@ -243,7 +239,7 @@ class CanvasC {
    }
 
    async createNewImage(img: string | HTMLImageElement, props?: Partial<ImageProps>) {
-      let image: DefaultImage | null = null;
+      let image: FabricImage | null = null;
       if (img instanceof HTMLImageElement) {
          img.crossOrigin = "Anonymous";
          image = new FabricImage(img);
@@ -290,12 +286,8 @@ class CanvasC {
             left: (this.canvas.width - image.getScaledWidth()) / 2,
             top: (this.canvas.height - image.getScaledHeight()) / 2,
             cornerSize: 10,
-            cornerStyle: "circle",
             padding: 1,
-            cornerStrokeColor: "#2020ff",
             strokeUniform: true,
-            transparentCorners: false,
-            cornerColor: "#2090a0",
             objectCaching: true,
             selectable: true,
             hasControls: true,
@@ -305,6 +297,8 @@ class CanvasC {
          });
 
          this.canvas.add(image);
+         this.canvas.discardActiveObject();
+         this.canvas.setActiveObject(image);
          this.canvas.requestRenderAll();
       } else {
          console.error("error while loading image");
@@ -477,10 +471,8 @@ class CanvasC {
                top: s.top + 10,
                left: s.left + 10,
                cornerSize: 10,
-               cornerStyle: "circle",
                padding: 1,
                transparentCorners: false,
-               cornerColor: "#2090a0",
             });
             this.canvas.add(s);
          });
@@ -490,10 +482,8 @@ class CanvasC {
             top: c.top + 10,
             left: c.left + 10,
             cornerSize: 10,
-            cornerStyle: "circle",
             padding: 1,
             transparentCorners: false,
-            cornerColor: "#2090a0",
          });
          c.setCoords();
          this.canvas.add(c);
@@ -587,6 +577,7 @@ class CanvasC {
       }
 
       // Request a re-render of the canvas after all properties are updated
+      this.canvas.fire("object:modified", { target: obj });
       this.canvas.requestRenderAll();
    }
 
@@ -639,7 +630,7 @@ class CanvasC {
       this.canvas.requestRenderAll();
    }
 
-   saveCanvasAs(t: "image" | "json") {
+   saveCanvasAs(t: "image" | "json", filename: string) {
       if (t == "image") {
          const data = this.canvas.toDataURL({
             format: "png",
@@ -648,7 +639,7 @@ class CanvasC {
          });
          const l = document.createElement("a");
          l.href = data;
-         l.download = "canvas.png";
+         l.download = `${filename}.png`;
          l.click();
       } else {
          const j = this.canvas.toJSON();
@@ -657,7 +648,7 @@ class CanvasC {
          });
          const l = document.createElement("a");
          l.href = URL.createObjectURL(jsonBlob); // Create an object URL for the Blob
-         l.download = "data.json"; // Specify the filename
+         l.download = `${filename}.json`; // Specify the filename
          l.click(); // Trigger the download
       }
    }

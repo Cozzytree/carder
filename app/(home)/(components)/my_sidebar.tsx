@@ -3,7 +3,14 @@
 import { useCreateDesign } from "@/api_/mutations/design-mutation";
 import { useCurrentUser } from "@/api_/queries/user-query";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import {
+   Dialog,
+   DialogContent,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
+   DialogClose,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { CreditCardIcon, FilesIcon, HomeIcon, PlusCircle } from "lucide-react";
@@ -83,7 +90,11 @@ const MySidebarProvider = ({ children }: { children: React.ReactNode }) => {
                <Separator className="mt-1 mb-1" />
 
                {routes.map((r, i) => (
-                  <Link className={`${buttonVariants({ variant: "simple", size: "sm" })} ${checkPath(r.url) && "bg-muted"} flex flex-col items-center w-full py-4 px-2`} key={i} href={r.url}>
+                  <Link
+                     className={`${buttonVariants({ variant: "simple", size: "sm" })} ${checkPath(r.url) && "bg-muted font-semibold"} flex flex-col items-center w-full py-4 px-2`}
+                     key={i}
+                     href={r.url}
+                  >
                      <r.icon />
                      {r.label}
                   </Link>

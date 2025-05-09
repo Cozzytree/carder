@@ -94,14 +94,14 @@ function ImageOption({ canvasC }: props) {
                         setCurrTab(t);
                      }}
                      size={"xs"}
-                     variant={"outline"}
-                     className={`${currTab === t && "bg-accent/30"}`}
+                     variant={"simple"}
+                     className={`${currTab === t && "bg-accent/30 font-semibold"}`}
                   >
                      {t}
                   </Button>
                ))}
             </div>
-            <div className="grid grid-cols-2 overflow-y-auto">
+            <div className="grid grid-cols-4 overflow-y-auto">
                {currTab === "programming" && (
                   <>
                      {programming.icons.map((p, i) => (

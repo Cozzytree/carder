@@ -1,18 +1,17 @@
 "use client";
 
-import UserInfo from "@/components/user_info";
-
-// import { useCurrentUser } from "@/api_/queries/user-query";
-import { useUserContext } from "@/hooks/use_user";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Header = () => {
-   const { user } = useUserContext();
-   return (
-      <div className="w-full flex items-center justify-between">
-         <div></div>
+   const isMobile = useIsMobile();
 
-         <UserInfo loading={false} user={user} />
-      </div>
+   return (
+      <>
+         <div className="w-full flex items-center justify-between">
+            <div>{isMobile && <SidebarTrigger />}</div>
+         </div>
+      </>
    );
 };
 

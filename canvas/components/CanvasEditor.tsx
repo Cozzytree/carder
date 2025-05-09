@@ -98,7 +98,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                         className="absolute top-0 left-0 flex justify-center items-center"
                         style={{
                            width:
-                              containerZoom < 1.5 && containerZoom > 0.6
+                              containerZoom < 1.5 && containerZoom >= 0.25
                                  ? "100%"
                                  : `${width + containerZoom * 500 + "px"}`,
                            height: `${height + containerZoom * 250 + "px"}`,
@@ -150,7 +150,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                      />
                   </div> */}
                   {/* {isMobile && <OptionsMobile canvasC={canvasC_ref} />} */}
-                  <div className="border-1 shadow-lg rounded-xl bg-foreground/20 p-2">
+                  <div className="border-1 shadow-lg rounded-xl bg-background p-2">
                      <OptionsMobile
                         containerRef={containerRef}
                         containerZoom={containerZoom}

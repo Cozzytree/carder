@@ -9,9 +9,16 @@ import { EyeClosed, EyeIcon, PanelRightClose, PanelRightOpen } from "lucide-reac
 import {
    DropdownMenu,
    DropdownMenuContent,
+   DropdownMenuGroup,
    DropdownMenuItem,
+   DropdownMenuPortal,
+   DropdownMenuSeparator,
+   DropdownMenuSub,
+   DropdownMenuSubContent,
+   DropdownMenuSubTrigger,
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SaveCanvas from "./saveCanvas";
 
 export default function LeftContainer() {
    const { showUploads, handleSideToggle, sidesOpen, canvas } = useEditorContext();
@@ -57,11 +64,19 @@ export default function LeftContainer() {
             <div className="w-[250px] lg:w-[400px] h-full border-r-2 border-r-muted bg-muted py-4">
                <div className="w-full flex justify-between px-3">
                   <DropdownMenu>
-                     <DropdownMenuTrigger>
-                        <span>Canvas</span>
-                     </DropdownMenuTrigger>
-                     <DropdownMenuContent className="w-36">
-                        <DropdownMenuItem>Export</DropdownMenuItem>
+                     <DropdownMenuTrigger>Canvas</DropdownMenuTrigger>
+
+                     <DropdownMenuContent>
+                        <DropdownMenuGroup>
+                           <DropdownMenuSub>
+                              <DropdownMenuSubTrigger>Save As</DropdownMenuSubTrigger>
+                              <DropdownMenuPortal>
+                                 <DropdownMenuSubContent>
+                                    <SaveCanvas />
+                                 </DropdownMenuSubContent>
+                              </DropdownMenuPortal>
+                           </DropdownMenuSub>
+                        </DropdownMenuGroup>
                      </DropdownMenuContent>
                   </DropdownMenu>
                   <PanelRightClose onClick={() => handleSideToggle(false)} />
@@ -77,7 +92,7 @@ export default function LeftContainer() {
                         )}
                      >
                         <button
-                           disabled={!activeObject?.get("visible")}
+                           // disabled={!activeObject?.get("visible")}
                            onClick={() => {
                               handleActive(o);
                            }}
