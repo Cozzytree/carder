@@ -5,7 +5,6 @@ import Header from "./(components)/header";
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { MySidebarProvider } from "./(components)/my_sidebar";
 import { UserContextProvider } from "@/hooks/use_user";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";

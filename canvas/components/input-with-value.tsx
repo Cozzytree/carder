@@ -22,14 +22,14 @@ function InputWithValue({ change, children, val }: props) {
       if (isNaN(num) || !inputRef.current) {
          // If invalid, reset to last valid value
          if (inputRef.current) {
-            inputRef.current.value = String(val.toFixed(2));
+            inputRef.current.value = String(val);
          }
          return;
       }
 
       change(num);
       setNumb(num);
-      inputRef.current.value = String(num.toFixed(2));
+      inputRef.current.value = String(num);
    };
 
    useEffect(() => {

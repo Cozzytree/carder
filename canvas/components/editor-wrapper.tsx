@@ -4,13 +4,20 @@ import * as fabric from "fabric";
 import CanvasC from "../canvas";
 import CanvasEditor from "./CanvasEditor";
 
+import React, { createContext, RefObject, useContext, useEffect, useRef, useState } from "react";
 import type { Shapes } from "@/api_/types";
 import { action } from "@/lib/queueShapes";
 import { useTheme } from "next-themes";
-import React, { createContext, RefObject, useContext, useEffect, useRef, useState } from "react";
 import { canvasConfig } from "../constants";
-import { DefaultCircle, DefaultCustomPath, DefaultIText, DefaultRect } from "../default_styles";
+import {
+   DefaultCircle,
+   DefaultCustomPath,
+   DefaultImage,
+   DefaultIText,
+   DefaultRect,
+} from "../default_styles";
 import { useCanvasStore } from "../store";
+import { createNewImage } from "../utilsfunc";
 
 type props = {
    editable?: boolean;
@@ -22,7 +29,15 @@ type props = {
       height: number;
       scale?: number;
    };
-   onChange?: (params: fabric.FabricObject, action: action) => void;
+   onChange?: ({
+      action,
+      params,
+      props,
+   }: {
+      action: action;
+      params?: fabric.FabricObject;
+      props?: { width: number; height: number; background: string };
+   }) => void;
 };
 
 type editorProps = {
@@ -65,6 +80,7 @@ function EditorWrapper({
 
    useEffect(() => {
       if (!canvasRef.current) return;
+      let isInitialized = false;
 
       if (initialData) {
          // setWidth(initialData.width);
@@ -98,135 +114,117 @@ function EditorWrapper({
          sacleY: initialData?.scale ? initialData?.scale : 1,
       });
 
-      if (initialData?.shapes) {
-         const asyncOperations: Promise<void>[] = [];
+      const asyncOperations: Promise<void>[] = [];
+      (async function () {
+         if (initialData?.shapes) {
+            initialData.shapes.forEach((shape) => {
+               let newShape: fabric.FabricObject | null = null;
+               const s = JSON.parse(shape.props) as fabric.FabricObject;
 
-         initialData.shapes.forEach((shape) => {
-            let newShape: fabric.FabricObject | null = null;
-            const s = JSON.parse(shape.props) as fabric.FabricObject;
+               if (s.type === "Path") {
+                  const fp = s as fabric.Path;
+                  let path = "";
+                  fp?.path.forEach((p) => {
+                     path += p.join(" ") + " ";
+                  });
+                  newShape = new DefaultCustomPath(path.trim(), {}, shape.id);
+               } else if (s.type === "Circle") {
+                  const cir = s as fabric.Circle;
+                  newShape = new DefaultCircle({ radius: cir.radius }, shape.id);
+               } else if (s.type === "Rect") {
+                  newShape = new DefaultRect({}, shape.id);
+               } else if (s.type === "Textbox") {
+                  const t = s as fabric.Text;
+                  newShape = new DefaultIText(
+                     t?.text,
+                     {
+                        fontSize: t.fontSize,
+                        fontFamily: t.fontFamily,
+                        fontStyle: t.fontStyle,
+                        fontWeight: t.fontWeight,
+                        textAlign: t.textAlign,
+                        underline: t.underline,
+                     },
+                     shape.id,
+                  );
+               } else if (s.type === "Image") {
+                  const imgPromise = new Promise<void>((resolve) => {
+                     (async function () {
+                        const img = await createNewImage({
+                           height: f.width,
+                           width: f.height,
+                           img: JSON.parse(shape.props)?.src || "",
+                           props: {
+                              left: s.left,
+                              top: s.top,
+                              lockRotation: s.lockRotation,
+                              lockMovementX: s.lockScalingX,
+                              lockMovementY: s.lockScalingY,
+                              width: s.width,
+                              height: s.height,
+                              scaleX: s.scaleX,
+                              scaleY: s.scaleY,
+                           },
+                        });
+                        if (img) {
+                           f.add(img);
+                           f.set("id", shape.id);
+                           resolve();
+                        }
+                     })();
+                  });
+                  asyncOperations.push(imgPromise);
+               }
 
-            if (s.type === "Path") {
-               const fp = s as fabric.Path;
-               let path = "";
-               fp?.path.forEach((p) => {
-                  path += p.join(" ") + " ";
-               });
-               newShape = new DefaultCustomPath(path.trim(), {}, shape.id);
-            } else if (s.type === "Circle") {
-               const cir = s as fabric.Circle;
-               newShape = new DefaultCircle({ radius: cir.radius }, shape.id);
-            } else if (s.type === "Rect") {
-               newShape = new DefaultRect({}, shape.id);
-            } else if (s.type === "Textbox") {
-               const t = s as fabric.Text;
-               newShape = new DefaultIText(
-                  t?.text,
-                  {
-                     fontSize: t.fontSize,
-                     fontFamily: t.fontFamily,
-                     fontStyle: t.fontStyle,
-                     fontWeight: t.fontWeight,
-                     textAlign: t.textAlign,
-                     underline: t.underline,
-                  },
-                  shape.id,
-               );
-            } else if (s.type === "Image") {
-               // Wrap asynchronous image loading in a Promise
-               const imagePromise = new Promise<void>((resolve) => {
-                  const img = s as fabric.FabricImage;
-                  const i = new Image();
-                  i.crossOrigin = "Anonymous";
-                  i.src = img?.src ?? "";
-                  i.onload = () => {
-                     // Use fabric.Image constructor (or fabric.FabricImage, depending on your version)
-                     const fabricImg = new fabric.FabricImage(i);
+               // For non-image shapes, set properties and add them immediately
+               if (newShape && s.type !== "Image") {
+                  newShape.set({
+                     fill: s.fill,
+                     top: s.top,
+                     left: s.left,
+                     width: s.width,
+                     height: s.height,
+                     scaleX: s.scaleX,
+                     scaleY: s.scaleY,
+                     stroke: s.stroke,
+                     strokeWidth: s.strokeWidth,
+                     lockScalingX: s.lockScalingX,
+                     lockScalingY: s.lockScalingY,
+                     shadow: s.shadow,
+                     flipX: s.flipX,
+                     flipY: s.flipY,
+                     lockMovementX: s.lockMovementX,
+                     lockMovementY: s.lockMovementY,
+                     opacity: s.opacity,
+                  });
+                  f.add(newShape);
+               }
+            });
 
-                     // If using filters from the original image, assign and apply them
-                     if (img.filters && img.filters.length > 0) {
-                        fabricImg.filters = img.filters;
-                        fabricImg.applyFilters();
-                     }
-                     newShape = fabricImg;
-                     // Set general properties for the shape
-                     newShape.set({
-                        id: shape.id,
-                        fill: s.fill,
-                        top: s.top,
-                        left: s.left,
-                        width: s.width,
-                        height: s.height,
-                        scaleX: s.scaleX,
-                        scaleY: s.scaleY,
-                        stroke: s.stroke,
-                        strokeWidth: s.strokeWidth,
-                        lockScalingX: s.lockScalingX,
-                        lockScalingY: s.lockScalingY,
-                        shadow: s.shadow,
-                        flipX: s.flipX,
-                        flipY: s.flipY,
-                        lockMovementX: s.lockMovementX,
-                        lockMovementY: s.lockMovementY,
-                        opacity: s.opacity,
-                     });
-                     f.add(newShape);
-                     // Resolve the promise once the image shape is added
-                     resolve();
-                  };
-
-                  // Optionally handle error if image fails to load
-                  i.onerror = () => {
-                     console.error("Error loading image:", i.src);
-                     resolve(); // resolve to avoid hanging the promise chain
-                  };
-               });
-               asyncOperations.push(imagePromise);
-            }
-
-            // For non-image shapes, set properties and add them immediately
-            if (newShape && s.type !== "Image") {
-               newShape.set({
-                  id: shape.id,
-                  fill: s.fill,
-                  top: s.top,
-                  left: s.left,
-                  width: s.width,
-                  height: s.height,
-                  scaleX: s.scaleX,
-                  scaleY: s.scaleY,
-                  stroke: s.stroke,
-                  strokeWidth: s.strokeWidth,
-                  lockScalingX: s.lockScalingX,
-                  lockScalingY: s.lockScalingY,
-                  shadow: s.shadow,
-                  flipX: s.flipX,
-                  flipY: s.flipY,
-                  lockMovementX: s.lockMovementX,
-                  lockMovementY: s.lockMovementY,
-                  opacity: s.opacity,
-               });
-               f.add(newShape);
-            }
-         });
-
-         // Once all asynchronous operations complete, re-render the canvas.
-         Promise.all(asyncOperations).then(() => {
-            f.renderAll();
-         });
-      }
+            // f.renderAll();
+            // Once all asynchronous operations complete, re-render the canvas.
+            await Promise.all(asyncOperations).then(() => {
+               isInitialized = true;
+            });
+            // f.renderAll();
+         }
+      })();
 
       canvasC_ref.current = new CanvasC({
          theme,
          snapping: snap,
          canvas: f,
          onCreation: (e) => {
-            onChange?.(e, "create");
+            if (!isInitialized) return;
+            onChange?.({ params: e, action: "create" });
          },
          onUpdate: (e) => {
-            onChange?.(e, "update");
+            if (!isInitialized) return;
+            onChange?.({ params: e, action: "update" });
          },
          onDelete: (e) => {
-            onChange?.(e, "delete");
+            if (!isInitialized) return;
+            onChange?.({ params: e, action: "delete" });
          },
          callbackSeleted: (e) => {
             setFabricObject(e);
@@ -250,6 +248,14 @@ function EditorWrapper({
       if (!canvasC_ref.current) return;
       canvasC_ref.current.changeCanvasSize("width", width);
       canvasC_ref.current.changeCanvasSize("height", height);
+      onChange?.({
+         action: "canvas-props",
+         props: {
+            background: String(canvasC_ref?.current?.canvas?.backgroundColor) || "",
+            width,
+            height,
+         },
+      });
    }, [width, height]);
 
    return (

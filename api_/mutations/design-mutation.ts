@@ -76,4 +76,29 @@ const useDeleteDesign = () => {
    return { deleteDesign, deletingDesign };
 };
 
-export { useCreateDesign, useDeleteDesign };
+const useUpdateDesign = () => {
+   const { mutate: updateDesign, isLoading: isUpdatingDesign } = useMutation({
+      mutationFn: handler(
+         async ({
+            id,
+            props,
+         }: {
+            id: string;
+            props: { width: number; height: number; background: string };
+         }) => {
+            const res = await fetch(`${conf.api_url}/design/update/${id}`, {
+               credentials: "include",
+               method: "PATCH",
+               body: JSON.stringify(props),
+            });
+            if (res?.status >= 400) {
+               throw new Error(res.statusText || "internal server error");
+            }
+            return res.statusText;
+         },
+      ),
+   });
+   return { updateDesign, isUpdatingDesign };
+};
+
+export { useCreateDesign, useDeleteDesign, useUpdateDesign };

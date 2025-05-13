@@ -1,5 +1,4 @@
 import CollapceWithBtn from "@/components/collapseWithBtn";
-
 import { cn } from "@/lib/utils";
 import { FabricObject } from "fabric";
 import { useCanvasStore } from "../store";
@@ -10,15 +9,14 @@ import {
    DropdownMenu,
    DropdownMenuContent,
    DropdownMenuGroup,
-   DropdownMenuItem,
    DropdownMenuPortal,
-   DropdownMenuSeparator,
    DropdownMenuSub,
    DropdownMenuSubContent,
    DropdownMenuSubTrigger,
    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SaveCanvas from "./saveCanvas";
+import UserAssets from "./user-assets";
 
 export default function LeftContainer() {
    const { showUploads, handleSideToggle, sidesOpen, canvas } = useEditorContext();
@@ -87,7 +85,7 @@ export default function LeftContainer() {
                      <div
                         key={i}
                         className={cn(
-                           activeObject?.get("id") === o.get("id") && "bg-foreground/20",
+                           activeObject?.get("id") === o?.get("id") && "bg-foreground/20",
                            "w-full rounded-l-md py-1 text-xs flex items-center justify-between px-4",
                         )}
                      >
@@ -113,7 +111,11 @@ export default function LeftContainer() {
 
                {showUploads && (
                   <CollapceWithBtn label="Assets" classname="px-3">
-                     <div className="px-3">Images</div>
+                     <UserAssets
+                        onChange={(e) => {
+                           canvas?.current?.createNewImage(e);
+                        }}
+                     />
                   </CollapceWithBtn>
                )}
             </div>

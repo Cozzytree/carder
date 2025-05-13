@@ -73,7 +73,7 @@ const DesignList = () => {
             </DialogContent>
          </Dialog>
 
-         <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
             {userDesigns?.data?.map((d, i) => (
                <div
                   className={`${buttonVariants({ variant: "simple", size: "sm" })} w-full h-fit relative group p-2`}
