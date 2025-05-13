@@ -1,5 +1,6 @@
 "use client";
 
+import { v4 as uuidV4 } from "uuid";
 import {
    ReactFlow,
    Background,
@@ -12,36 +13,83 @@ import {
    OnNodesChange,
    Edge,
    Node,
+   useReactFlow,
+   OnConnectEnd,
+   ReactFlowProvider,
+   DefaultEdgeOptions,
+   OnSelectionChangeParams,
+   OnReconnect,
+   reconnectEdge,
+   MarkerType,
+   useNodesState,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useState } from "react";
 import TextUpdaterNode from "./text_updater";
 import CircleNode from "./circle_node";
+import ResizableNodeSelected from "./node_resizer_selected";
+import { debouncer } from "@/lib/utils";
+import { useCallback, useRef, useState } from "react";
+import ActiveEdge from "./components/active_edge";
+import ActiveNode from "./components/active_node";
 
 const nodeTypes = {
    textUpdater: TextUpdaterNode,
    circle: CircleNode,
+   re_selected: ResizableNodeSelected,
 };
 
 const initialNodes: Node[] = [
    {
       id: "1",
-      data: { label: "Node 1" },
+      data: { label: "label", content: "Hello Seattle" },
       type: "textUpdater",
       position: { x: 5, y: 5 },
       className: "rounded-xl",
    },
    { id: "2", data: { label: "Node 2" }, position: { x: 5, y: 100 } },
-   { id: "3", type: "circle", data: { label: "Node 2" }, position: { x: 5, y: 100 } },
+   {
+      id: "3",
+      type: "circle",
+      data: { label: "Node 2", background: "red", text: "black" },
+      position: { x: 5, y: 100 },
+   },
+   {
+      id: "5",
+      type: "re_selected",
+      data: { label: "hello world" },
+      position: { x: 500, y: 500 },
+   },
 ];
 
 const initialEdges: Edge[] = [
-   { id: "e1-2", source: "1", target: "2", type: "step", style: { borderRadius: "20px" } },
+   {
+      id: "e1-2",
+      source: "1",
+      target: "2",
+      type: "step",
+      style: { borderRadius: "20px" },
+      label: "Hello world",
+      markerEnd: {
+         type: MarkerType.Arrow,
+      },
+   },
 ];
 
-export default function FlowEditor() {
-   const [nodes, setNodes] = useState<Node[]>(initialNodes);
+const defaultEdgeOptions: DefaultEdgeOptions = {
+   animated: false,
+   type: "default",
+};
+
+function Flow() {
+   const [nodes, setNodes, OnNodesChange] = useNodesState(initialNodes);
+   const edgeReconnectSuccessful = useRef(true);
+   const reactFlowWrapper = useRef(null);
+   const [activeNode, setActiveNode] = useState<Node[]>([]);
+   const [activeEdges, setActiveEdges] = useState<Edge[]>([]);
+
+   // const [nodes, setNodes] = useState<Node[]>(initialNodes);
    const [edges, setEdges] = useState<Edge[]>(initialEdges);
+   const { screenToFlowPosition } = useReactFlow();
 
    const onNodesChange: OnNodesChange = useCallback(
       (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -51,16 +99,96 @@ export default function FlowEditor() {
       (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
       [setEdges],
    );
+
    const onConnect: OnConnect = useCallback(
       (connection) => setEdges((eds) => addEdge(connection, eds)),
       [setEdges],
    );
 
+   const onConnectEnd: OnConnectEnd = useCallback(
+      (event, connectionState) => {
+         // when a connection is dropped on the pane it's not valid
+         if (!connectionState.isValid) {
+            // we need to remove the wrapper bounds, in order to get the correct position
+            const id = uuidV4();
+            const { clientX, clientY } =
+               "changedTouches" in event ? event.changedTouches[0] : event;
+            const newNode = {
+               id,
+               position: screenToFlowPosition({
+                  x: clientX,
+                  y: clientY,
+               }),
+               data: { label: `label`, content: "helllo" },
+               origin: [0.5, 0.0] as [number, number],
+            };
+
+            setNodes((nds) => nds.concat(newNode));
+            setEdges((eds) => eds.concat({ id, source: connectionState?.fromNode.id, target: id }));
+         }
+      },
+      [screenToFlowPosition],
+   );
+
+   const onReconnectStart = useCallback(() => {
+      edgeReconnectSuccessful.current = false;
+   }, []);
+
+   const onReconnect: OnReconnect = useCallback((oldEdge, newConnection) => {
+      edgeReconnectSuccessful.current = true;
+      setEdges((els) => reconnectEdge(oldEdge, newConnection, els));
+   }, []);
+
+   const onReconnectEnd = useCallback((_, edge: Edge) => {
+      if (!edgeReconnectSuccessful.current) {
+         setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+      }
+
+      edgeReconnectSuccessful.current = true;
+   }, []);
+
    return (
-      <div style={{ width: "100%", height: "100vh", color: "var(--foreground)" }}>
+      <div
+         className="wrapper"
+         ref={reactFlowWrapper}
+         style={{ width: "100%", height: "100vh", color: "var(--foreground)" }}
+      >
+         {activeNode?.length > 0 && (
+            <div className="fixed top-2 right-2 z-50 bg-background p-3 rounded-sm">
+               <ActiveNode
+                  activeNode={activeNode}
+                  onChange={(n) => {
+                     const i = nodes.findIndex((node) => node.id === n.id);
+                     if (i === -1) return;
+                     setNodes((no) => {
+                        no[i] = n;
+                        return [...no];
+                     });
+                  }}
+               />
+            </div>
+         )}
+
+         {activeEdges?.length > 0 && (
+            <div className="fixed top-2 right-2 z-50 bg-background p-3 rounded-sm">
+               <ActiveEdge
+                  edges={activeEdges}
+                  nodes={nodes}
+                  onChange={(e) => {
+                     const i = edges.findIndex((ed) => ed.id == e.id);
+                     if (i == -1) return;
+                     setEdges((ed) => {
+                        ed[i] = e;
+                        return [...ed];
+                     });
+                  }}
+               />
+            </div>
+         )}
+
          <ReactFlow
             defaultEdgeOptions={{
-               type: "straight",
+               type: "",
             }}
             nodeTypes={nodeTypes}
             colorMode="dark"
@@ -68,10 +196,18 @@ export default function FlowEditor() {
             onEdgesChange={onEdgesChange}
             nodes={nodes}
             edges={edges}
+            onReconnect={onReconnect}
+            onReconnectStart={onReconnectStart}
+            onReconnectEnd={onReconnectEnd}
             onConnect={onConnect}
-            onSelectionChange={(e) => {
-               console.log(e);
-            }}
+            onConnectEnd={onConnectEnd}
+            onSelectionChange={debouncer((e: OnSelectionChangeParams<Node, Edge>) => {
+               setActiveNode(e.nodes);
+               setActiveEdges(e.edges);
+            }, 100)}
+            defaultEdgeOptions={defaultEdgeOptions}
+            // fitView
+            // snapToGrid={true}
          >
             <Background />
             <Controls />
@@ -79,3 +215,12 @@ export default function FlowEditor() {
       </div>
    );
 }
+
+const FlowEditor = () => {
+   return (
+      <ReactFlowProvider>
+         <Flow />
+      </ReactFlowProvider>
+   );
+};
+export default FlowEditor;
