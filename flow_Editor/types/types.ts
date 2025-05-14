@@ -5,6 +5,12 @@ export type NodeData = {
    text: string;
 };
 
-export type EdgeType = "default" | "straight" | "step" | "smoothstep" | "simplebezier";
+export type EdgeType =
+   | "default"
+   | "straight"
+   | "step"
+   | "smoothstep"
+   | "simplebezier"
+   | "buttonedge";
 
 export type NodeType = "textUpdater" | "circle" | "default";

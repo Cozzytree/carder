@@ -31,11 +31,18 @@ import { debouncer } from "@/lib/utils";
 import { useCallback, useRef, useState } from "react";
 import ActiveEdge from "./components/active_edge";
 import ActiveNode from "./components/active_node";
+import LabeledGroupNode from "./label_group_node";
+import ButtonEdge from "./button_edge";
+
+const edgeTypes = {
+   buttonedge: ButtonEdge,
+};
 
 const nodeTypes = {
    textUpdater: TextUpdaterNode,
    circle: CircleNode,
    re_selected: ResizableNodeSelected,
+   labeledGroupNode: LabeledGroupNode,
 };
 
 const initialNodes: Node[] = [
@@ -59,6 +66,30 @@ const initialNodes: Node[] = [
       data: { label: "hello world" },
       position: { x: 500, y: 500 },
    },
+   {
+      id: "6",
+      position: { x: 200, y: 200 },
+      data: { label: "Group Node" },
+      width: 380,
+      height: 200,
+      type: "labeledGroupNode",
+   },
+   {
+      id: "7",
+      position: { x: 50, y: 100 },
+      data: { label: "Node" },
+      type: "default",
+      parentId: "6",
+      extent: "parent",
+   },
+   {
+      id: "8",
+      position: { x: 200, y: 50 },
+      data: { label: "Node" },
+      type: "default",
+      parentId: "6",
+      extent: "parent",
+   },
 ];
 
 const initialEdges: Edge[] = [
@@ -72,6 +103,13 @@ const initialEdges: Edge[] = [
       markerEnd: {
          type: MarkerType.Arrow,
       },
+   },
+   {
+      label: "Button Edge",
+      id: "e1-3",
+      source: "1",
+      target: "5",
+      type: "buttonedge",
    },
 ];
 
@@ -175,6 +213,7 @@ function Flow() {
                   edges={activeEdges}
                   nodes={nodes}
                   onChange={(e) => {
+                     console.log(e);
                      const i = edges.findIndex((ed) => ed.id == e.id);
                      if (i == -1) return;
                      setEdges((ed) => {
@@ -190,6 +229,7 @@ function Flow() {
             defaultEdgeOptions={{
                type: "",
             }}
+            edgeTypes={edgeTypes}
             nodeTypes={nodeTypes}
             colorMode="dark"
             onNodesChange={onNodesChange}

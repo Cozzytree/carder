@@ -1,9 +1,11 @@
-import { Handle, Position } from "@xyflow/react";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { NodeData } from "./types/types";
 
 const CircleNode = ({ data, isConnectable }: { data: NodeData; isConnectable: boolean }) => {
+   const reactFlow = useReactFlow();
    const width = 100;
    const height = 100;
+
    return (
       <div
          style={{

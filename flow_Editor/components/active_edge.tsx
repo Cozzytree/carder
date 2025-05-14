@@ -11,7 +11,14 @@ type Props = {
    onChange: (v: Edge) => void;
 };
 
-const edgeTypes: EdgeType[] = ["default", "straight", "step", "smoothstep", "simplebezier"];
+const edgeTypes: EdgeType[] = [
+   "default",
+   "straight",
+   "step",
+   "smoothstep",
+   "simplebezier",
+   "buttonedge",
+];
 
 export default function ActiveEdge({ edges, nodes, onChange }: Props) {
    function finrNodewithID(id: string) {

@@ -1,9 +1,10 @@
 import { Node } from "@xyflow/react";
-import type { NodeData, NodeType } from "../types/types";
+import type { NodeType } from "../types/types";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import ChangeColor from "./changeColor";
 
 type Props = {
    activeNode: Node[];
@@ -21,7 +22,7 @@ export default function ActiveNode({ activeNode, onChange }: Props) {
 
          {activeNode.map((node) => (
             <div key={node.id} className="flex flex-col gap-2">
-               <NodeD data={node?.data as NodeData} />
+               <NodeD data={node} onChange={onChange} />
                <Popover>
                   <PopoverTrigger asChild>
                      <Button size={"sm"} className="flex justify-start font-semibold">
@@ -55,6 +56,28 @@ export default function ActiveNode({ activeNode, onChange }: Props) {
    );
 }
 
-function NodeD({ data }: { data: NodeData }) {
-   return <div>{data?.label}</div>;
+function NodeD({ data, onChange }: { data: Node; onChange: (v: Node) => void }) {
+   return (
+      <div className="flex flex-col gap-2">
+         <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold">Fill</span>
+            <ChangeColor
+               color={(data?.data?.background as string) || ""}
+               node={data}
+               onChange={onChange}
+               prop="background"
+            />
+         </div>
+
+         <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold">Text</span>
+            <ChangeColor
+               node={data}
+               color={(data?.data?.text as string) || ""}
+               onChange={onChange}
+               prop="text"
+            />
+         </div>
+      </div>
+   );
 }
