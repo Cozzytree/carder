@@ -22,17 +22,33 @@ export default async function RootLayout({
       redirect("/landing");
    }
 
-   const res = await fetch(`${conf.api_url}/user`, {
-      headers: {
-         Authorization: `Bearer ${session?.value}`,
-      },
-   });
+   let data: { data: User } | null = null;
 
-   if (res.status >= 400) {
-      redirect(`/error/${res?.statusText || "internal server error"}`);
+   try {
+      const res = await fetch(`${conf.api_url}/user`, {
+         headers: {
+            Authorization: `Bearer ${session?.value}`,
+         },
+      });
+
+      if (res.status >= 400) {
+         redirect(`/error/${res?.statusText || "internal server error"}`);
+      }
+
+      if (res.headers.get("Content/Type") !== "application/json") {
+         redirect("/landing");
+      }
+
+      data = (await res.json()) as { data: User };
+   } catch (err) {
+      // Handle fetch/network errors
+      console.error("Fetch failed:", err);
+      redirect("/error/network-error");
    }
 
-   const data = (await res.json()) as { data: User };
+   if (data == null) {
+      redirect("/landing");
+   }
 
    return (
       // <MySidebarProvider>

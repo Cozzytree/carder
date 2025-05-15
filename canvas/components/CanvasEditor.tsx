@@ -69,7 +69,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                )}
             </div>
          )} */}
-         {isEdit && !isMobile && <LeftContainer />}
+         <div className="w-fit h-full shrink-0">{isEdit && <LeftContainer />}</div>
 
          <div className="relative w-full h-full flex flex-col items-center">
             {/* {isEdit && (
@@ -97,10 +97,7 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                         ref={innerContainerRef}
                         className="absolute top-0 left-0 flex justify-center items-center"
                         style={{
-                           width:
-                              containerZoom < 1.5 && containerZoom >= 0.25
-                                 ? "100%"
-                                 : `${width + containerZoom * 500 + "px"}`,
+                           width: `${width + containerZoom * 500 + "px"}`,
                            height: `${height + containerZoom * 250 + "px"}`,
                         }}
                      >
@@ -162,15 +159,17 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
          </div>
 
          {/* {right container} */}
-         {isEdit && !isMobile && (
-            <>
-               <RightContainer
-                  containerZoom={containerZoom}
-                  containerRef={containerRef}
-                  setContainerZoom={setContainerZoom}
-               />
-            </>
-         )}
+         <div className="w-fit hidden lg:block h-full shrink-0">
+            {isEdit && (
+               <>
+                  <RightContainer
+                     containerZoom={containerZoom}
+                     containerRef={containerRef}
+                     setContainerZoom={setContainerZoom}
+                  />
+               </>
+            )}
+         </div>
       </div>
    );
 }

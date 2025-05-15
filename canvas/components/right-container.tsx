@@ -28,11 +28,10 @@ type props = {
 };
 
 function RightContainer({ containerZoom, containerRef, setContainerZoom }: props) {
-   const { sidesOpen, canvas } = useEditorContext();
+   const { sidesOpen, canvas, sideWidth } = useEditorContext();
+   const isMobile = useIsMobile();
 
    const { activeObject, setFabricObject } = useCanvasStore();
-
-   const [sideWidth] = useState(350);
 
    const isActiveSelection =
       activeObject && (activeObject instanceof ActiveSelection || activeObject instanceof Group);
@@ -47,14 +46,14 @@ function RightContainer({ containerZoom, containerRef, setContainerZoom }: props
 
    const Sept = () => <Separator className="border-[1px] mt-1 mb-2 border-foreground/20" />;
 
-   const height = sidesOpen ? "100%" : activeObject ? "96%" : "fit-content";
+   const height = sidesOpen ? "100%" : activeObject ? "98%" : "fit-content";
 
    return (
       <div
          style={{
             width: sideWidth + "px",
-            left: sidesOpen ? `0px` : `calc(100% - ${sideWidth + 30}px)`,
-            top: sidesOpen ? `0px` : `${2}%`,
+            right: `10px`,
+            top: sidesOpen ? `0px` : `${1}%`,
             position: sidesOpen ? "relative" : "fixed",
             height: height,
          }}

@@ -17,10 +17,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import SaveCanvas from "./saveCanvas";
 import UserAssets from "./user-assets";
+import { useIsMobile } from "../hooks/isMobile";
 
 export default function LeftContainer() {
-   const { showUploads, handleSideToggle, sidesOpen, canvas } = useEditorContext();
+   const isMobile = useIsMobile();
    const activeObject = useCanvasStore((state) => state.activeObject);
+
+   const { showUploads, handleSideToggle, sidesOpen, canvas, sideWidth } = useEditorContext();
    const [objs, setObjs] = useState<FabricObject[] | []>(() => {
       return canvas?.current?.canvas?.getObjects() || [];
    });
@@ -55,11 +58,19 @@ export default function LeftContainer() {
    return (
       <>
          {!sidesOpen ? (
-            <div className="fixed z-50 top-4 left-5 p-2 rounded-sm bg-muted border border-muted-foreground/40 shadow-md">
-               <PanelRightOpen onClick={() => handleSideToggle(true)} />
+            <div
+               className={`fixed z-50 ${isMobile ? "bottom-4" : "top-4"} left-5 p-1 rounded-xs bg-muted border border-muted-foreground/40 shadow-md`}
+            >
+               <PanelRightOpen width={20} onClick={() => handleSideToggle(true)} />
             </div>
          ) : (
-            <div className="w-[250px] lg:w-[400px] h-full border-r-2 border-r-muted bg-muted py-4">
+            <div
+               style={{ width: sideWidth }}
+               className={cn(
+                  "absolute lg:relative left-0 top-0 z-50",
+                  "h-full border-r-2 border-r-muted bg-muted py-4",
+               )}
+            >
                <div className="w-full flex justify-between px-3">
                   <DropdownMenu>
                      <DropdownMenuTrigger>Canvas</DropdownMenuTrigger>

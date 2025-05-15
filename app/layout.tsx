@@ -4,6 +4,7 @@ import { Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import QueryProvider from "@/components/query-client_provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geist = Geist_Mono({
    weight: ["400", "700"],
@@ -37,6 +38,7 @@ export default async function RootLayout({
                   </SidebarProvider>
                </ThemeProvider>
             </QueryProvider>
+            <Toaster />
          </body>
       </html>
    );

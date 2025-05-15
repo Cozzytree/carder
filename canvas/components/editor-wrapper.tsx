@@ -9,13 +9,7 @@ import type { Shapes } from "@/api_/types";
 import { action } from "@/lib/queueShapes";
 import { useTheme } from "next-themes";
 import { canvasConfig } from "../constants";
-import {
-   DefaultCircle,
-   DefaultCustomPath,
-   DefaultImage,
-   DefaultIText,
-   DefaultRect,
-} from "../default_styles";
+import { DefaultCircle, DefaultCustomPath, DefaultIText, DefaultRect } from "../default_styles";
 import { useCanvasStore } from "../store";
 import { createNewImage } from "../utilsfunc";
 
@@ -41,6 +35,8 @@ type props = {
 };
 
 type editorProps = {
+   sideWidth: number;
+   setSideWidth: (v: number) => void;
    showUploads?: boolean;
    isEdit?: boolean;
    sidesOpen: boolean;
@@ -56,13 +52,8 @@ export const useEditorContext = () => {
    return ctx;
 };
 
-function EditorWrapper({
-   initialData,
-   onChange,
-   children,
-   showUploads = false,
-   editable = true,
-}: props) {
+function EditorWrapper({ initialData, onChange, showUploads = false, editable = true }: props) {
+   const [sideWidth, setSideWidth] = useState(350);
    const [isSideOpen, setSideOpen] = useState(true);
 
    const { theme } = useTheme();
@@ -261,6 +252,10 @@ function EditorWrapper({
    return (
       <EditorContext.Provider
          value={{
+            setSideWidth: (v) => {
+               setSideWidth(v);
+            },
+            sideWidth,
             canvas: canvasC_ref,
             showUploads,
             isEdit: editable,

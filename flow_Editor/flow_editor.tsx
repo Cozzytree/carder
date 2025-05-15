@@ -1,4 +1,12 @@
 "use client";
+import "@xyflow/react/dist/style.css";
+import TextUpdaterNode from "./text_updater";
+import CircleNode from "./circle_node";
+import ResizableNodeSelected from "./node_resizer_selected";
+import ActiveEdge from "./components/active_edge";
+import ActiveNode from "./components/active_node";
+import LabeledGroupNode from "./label_group_node";
+import ButtonEdge from "./button_edge";
 
 import { v4 as uuidV4 } from "uuid";
 import {
@@ -23,16 +31,10 @@ import {
    MarkerType,
    useNodesState,
 } from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
-import TextUpdaterNode from "./text_updater";
-import CircleNode from "./circle_node";
-import ResizableNodeSelected from "./node_resizer_selected";
 import { debouncer } from "@/lib/utils";
 import { useCallback, useRef, useState } from "react";
-import ActiveEdge from "./components/active_edge";
-import ActiveNode from "./components/active_node";
-import LabeledGroupNode from "./label_group_node";
-import ButtonEdge from "./button_edge";
+import { Button } from "@/components/ui/button";
+import { Square } from "lucide-react";
 
 const edgeTypes = {
    buttonedge: ButtonEdge,
@@ -121,7 +123,7 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 function Flow() {
    const [nodes, setNodes, OnNodesChange] = useNodesState(initialNodes);
    const edgeReconnectSuccessful = useRef(true);
-   const reactFlowWrapper = useRef(null);
+   const reactFlowWrapper = useRef<HTMLDivElement>(null);
    const [activeNode, setActiveNode] = useState<Node[]>([]);
    const [activeEdges, setActiveEdges] = useState<Edge[]>([]);
 
@@ -224,6 +226,37 @@ function Flow() {
                />
             </div>
          )}
+
+         <div className="w-full flex justify-center fixed bottom-10 z-50">
+            <div className="border p-2 rounded-[5px]">
+               <Button
+                  onClick={() => {
+                     setNodes((n) => {
+                        n.push({
+                           data: { label: "Node", background: "transparent" },
+                           id: uuidV4(),
+                           position: {
+                              x: reactFlowWrapper?.current
+                                 ? reactFlowWrapper.current?.clientWidth / 2 - 50
+                                 : 100,
+                              y: reactFlowWrapper?.current
+                                 ? reactFlowWrapper.current?.clientHeight / 2 - 50
+                                 : 100,
+                           },
+                           type: "textUpdater",
+                        });
+
+                        return [...n];
+                     });
+                  }}
+                  className="rounded-[5px]"
+                  variant={"outline"}
+                  size={"sm"}
+               >
+                  <Square />
+               </Button>
+            </div>
+         </div>
 
          <ReactFlow
             defaultEdgeOptions={{

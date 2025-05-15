@@ -1,5 +1,4 @@
 import CollapceWithBtn from "@/components/collapseWithBtn";
-import CanvasC from "./canvas";
 import CanvasOptions from "./canvas_options";
 import BtnWithColor from "./components/btn-with-color";
 import ShapeActions from "./components/canvas_options/shape_actions";
@@ -134,21 +133,19 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
 
    return (
       <div className="w-full px-2 flex items-center gap-3">
-         {isMobile && (
-            <Popover>
-               <PopoverTrigger>S</PopoverTrigger>
-               <PopoverContent>
-                  <CanvasOptions canvasC={canvas} />
-                  <ZoomContainer
-                     containerRef={containerRef}
-                     handleZoom={(z) => {
-                        setContainerZoom(z);
-                     }}
-                     zoomLevel={containerZoom}
-                  />
-               </PopoverContent>
-            </Popover>
-         )}
+         <Popover>
+            <PopoverTrigger className="block lg:hidden">S</PopoverTrigger>
+            <PopoverContent>
+               <CanvasOptions canvasC={canvas} />
+               <ZoomContainer
+                  containerRef={containerRef}
+                  handleZoom={(z) => {
+                     setContainerZoom(z);
+                  }}
+                  zoomLevel={containerZoom}
+               />
+            </PopoverContent>
+         </Popover>
          {activeObject && (
             <>
                {(activeObject.type === "text" ||

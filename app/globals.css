@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.react-transform-wrapper {
+   width: 100% !important;
+   height: 100% !important;
+}
+
 .dark .react-flow__node {
    background: var(--background);
    color: var(--foreground);
