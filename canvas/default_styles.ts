@@ -129,7 +129,7 @@ class DefaultEllipse extends fabric.Ellipse {
          strokeWidth: 4,
          cornerColor: "transparent",
          centeredRotation: true,
-         cornerStyle: "circle",
+         // cornerStyle: "circle",
          // objectCaching: true,
 
          padding: 3,
@@ -223,18 +223,13 @@ class DefaultIText extends fabric.Textbox {
       super(text, {
          stroke: "black",
          fontFamily: "sans serif",
-         // underline: true,
-         cornerStyle: "circle",
          charSpacing: -1,
-         fontStyle: "italic",
-         // objectCaching: true,
 
          centeredRotation: true,
 
          padding: 3,
          cornerSize: 8,
          strokeUniform: true,
-         cornerStrokeColor: canvasConfig.selectionStroke,
          borderScaleFactor: 2,
          ...params,
       });

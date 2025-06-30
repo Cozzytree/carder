@@ -15,7 +15,7 @@ import { filters } from "fabric";
 
 const canvasConfig = {
    selectionWidth: 4,
-   selectionStroke: "#5060ff",
+   selectionStroke: "#1b6bff",
 };
 
 export const PROPGUIDE = "prop-guide";

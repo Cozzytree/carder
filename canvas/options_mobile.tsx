@@ -3,22 +3,15 @@ import CanvasOptions from "./canvas_options";
 import BtnWithColor from "./components/btn-with-color";
 import ShapeActions from "./components/canvas_options/shape_actions";
 import ExportShape from "./components/exportShape";
-import FontOptionUpdated from "./components/font_option(updated)";
 import ImageFiltersOption from "./components/image_filter_options";
 import ImageOption from "./components/image_option";
 import InputWithValue from "./components/input-with-value";
 import OpacityOption from "./components/opacity_option";
 import ColorOptions from "./components/which_option_items/color_options";
-import FontOptions from "./components/which_option_items/fonts_option(big)";
+import FontOptions from "./components/font_options";
 import OutlineAndShadow from "./components/which_option_items/outlineandShaodow";
 import Shapes from "./components/which_option_items/shapes";
 import TextOptions from "./components/which_option_items/texts_o";
-
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { debouncer } from "@/lib/utils";
@@ -34,10 +27,8 @@ import {
    RedoIcon,
    SettingsIcon,
    TypeIcon,
-   TypeOutline,
    UndoIcon,
 } from "lucide-react";
-import { Dispatch, RefObject, SetStateAction } from "react";
 import { useEditorContext } from "./components/editor-wrapper";
 import { brushes } from "./constants";
 import { useIsMobile } from "./hooks/isMobile";
@@ -45,13 +36,7 @@ import { useCanvasStore } from "./store";
 import { handleColorfill, handleGradient } from "./utilsfunc";
 import ZoomContainer from "./components/zoom_container";
 
-type props = {
-   containerRef: RefObject<HTMLDivElement | null>;
-   setContainerZoom: Dispatch<SetStateAction<number>>;
-   containerZoom: number;
-};
-
-function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props) {
+function OptionsMobile() {
    const { canvas } = useEditorContext();
    const { activeObject, setFabricObject } = useCanvasStore();
 
@@ -66,7 +51,7 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
 
    if (canvas.current?.canvas.isDrawingMode) {
       return (
-         <div className="w-full px-2 flex items-center gap-3">
+         <div className="w-fit px-2 flex items-center gap-3">
             <Popover>
                <PopoverTrigger>
                   <BrushIcon className="2-5 h-5" />
@@ -96,7 +81,7 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
                </PopoverTrigger>
                <PopoverContent className="w-fit flex flex-col gap-2">
                   <ColorOptions
-                     handleGradient={(e) => {}}
+                     handleGradient={() => {}}
                      handleColor={(c) => {
                         if (!canvas.current) return;
                         canvas.current?.setBrushColor(c);
@@ -132,23 +117,17 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
    }
 
    return (
-      <div className="w-full px-2 flex items-center gap-3">
+      <div className="w-fit px-2 flex items-center gap-3">
          <Popover>
-            <PopoverTrigger className="block lg:hidden">S</PopoverTrigger>
+            <PopoverTrigger className="block xl:hidden">S</PopoverTrigger>
             <PopoverContent>
                <CanvasOptions canvasC={canvas} />
-               <ZoomContainer
-                  containerRef={containerRef}
-                  handleZoom={(z) => {
-                     setContainerZoom(z);
-                  }}
-                  zoomLevel={containerZoom}
-               />
+               <ZoomContainer />
             </PopoverContent>
          </Popover>
          {activeObject && (
             <>
-               {(activeObject.type === "text" ||
+               {/* {(activeObject.type === "text" ||
                   activeObject.type === "textbox" ||
                   activeObject.type === "i-text") && (
                   <Popover>
@@ -165,10 +144,10 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
                         </DropdownMenu>
                      </PopoverContent>
                   </Popover>
-               )}
+               )} */}
 
                {/* {stroke} */}
-               {isMobile && (
+               <div className={"xl:hidden flex justify-center items-center"}>
                   <Popover>
                      <PopoverTrigger>
                         <PencilLine className="w-4 h-4" />
@@ -177,7 +156,7 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
                         <OutlineAndShadow canvasC={canvas} />
                      </PopoverContent>
                   </Popover>
-               )}
+               </div>
 
                {activeObject.type === "image" && isMobile && (
                   <Popover>
@@ -263,11 +242,11 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
             </PopoverContent>
          </Popover>
 
-         {activeObject && isMobile && (
-            <>
+         {activeObject && (
+            <div className={"xl:hidden flex justify-center items-center"}>
                <Popover>
                   <PopoverTrigger className="pl-2 text-sm border-l-2 border-foreground/30">
-                     <SettingsIcon className="w-6 h-6" />
+                     <SettingsIcon className="w-5 h-5" />
                   </PopoverTrigger>
                   <PopoverContent sideOffset={20} className="flex gap-2 flex-col bg-background/80">
                      <CollapceWithBtn classname={"px-3 text-sm"} label="Position">
@@ -306,9 +285,66 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
                         <ShapeActions canvasC={canvas} />
                      </CollapceWithBtn>
 
+                     <CollapceWithBtn label="Fill" classname="text-sm px-3">
+                        <Popover>
+                           <PopoverTrigger
+                              disabled={activeObject == null}
+                              className="flex items-center gap-1 px-3 mt-2"
+                           >
+                              <BtnWithColor w={20} h={20} color={activeObjectFill} />
+                           </PopoverTrigger>
+                           <PopoverContent
+                              side="top"
+                              align="center"
+                              className="w-fit bg-muted/40 border-foreground/20"
+                           >
+                              <ColorOptions
+                                 showGradient
+                                 showGradientOptions
+                                 forCanvas={false}
+                                 canvasC={canvas}
+                                 height={activeObjectWidth || 0}
+                                 width={activeObjectHeight || 0}
+                                 color={
+                                    activeObjectFill as string | Gradient<"linear" | "gradient">
+                                 }
+                                 handleColor={(v) => {
+                                    handleColorfill({
+                                       activeObject: activeObject,
+                                       canvasC: canvas,
+                                       color: v,
+                                       fn: () => {
+                                          setFabricObject(activeObject);
+                                       },
+                                    });
+                                 }}
+                                 handleGradient={(c, t) => {
+                                    if (!activeObject) return;
+                                    handleGradient({
+                                       params: "fill",
+                                       type: t ? t : "linear",
+                                       activeObject: activeObject,
+                                       canvasC: canvas,
+                                       color: c,
+                                       fn: () => {
+                                          setFabricObject(activeObject);
+                                       },
+                                    });
+                                 }}
+                              />
+                           </PopoverContent>
+                        </Popover>
+                     </CollapceWithBtn>
+
                      <CollapceWithBtn label="Export" classname={"text-sm px-3"}>
                         <ExportShape canvasC={canvas} />
                      </CollapceWithBtn>
+
+                     {(activeObject?.type == "textbox" || activeObject?.type == "i-text") && (
+                        <div className="flex justify-start px-3">
+                           <FontOptions canvasC={canvas} />
+                        </div>
+                     )}
 
                      <OpacityOption
                         fn={(v) => {
@@ -323,59 +359,7 @@ function OptionsMobile({ containerRef, containerZoom, setContainerZoom }: props)
 
                   {/* <ShapeActions canvasC={canvasC} /> */}
                </Popover>
-
-               <div className="flex items-center gap-2">
-                  <Popover>
-                     <PopoverTrigger
-                        disabled={activeObject == null}
-                        className="flex items-center gap-1"
-                     >
-                        <BtnWithColor w={20} h={20} color={activeObjectFill} />
-                     </PopoverTrigger>
-                     <PopoverContent
-                        side="top"
-                        align="center"
-                        className="w-fit bg-muted/40 border-foreground/20"
-                     >
-                        <ColorOptions
-                           showGradient
-                           showGradientOptions
-                           forCanvas={false}
-                           canvasC={canvas}
-                           height={activeObjectWidth || 0}
-                           width={activeObjectHeight || 0}
-                           color={activeObjectFill as string | Gradient<"linear" | "gradient">}
-                           handleColor={(v) => {
-                              handleColorfill({
-                                 activeObject: activeObject,
-                                 canvasC: canvas,
-                                 color: v,
-                                 fn: () => {
-                                    setFabricObject(activeObject);
-                                 },
-                              });
-                           }}
-                           handleGradient={(c, t) => {
-                              if (!activeObject) return;
-                              handleGradient({
-                                 params: "fill",
-                                 type: t ? t : "linear",
-                                 activeObject: activeObject,
-                                 canvasC: canvas,
-                                 color: c,
-                                 fn: () => {
-                                    setFabricObject(activeObject);
-                                 },
-                              });
-                           }}
-                        />
-                     </PopoverContent>
-                  </Popover>
-                  {(activeObject?.type == "textbox" || activeObject?.type == "i-text") && (
-                     <FontOptions canvasC={canvas} />
-                  )}
-               </div>
-            </>
+            </div>
          )}
 
          <button

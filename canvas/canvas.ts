@@ -44,6 +44,7 @@ interface canvasInterface {
 }
 
 class CanvasC {
+   declare tempShapeHistory : unknown[];
    declare mousedownpoint: { x: number; y: number };
    declare canvas: Canvas;
    declare draw_brush: PencilBrush | SprayBrush | CircleBrush | null;
@@ -54,8 +55,8 @@ class CanvasC {
    idPrefix?: string;
 
    theme: string | undefined;
-   history: any[][] = [];
-   historyRedo: any[][] = [];
+   declare history: unknown[][];
+   declare historyRedo: unknown[][];
    isDragging: boolean = false;
    guideLines: DefaultLine[] | [] = [];
 
@@ -85,6 +86,9 @@ class CanvasC {
       this.snapping = snapping;
       this.theme = theme;
       this.idPrefix = idPrefix;
+      this.history = [];
+      this.historyRedo = [];
+      this.tempShapeHistory = [];
 
       this.canvas.on("selection:created", () => {
          const selected = this.canvas.getActiveObject();
@@ -94,7 +98,6 @@ class CanvasC {
                cornerSize: 10,
                cornerStrokeColor: canvasConfig.selectionStroke,
                strokeUniform: true,
-               cornerColor: "#2020ff",
             });
          }
          callbackSeleted(selected);
@@ -108,7 +111,6 @@ class CanvasC {
          const objs: FabricObject[] = [];
          this.canvas.getObjects().forEach((o) => {
             const r = o.getBoundingRect();
-
             objs.push({ ...o.toObject(), left: r.left, top: r.top });
          });
          if (objs.length) {
@@ -147,17 +149,6 @@ class CanvasC {
          callbackSeleted(e.target);
 
          onUpdate(e.target);
-
-         // store to history
-         const objs: FabricObject[] = [];
-         this.canvas.getObjects().forEach((o) => {
-            const r = o.getBoundingRect();
-
-            objs.push({ ...o.toObject(), left: r.left, top: r.top });
-         });
-         if (objs.length) {
-            this.pushtoHistory(objs);
-         }
       });
 
       this.canvas.on("object:removed", (e) => {
@@ -197,7 +188,9 @@ class CanvasC {
                this.redo();
             } else if (e.key == "d") {
                e.preventDefault();
-               this.duplicateCanvasObject();
+               (async () => {
+                  await this.duplicateCanvasObject();
+               })()
             }
          }
       });
@@ -209,6 +202,7 @@ class CanvasC {
       this.mousedownpoint = { x: p.x, y: p.y };
       this.isDragging = true;
    }
+
    canvasMouseMove() {
       if (!this.isDragging) return;
       // this.changePointerEventsForCanvas(false);
@@ -219,6 +213,7 @@ class CanvasC {
       // vpt[5] += y - this.mousedownpoint.y;
       // this.canvas.requestRenderAll();
    }
+
    canvasMouseup(e) {
       this.isDragging = false;
       // this.changePointerEventsForCanvas(true);
@@ -372,6 +367,7 @@ class CanvasC {
       }
 
       if (shape) {
+         this.pushtoHistory(this.canvas.getObjects());
          this.canvas.discardActiveObject();
          this.canvas.add(shape);
          this.canvas.setActiveObject(shape);
@@ -456,7 +452,7 @@ class CanvasC {
    }
 
    async cloneCanvasObject() {
-      return await this.canvas.getActiveObject()?.clone();
+      return this.canvas.getActiveObject()?.clone();
    }
 
    async duplicateCanvasObject() {
@@ -663,7 +659,7 @@ class CanvasC {
    undo() {
       if (!this.history.length) return;
       const lastState = this.popFromHistory();
-      if (!lastState) return;
+      if (!lastState?.length) return;
 
       this.pushtoHistoryRedo(lastState);
       this.canvas.discardActiveObject();

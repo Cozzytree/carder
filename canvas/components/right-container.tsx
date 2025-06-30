@@ -14,20 +14,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { ActiveSelection, Gradient, Group } from "fabric";
-import { Dispatch, RefObject, SetStateAction, useEffect, useState } from "react";
 import { useCanvasStore } from "../store";
 import { canvasShapeTypes } from "../types";
 import { handleColorfill, handleGradient } from "../utilsfunc";
 import { useEditorContext } from "./editor-wrapper";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-type props = {
-   containerRef: RefObject<HTMLDivElement | null>;
-   setContainerZoom: Dispatch<SetStateAction<number>>;
-   containerZoom: number;
-};
-
-function RightContainer({ containerZoom, containerRef, setContainerZoom }: props) {
+function RightContainer() {
    const { sidesOpen, canvas, sideWidth } = useEditorContext();
    const isMobile = useIsMobile();
 
@@ -316,13 +309,7 @@ function RightContainer({ containerZoom, containerRef, setContainerZoom }: props
                <Sept />
 
                <div className="px-3">
-                  <ZoomContainer
-                     containerRef={containerRef}
-                     handleZoom={(v) => {
-                        setContainerZoom(v);
-                     }}
-                     zoomLevel={containerZoom}
-                  />
+                  <ZoomContainer />
                </div>
             </div>
          )}

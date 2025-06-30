@@ -1,3 +1,4 @@
+import UpDown from "@/components/updown";
 import {
    DropdownMenu,
    DropdownMenuContent,
@@ -5,40 +6,29 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { zooms } from "../constants";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { RefObject } from "react";
-import UpDown from "@/components/updown";
+import { useZoomContext } from "@/components/zoomable";
 
-type props = {
-   zoomLevel: number;
-   handleZoom: (v: number) => void;
-   containerRef: RefObject<HTMLDivElement | null>;
-};
-
-function ZoomContainer({ handleZoom, zoomLevel, containerRef }: props) {
+function ZoomContainer() {
+   const { setZoom, zoom } = useZoomContext();
    return (
       <div className="w-full flex justify-between items-center">
          <UpDown
-            defaultV={zoomLevel * 100}
+            defaultV={zoom * 100}
+            rate={20}
             onChange={(v) => {
-               if (containerRef.current) {
-                  handleZoom(v / 100);
-                  containerRef.current.style.scale = `${v / 100}`;
-               }
+               if (v < 50 || v > 500) return;
+               setZoom(v / 100);
             }}
          >
             <DropdownMenu>
                <DropdownMenuTrigger className="text-nowrap text-sm">
-                  {(zoomLevel * 100).toFixed(0)} %
+                  {(zoom * 100).toFixed(0)} %
                </DropdownMenuTrigger>
                <DropdownMenuContent className="flex flex-col">
                   {zooms.map((z, i) => (
                      <Button
                         onClick={() => {
-                           if (containerRef.current) {
-                              handleZoom(z / 100);
-                              containerRef.current.style.scale = `${z / 100}`;
-                           }
+                           setZoom(z / 100);
                         }}
                         key={i}
                         size={"icon"}
