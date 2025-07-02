@@ -5,6 +5,7 @@ import CanvasC from "@/canvas/canvas";
 import OptionsMobile from "../options_mobile";
 import RightContainer from "./right-container";
 // import WhichOContainer from "./which_option_container";
+import { TransformComponent } from "react-zoom-pan-pinch";
 
 // import { CanvasElements } from "./elements";
 import { RefObject, useRef } from "react";
@@ -17,7 +18,6 @@ import {
 } from "@/components/ui/context-menu";
 import { useEditorContext } from "./editor-wrapper";
 import LeftContainer from "./left-container";
-import { ZoomPanContainer } from "@/components/zoomable";
 
 type props = {
    canvasC_ref: RefObject<CanvasC | null>;
@@ -37,12 +37,12 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
       <div className="w-full h-full flex">
          <div className="w-fit h-full shrink-0">{isEdit && <LeftContainer />}</div>
 
-         <div className={`relative w-full h-full flex flex-col items-center`}>
-            <ZoomPanContainer>
+         <TransformComponent>
+            <div className={`relative w-full h-full flex flex-col items-center`}>
                {/* {canvas container} */}
                {isEdit ? (
                   <>
-                     <div className="w-full h-full flex justify-center items-center overflow-auto">
+                     <div className="w-full h-full flex justify-center items-center">
                         <div
                            ref={containerRef}
                            style={{
@@ -85,8 +85,8 @@ function CanvasEditor({ canvasC_ref, canvasRef }: props) {
                      className={`shrink-0 border border-foreground/10 rounded-md shadow-lg`}
                   ></canvas>
                )}
-            </ZoomPanContainer>
-         </div>
+            </div>
+         </TransformComponent>
 
          {isEdit && (
             // <div className="w-full border-t border-t-foreground/50 z-50 min-h-14 flex items-center px-5">

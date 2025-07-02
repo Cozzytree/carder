@@ -12,7 +12,7 @@ import { canvasConfig } from "../constants";
 import { DefaultCircle, DefaultCustomPath, DefaultIText, DefaultRect } from "../default_styles";
 import { useCanvasStore } from "../store";
 import { createNewImage } from "../utilsfunc";
-import ZoomPanProvider from "@/components/zoomable";
+import { TransformWrapper } from "react-zoom-pan-pinch";
 
 type props = {
    editable?: boolean;
@@ -251,7 +251,16 @@ function EditorWrapper({ initialData, onChange, showUploads = false, editable = 
    }, [width, height]);
 
    return (
-      <ZoomPanProvider>
+      <TransformWrapper
+         panning={{
+            disabled: true,
+         }}
+         zoomAnimation={{ animationType: "easeInQuad" }}
+         minScale={0.5}
+         maxScale={3.0}
+         centerZoomedOut={false}
+         smooth={false}
+      >
          <EditorContext.Provider
             value={{
                setSideWidth: (v) => {
@@ -277,7 +286,7 @@ function EditorWrapper({ initialData, onChange, showUploads = false, editable = 
                </div>
             </div>
          </EditorContext.Provider>
-      </ZoomPanProvider>
+      </TransformWrapper>
    );
 }
 

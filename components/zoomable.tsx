@@ -1,5 +1,6 @@
 "use client";
 
+import { useIsMobile } from "@/hooks/use-mobile";
 import * as React from "react";
 
 type Props = {
@@ -69,34 +70,6 @@ export default function ZoomPanProvider({ children }: Props) {
    //    return () => window.removeEventListener("wheel", handler);
    // }, [position]);
 
-   // Handle mouse drag to pan
-   // useEffect(() => {
-   //    const onMouseMove = (e: MouseEvent) => {
-   //       if (!isDraggingRef.current) return;
-   //       const dx = e.clientX - dragStartRef.current.x;
-   //       const dy = e.clientY - dragStartRef.current.y;
-   //       setPosition({
-   //          x: lastPosRef.current.x + dx,
-   //          y: lastPosRef.current.y + dy,
-   //       });
-   //    };
-
-   //    const onMouseUp = () => {
-   //       if (isDraggingRef.current) {
-   //          lastPosRef.current = position;
-   //          isDraggingRef.current = false;
-   //       }
-   //    };
-
-   //    window.addEventListener("mousemove", onMouseMove);
-   //    window.addEventListener("mouseup", onMouseUp);
-
-   //    return () => {
-   //       window.removeEventListener("mousemove", onMouseMove);
-   //       window.removeEventListener("mouseup", onMouseUp);
-   //    };
-   // }, [position]);
-
    // // Update content size on zoom
    // useEffect(() => {
    //    if (contentRef.current && containerRef.current) {
@@ -122,6 +95,7 @@ export default function ZoomPanProvider({ children }: Props) {
 }
 
 const ZoomPanContainer = ({ children }: { children: React.ReactNode }) => {
+   const isMobile = useIsMobile();
    const [isVerticalScroll, setVerticalScroll] = React.useState(false);
    const [isHorizontalScroll, setHorizontalScroll] = React.useState(false);
    const [scrollSize, setScrollSize] = React.useState({
@@ -260,6 +234,34 @@ const ZoomPanContainer = ({ children }: { children: React.ReactNode }) => {
       window.addEventListener("wheel", handler, { passive: false });
       return () => window.removeEventListener("wheel", handler);
    }, [position, setZoom, zoom]);
+
+   // React.useEffect(() => {
+   //    const onMouseMove = (e: MouseEvent) => {
+   //       if (!isMobile) return;
+   //       if (!isDraggingRef.current) return;
+   //       const dx = e.clientX - dragStartRef.current.x;
+   //       const dy = e.clientY - dragStartRef.current.y;
+   //       setPosition({
+   //          x: lastPosRef.current.x + dx,
+   //          y: lastPosRef.current.y + dy,
+   //       });
+   //    };
+
+   //    const onMouseUp = () => {
+   //       if (isDraggingRef.current && isMobile) {
+   //          lastPosRef.current = position;
+   //          isDraggingRef.current = false;
+   //       }
+   //    };
+
+   //    window.addEventListener("mousemove", onMouseMove);
+   //    window.addEventListener("mouseup", onMouseUp);
+
+   //    return () => {
+   //       window.removeEventListener("mousemove", onMouseMove);
+   //       window.removeEventListener("mouseup", onMouseUp);
+   //    };
+   // }, [position, isMobile]);
 
    return (
       <div

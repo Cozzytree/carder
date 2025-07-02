@@ -9,26 +9,26 @@ import { Button } from "@/components/ui/button";
 import { useZoomContext } from "@/components/zoomable";
 
 function ZoomContainer() {
-   const { setZoom, zoom } = useZoomContext();
+   // const { setZoom, zoom } = useZoomContext();
    return (
       <div className="w-full flex justify-between items-center">
          <UpDown
-            defaultV={zoom * 100}
+            // defaultV={zoom * 100}
             rate={20}
             onChange={(v) => {
                if (v < 50 || v > 500) return;
-               setZoom(v / 100);
+               // setZoom(v / 100);
             }}
          >
             <DropdownMenu>
                <DropdownMenuTrigger className="text-nowrap text-sm">
-                  {(zoom * 100).toFixed(0)} %
+                  {/* {(zoom * 100).toFixed(0)} % */}
                </DropdownMenuTrigger>
                <DropdownMenuContent className="flex flex-col">
                   {zooms.map((z, i) => (
                      <Button
                         onClick={() => {
-                           setZoom(z / 100);
+                           // setZoom(z / 100);
                         }}
                         key={i}
                         size={"icon"}
