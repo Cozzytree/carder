@@ -44,7 +44,7 @@ interface canvasInterface {
 }
 
 class CanvasC {
-   declare tempShapeHistory : unknown[];
+   declare tempShapeHistory: unknown[];
    declare mousedownpoint: { x: number; y: number };
    declare canvas: Canvas;
    declare draw_brush: PencilBrush | SprayBrush | CircleBrush | null;
@@ -190,7 +190,7 @@ class CanvasC {
                e.preventDefault();
                (async () => {
                   await this.duplicateCanvasObject();
-               })()
+               })();
             }
          }
       });

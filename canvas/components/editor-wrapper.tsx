@@ -252,14 +252,16 @@ function EditorWrapper({ initialData, onChange, showUploads = false, editable = 
 
    return (
       <TransformWrapper
+         alignmentAnimation={{ disabled: true }}
          panning={{
             disabled: true,
          }}
          zoomAnimation={{ animationType: "easeInQuad" }}
          minScale={0.5}
          maxScale={3.0}
-         centerZoomedOut={false}
+         centerZoomedOut={true}
          smooth={false}
+         centerOnInit={true}
       >
          <EditorContext.Provider
             value={{

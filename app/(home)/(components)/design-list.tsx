@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import type { User } from "@/api_/types";
 import { useGetUserDesigns } from "@/api_/queries/design-query";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
